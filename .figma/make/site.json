@@ -1,0 +1,11 @@
+{
+  "title": "Jean Luc Solutions — Skills • Speed • Sustainability",
+  "description": "Connect with top-tier CCTV and electronics repair technicians through a sleek, responsive platform offering easy service booking and client testimonials.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

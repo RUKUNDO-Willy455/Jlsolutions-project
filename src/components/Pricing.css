@@ -1,0 +1,18 @@
+/* Pricing section — latest-version texture */
+.pricing {
+  position: relative;
+  background-color: #0e0e0e;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.pricing::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: -160px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(closest-side, rgba(37, 99, 235, 0.09), transparent 70%);
+  pointer-events: none;
+}

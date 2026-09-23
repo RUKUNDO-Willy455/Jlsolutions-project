@@ -1,0 +1,383 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-obsidian: #090909;
+  --color-surface: #111111;
+  --color-surface-2: #181818;
+  --color-surface-3: #202020;
+  --color-ash: #f2ede6;
+  --color-smoke: #7a7a7a;
+  --color-smoke-2: #4a4a4a;
+  --color-ember: #2563eb;
+  --color-ember-light: #60a5fa;
+  --color-ember-dim: rgba(37, 99, 235, 0.15);
+  --color-wire: rgba(255, 255, 255, 0.06);
+  --font-family-display: 'Fraunces', Georgia, serif;
+  --font-family-body: 'Outfit', system-ui, sans-serif;
+  --font-family-mono: 'DM Mono', 'Courier New', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #090909;
+  color: #f2ede6;
+  font-family: 'Outfit', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+/* Page-change transition (mounted with a new route key) */
+.page-enter {
+  animation: pageIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Keyboard focus visibility */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: #090909;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 2px;
+}
+
+/* Scroll reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.delay-100 { transition-delay: 0.1s; }
+.delay-200 { transition-delay: 0.2s; }
+.delay-300 { transition-delay: 0.3s; }
+.delay-400 { transition-delay: 0.4s; }
+.delay-500 { transition-delay: 0.5s; }
+.delay-600 { transition-delay: 0.6s; }
+
+/* Ember glow button */
+.btn-ember {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.btn-ember::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.btn-ember:hover {
+  background-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.45), 0 0 0 1px rgba(37, 99, 235, 0.25);
+}
+.btn-ember:hover::after {
+  opacity: 1;
+}
+.btn-ember:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Ghost button */
+.btn-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f2ede6;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+}
+.btn-ghost:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Hairline rule */
+.hairline {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Form inputs */
+.field {
+  background-color: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f2ede6;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 2px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.field:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.field::placeholder {
+  color: #4a4a4a;
+}
+.field option {
+  background-color: #161616;
+  color: #f2ede6;
+}
+
+/* Noise overlay on hero */
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* ============================================================
+   Jluc compat theme — powers the LoadingScreen and Footer that
+   are preserved from the Jluc-solutions build. Scoped palette.
+   ============================================================ */
+:root {
+  /* Navy scale */
+  --bg-950: #050a17;
+  --bg-900: #071026;
+  --bg-850: #0a1632;
+  --bg-800: #0c1b3a;
+
+  /* Electric blue */
+  --electric: #3d9bff;
+  --electric-bright: #6cb8ff;
+  --electric-soft: #9fd0ff;
+  --cyan: #22d3ee;
+
+  /* Text */
+  --white: #f4f8ff;
+  --text: #cdd9ee;
+  --muted: #93a7c8;
+  --faint: #64789c;
+
+  /* Surfaces */
+  --panel: rgba(255, 255, 255, 0.035);
+  --panel-strong: rgba(255, 255, 255, 0.06);
+  --panel-solid: #0b1730;
+  --hairline: rgba(143, 163, 194, 0.15);
+  --hairline-blue: rgba(61, 155, 255, 0.28);
+
+  /* Branded surfaces */
+  --on-brand: #05101f;
+  --nav-bg: rgba(5, 10, 23, 0.72);
+
+  /* Layout */
+  --container: 1200px;
+
+  /* Fonts */
+  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* Shared layout helper used by the preserved Jluc components */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 18px;
+  }
+}
+
+/* Mobile-friendly smoothness -------------------------------------------------- */
+@media (max-width: 640px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Cap oversized display type on very narrow screens so nothing clips horizontally */
+@media (max-width: 380px) {
+  .reveal h1,
+  .reveal h2,
+  .founder h1,
+  .founder h2,
+  .reveal h1 *,
+  .reveal h2 *,
+  .founder h1 *,
+  .founder h2 * {
+    overflow-wrap: break-word;
+  }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .reveal-left,
+  .reveal-scale {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Rwanda location picker (Leaflet) ---------- */
+.loc-map .leaflet-container {
+  background: #0e0e0e;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+.loc-map .leaflet-tile-pane {
+  filter: brightness(0.86) saturate(0.95) contrast(1.02);
+}
+
+/* Nearby business / POI markers */
+.poi-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  background: #2563eb;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45);
+  transition: transform 0.2s ease;
+}
+.poi-dot-wrap:hover .poi-dot {
+  transform: scale(1.3);
+}
+.leaflet-tooltip.poi-tip {
+  background: #0d0d0d;
+  color: #e8e8e8;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.leaflet-tooltip.poi-tip::before {
+  border-top-color: #0d0d0d;
+}
+.loc-map .leaflet-control-zoom {
+  border: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+.loc-map .leaflet-control-zoom a {
+  background: #161616;
+  color: #cfcfcf;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+}
+.loc-map .leaflet-control-zoom a:first-child {
+  border-radius: 2px 2px 0 0;
+}
+.loc-map .leaflet-control-zoom a:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 2px 2px;
+}
+.loc-map .leaflet-control-zoom a:hover {
+  background: #222;
+  color: #fff;
+}
+.loc-map .leaflet-control-attribution {
+  background: rgba(14, 14, 14, 0.75);
+  color: #6a6a6a;
+  font-size: 10px;
+}
+.loc-map .leaflet-control-attribution a {
+  color: #8a8a8a;
+}
+.loc-pin {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #2563eb;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.35), 0 6px 16px rgba(0, 0, 0, 0.65);
+}
