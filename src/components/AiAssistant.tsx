@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Bot, Send, X, Sparkles, Phone } from 'lucide-react';
+import { Sparkles, Send, X, Phone } from 'lucide-react';
 import {
   answerFor,
   GREETING,
@@ -8,7 +8,6 @@ import {
   type Suggestion,
 } from '../data/assistant';
 import { SITE } from '../data/site';
-import BrandLogo from './BrandLogo';
 import './AiAssistant.css';
 
 interface Msg {
@@ -151,7 +150,13 @@ export default function AiAssistant() {
         {open ? (
           <X size={22} strokeWidth={2.2} />
         ) : (
-          <Bot size={23} strokeWidth={2} />
+          <img
+            src="/KEEP SYSTEMS RUNNING.jpeg"
+            alt=""
+            className="ai-fab__logo"
+            width={44}
+            height={44}
+          />
         )}
         {!open && (
           <span className="ai-fab__label">
@@ -173,7 +178,13 @@ export default function AiAssistant() {
         {/* Header */}
         <header className="ai-chat__header">
           <div className="ai-chat__avatar">
-            <BrandLogo size={30} glow />
+            <img
+              src="/KEEP SYSTEMS RUNNING.jpeg"
+              alt="Jean Luc Solutions AI assistant logo"
+              className="ai-chat__avatar-img"
+              width={30}
+              height={30}
+            />
           </div>
           <div className="ai-chat__title">
             <strong>JL Assistant</strong>
@@ -207,7 +218,13 @@ export default function AiAssistant() {
             <div key={m.id} className={`ai-msg ai-msg--${m.role}`}>
               {m.role === 'ai' && (
                 <span className="ai-msg__bubble-avatar" aria-hidden="true">
-                  <Bot size={14} />
+                  <img
+                    src="/KEEP SYSTEMS RUNNING.jpeg"
+                    alt=""
+                    className="ai-msg__bubble-avatar-img"
+                    width={14}
+                    height={14}
+                  />
                 </span>
               )}
               <div className="ai-msg__bubble">
