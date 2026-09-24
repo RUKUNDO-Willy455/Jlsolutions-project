@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import jeanlucLogo from '../assets/jeanluc-logo.png';
 import adminBg1 from '../assets/admin-bg-1.jpg';
 import {
@@ -10,9 +10,8 @@ import {
 } from '../data/editor';
 import type { Technician, ProfileEditRequest, Booking } from '../data/editor';
 import { AvatarUpload } from './AvatarUpload';
-import BookingMapModal from './BookingMapModal';
 
-// ─── Shared bits ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Shared bits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PanelBackground() {
   return (
@@ -28,7 +27,7 @@ function PanelBackground() {
         className="absolute bottom-6 right-8 text-[0.58rem] tracking-[0.22em] uppercase text-white/20 select-none"
         style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
       >
-        Skills · Speed · Sustainable
+        Skills Â· Speed Â· Sustainable
       </p>
     </div>
   );
@@ -56,7 +55,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
   );
 }
 
-// ─── Login ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function TechLogin({
   technicians, onLogin, onExit,
@@ -121,7 +120,7 @@ function TechLogin({
                   Technician <span className="text-ember italic font-light">Portal</span>
                 </p>
                 <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3a3a3a] mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Jean Luc Solutions · Kigali
+                  Jean Luc Solutions Â· Kigali
                 </p>
               </div>
             </div>
@@ -139,7 +138,7 @@ function TechLogin({
                 <Label>Password</Label>
                 <div className="relative">
                   <input type={showPass ? 'text' : 'password'} value={pass}
-                    onChange={e => setPass(e.target.value)} placeholder="••••••••••••"
+                      onChange={e => setPass(e.target.value)} placeholder="••••••••••••"
                     required autoComplete="current-password" className="field text-sm pr-10" />
                   <button type="button" onClick={() => setShowPass(s => !s)} tabIndex={-1}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4a4a4a] hover:text-[#aaa] transition-colors duration-150">
@@ -192,7 +191,7 @@ function TechLogin({
   );
 }
 
-// ─── Tabs ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TECH_TABS = ['Dashboard', 'Profile Settings', 'Requests'] as const;
 type TechTab = typeof TECH_TABS[number];
@@ -278,7 +277,7 @@ function ProfileSettingsTab({
           <div className="min-w-0 pt-1.5">
             <p className="text-white text-base font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{name || tech.name}</p>
             <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{role || tech.role}</p>
-            <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{phone || tech.phone} · {email || tech.email}</p>
+            <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{phone || tech.phone} Â· {email || tech.email}</p>
           </div>
         </div>
         <p className="text-[0.6rem] text-[#3a3a3a] mt-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
@@ -312,7 +311,7 @@ function ProfileSettingsTab({
         <div>
           <p className="text-xs font-semibold text-ember mb-1">Changes require approval</p>
           <p className="text-xs text-[#5a5a5a] leading-relaxed">
-            Your profile edits are saved only after the admin reviews and approves them in the Admin Console → Requests.
+            Your profile edits are saved only after the admin reviews and approves them in the Admin Console â†’ Requests.
           </p>
         </div>
       </div>
@@ -333,7 +332,6 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
   const myBookings = bookings.filter(b => b.technicianId && b.technicianId === tech.id).sort((a, b) => a.date.localeCompare(b.date));
   const pendingBookings = myBookings.filter(b => b.status === 'pending').length;
   const activeBookings = myBookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length;
-  const [mapReq, setMapReq] = useState<Booking | null>(null);
 
   return (
     <div className="flex flex-col gap-8">
@@ -348,7 +346,7 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
         <div className="min-w-0 flex-1">
           <p className="text-white text-lg font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{tech.name}</p>
           <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{tech.role}</p>
-          <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{tech.phone} · {tech.email}</p>
+          <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{tech.phone} Â· {tech.email}</p>
         </div>
         <span className={`ml-auto text-[0.58rem] tracking-wide uppercase px-3 py-1.5 border rounded-[1px] shrink-0 ${tech.available ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
           {tech.available ? 'Available' : 'Off Duty'}
@@ -373,18 +371,8 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
               <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                 <div className="min-w-0">
                   <p className="text-white text-sm font-semibold">{b.name}</p>
-                  <button
-                    type="button"
-                    onClick={() => setMapReq(b)}
-                    className="inline-flex items-center gap-1 text-[0.6rem] text-ember/80 hover:text-ember transition-colors duration-150 mt-1"
-                    style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-                  >
-                    <i className="bx bx-map-pin text-[0.8rem]" /> View on map
-                  </button>
-                  {mapReq && mapReq.id === b.id && (
-                    <BookingMapModal booking={mapReq} onClose={() => setMapReq(null)} />
-                  )}
-                  <p className="text-[0.62rem] text-[#4a4a4a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{b.phone} · {b.id}</p>
+                  
+                  <p className="text-[0.62rem] text-[#4a4a4a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{b.phone} Â· {b.id}</p>
                 </div>
                 <span className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1 border rounded-[1px] shrink-0 ${b.status === 'confirmed' ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : b.status === 'pending' ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' : b.status === 'completed' ? 'text-blue-400 bg-blue-400/10 border-blue-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                   {b.status}
@@ -476,7 +464,7 @@ function TechRequestsTab({ tech, requests, setRequests }: { tech: Technician; re
   );
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
   const [technicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians);
@@ -593,7 +581,7 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
               <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{tab}</h1>
               <p className="text-xs text-[#4a4a4a] mt-1">
                 {tab === 'Dashboard'        && 'Your assignments, availability, and request overview'}
-                {tab === 'Profile Settings' && 'Update your details — changes are approved by the admin'}
+                {tab === 'Profile Settings' && 'Update your details â€” changes are approved by the admin'}
                 {tab === 'Requests'         && 'Track the status of your profile change requests'}
               </p>
             </div>

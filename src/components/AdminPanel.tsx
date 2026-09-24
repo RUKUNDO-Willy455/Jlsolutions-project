@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+﻿import { useState, useEffect, Fragment } from 'react';
 import jeanlucLogo from '../assets/jeanluc-logo.png';
 import adminBg1 from '../assets/admin-bg-1.jpg';
 import jlCeo from '../assets/jl-ceo.png';
@@ -13,9 +13,8 @@ import {
 } from '../data/editor';
 import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial } from '../data/editor';
 import { AvatarUpload } from './AvatarUpload';
-import BookingMapModal from './BookingMapModal';
 
-// ─── Auth credentials (frontend demo — replace with real auth in production) ──
+// â”€â”€â”€ Auth credentials (frontend demo â€” replace with real auth in production) â”€â”€
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'jeanluc@2024';
 
@@ -30,18 +29,18 @@ function AdminBackground() {
       />
       {/* Dark overlay left-heavy so sidebar + content stay readable */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
-      {/* Tagline — bottom right */}
+      {/* Tagline â€” bottom right */}
       <p
         className="absolute bottom-6 right-8 text-[0.58rem] tracking-[0.22em] uppercase text-white/20 select-none"
         style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
       >
-        Skills · Speed · Sustainable
+        Skills Â· Speed Â· Sustainable
       </p>
     </div>
   );
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface Service { id: string; title: string; description: string; active: boolean; }
 interface SiteSettings {
@@ -49,7 +48,7 @@ interface SiteSettings {
   phone: string; emergencyPhone: string; email: string; founded: string;
 }
 
-// ─── Seed data ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Seed data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const seedServices: Service[] = [
   { id: 's1', title: 'CCTV & Surveillance', description: 'End-to-end IP and analogue camera systems for residential, commercial, and industrial sites.', active: true },
@@ -60,12 +59,12 @@ const seedServices: Service[] = [
   { id: 's6', title: 'Emergency Response', description: 'Rapid-deployment field technicians available around the clock.', active: true },
 ];
 const seedSettings: SiteSettings = {
-  companyName: 'Jean Luc Solutions', tagline: 'Skills · Speed · Sustainable',
+  companyName: 'Jean Luc Solutions', tagline: 'Skills Â· Speed Â· Sustainable',
   address: 'KG 11 Ave, Gasabo, Kigali, Rwanda', phone: '+250 788 123 456',
   emergencyPhone: '+250 788 999 000', email: 'info@jeanlucsolutions.rw', founded: '2008',
 };
 
-// ─── Small shared components ──────────────────────────────────────────────────
+// â”€â”€â”€ Small shared components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TABS = ['Dashboard', 'Bookings', 'Technicians', 'Requests', 'Founder', 'Services', 'Testimonials', 'Settings'] as const;
 type Tab = typeof TABS[number];
@@ -95,7 +94,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
   );
 }
 
-// ─── Login Screen ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Login Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => void }) {
   const [user, setUser] = useState('');
@@ -121,7 +120,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
   return (
     <div className="min-h-dvh flex bg-[#080808]">
 
-      {/* Home button — top-left corner */}
+      {/* Home button â€” top-left corner */}
       <button
         onClick={onExit}
         title="Back to main site"
@@ -130,25 +129,25 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
         <i className="bx bx-home text-xl text-[#4a4a4a] group-hover:text-ember transition-colors duration-200" />
       </button>
 
-      {/* ── Right panel — CCTV photo (rendered first, sits behind) ── */}
+      {/* â”€â”€ Right panel â€” CCTV photo (rendered first, sits behind) â”€â”€ */}
       <div className="hidden lg:block absolute inset-0">
         <img src={adminBg1} alt="" className="w-full h-full object-cover" style={{ opacity: 0.9 }} />
         {/* Dark fade on the left so the card area stays readable */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/55 to-transparent" />
         <div className="absolute bottom-8 right-8">
           <p className="text-[0.58rem] tracking-[0.22em] uppercase text-white/25" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-            Skills · Speed · Sustainable
+            Skills Â· Speed Â· Sustainable
           </p>
         </div>
       </div>
 
-      {/* ── Left panel — dark wash behind the card ── */}
+      {/* â”€â”€ Left panel â€” dark wash behind the card â”€â”€ */}
       <div className="relative z-10 flex items-center justify-end w-full lg:w-[54%] shrink-0 px-5 py-10 sm:px-10 sm:py-16">
 
-        {/* ── Card with L-bracket corners + dotted right edge ── */}
+        {/* â”€â”€ Card with L-bracket corners + dotted right edge â”€â”€ */}
         <div className="relative w-full max-w-[400px]">
 
-          {/* Corner brackets — each is a small L-shape with rounded ends */}
+          {/* Corner brackets â€” each is a small L-shape with rounded ends */}
           {/* Top-left */}
           <span className="absolute top-0 left-0 w-7 h-7 pointer-events-none"
             style={{ borderTop: '2px solid rgba(37,99,235,0.7)', borderLeft: '2px solid rgba(37,99,235,0.7)', borderRadius: '6px 0 0 0' }} />
@@ -169,7 +168,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
           {/* Card body */}
           <div className="px-6 py-8 sm:px-8 flex flex-col gap-0" style={{ background: 'rgba(8,8,8,0.38)', backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)' }}>
 
-            {/* Logo + title — centered */}
+            {/* Logo + title â€” centered */}
             <div className="flex flex-col items-center gap-4 mb-8">
               <img src={jeanlucLogo} alt="Jean Luc Solutions" className="h-20 w-auto object-contain sm:h-24"
                 style={{ animation: 'loadPulse 3s ease-in-out infinite' }} />
@@ -178,7 +177,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
                   Admin <span className="text-ember italic font-light">Console</span>
                 </p>
                 <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3a3a3a] mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Jean Luc Solutions · Kigali
+                  Jean Luc Solutions Â· Kigali
                 </p>
               </div>
             </div>
@@ -197,7 +196,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
                 <Label>Password</Label>
                 <div className="relative">
                   <input type={showPass ? 'text' : 'password'} value={pass}
-                    onChange={e => setPass(e.target.value)} placeholder="••••••••••••"
+                     onChange={e => setPass(e.target.value)} placeholder="••••••••••••"
                     required autoComplete="current-password" className="field text-sm pr-10" />
                   <button type="button" onClick={() => setShowPass(s => !s)} tabIndex={-1}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4a4a4a] hover:text-[#aaa] transition-colors duration-150">
@@ -241,7 +240,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
               </button>
 
               <p className="text-center text-[0.6rem] text-[#2a2a2a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                Secured · Jean Luc Solutions Admin
+                Secured Â· Jean Luc Solutions Admin
               </p>
             </form>
           </div>
@@ -258,7 +257,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
   );
 }
 
-// ─── Tab panels ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Tab panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function Dashboard({ bookings, technicians }: { bookings: Booking[]; technicians: Technician[] }) {
   const counts = { pending: 0, confirmed: 0, completed: 0, cancelled: 0 };
@@ -295,7 +294,6 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
   const [msgDraft, setMsgDraft] = useState('');
   const [msgError, setMsgError] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
-  const [mapBooking, setMapBooking] = useState<Booking | null>(null);
 
   function resetBookings() {
     if (!confirmReset) {
@@ -354,7 +352,7 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
           }`}
           style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
         >
-          {confirmReset ? 'Confirm — delete ALL bookings' : 'Reset bookings'}
+          {confirmReset ? 'Confirm â€” delete ALL bookings' : 'Reset bookings'}
         </button>
       </div>
       {bookings.length === 0 && (
@@ -378,20 +376,13 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                   <td className="px-4 py-3 whitespace-nowrap"><p className="text-white text-xs font-medium">{b.name}</p><p className="text-[#4a4a4a] text-[0.62rem]">{b.phone}</p></td>
                   <td className="px-4 py-3 text-xs text-[#7a7a7a] max-w-[160px] truncate">{b.service}</td>
                   <td className="px-4 py-3 max-w-[210px]">
-                    <p className="text-xs text-[#7a7a7a] truncate">{b.location || '—'}</p>
+                    <p className="text-xs text-[#7a7a7a] truncate">{b.location || 'â€”'}</p>
                     {mapLink(b) && (
-                      <button
-                        type="button"
-                        onClick={() => setMapBooking(b)}
-                        className="inline-flex items-center gap-1 text-[0.6rem] text-ember/80 hover:text-ember transition-colors duration-150"
-                        style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-                      >
+                      <a href={mapLink(b)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[0.6rem] text-ember/80 hover:text-ember transition-colors duration-150">
                         <i className="bx bx-map-pin text-[0.8rem]" /> View on map
-                      </button>
+                      </a>
                     )}
-                    {mapBooking && mapBooking.id === b.id && (
-                      <BookingMapModal booking={mapBooking} onClose={() => setMapBooking(null)} />
-                    )}
+                    
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap"><p className="text-xs text-[#7a7a7a]">{b.date}</p><p className="text-[0.62rem] text-[#4a4a4a]">{b.time}</p></td>
                   <td className="px-4 py-3 text-xs text-[#7a7a7a] whitespace-nowrap">{b.technician}</td>
@@ -420,7 +411,7 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                            Client updates · {b.name}
+                            Client updates Â· {b.name}
                           </p>
                           <a
                             href={`https://wa.me/${waFor(b.phone)}?text=${encodeURIComponent(`Hello ${b.name}, regarding your booking ${b.id} with Jean Luc Solutions:\nService: ${b.service}\nScheduled: ${b.date} ${b.time}\nStatus: ${b.status}`)}`}
@@ -434,12 +425,12 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                         </div>
                         <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1">
                           {(b.updates ?? []).length === 0 && (
-                            <p className="text-xs text-[#5a5a5a] py-2">No updates yet — send the client their first message.</p>
+                            <p className="text-xs text-[#5a5a5a] py-2">No updates yet â€” send the client their first message.</p>
                           )}
                           {(b.updates ?? []).map(u => (
                             <div key={u.id} className={`flex flex-col gap-0.5 max-w-[85%] rounded-[2px] px-3 py-2 text-xs ${u.from === 'admin' ? 'bg-[rgba(37,99,235,0.12)] border border-[rgba(37,99,235,0.22)] self-end' : 'bg-[#181818] border border-[rgba(255,255,255,0.06)] self-start'}`}>
                               <span className="text-[0.55rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                                {u.from === 'admin' ? 'Jean Luc Solutions' : b.name} · {u.createdAt}
+                                {u.from === 'admin' ? 'Jean Luc Solutions' : b.name} Â· {u.createdAt}
                               </span>
                               <span className="text-white/90 leading-relaxed">{u.text}</span>
                             </div>
@@ -450,7 +441,7 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                             value={msgDraft}
                             onChange={(e) => { setMsgDraft(e.target.value); if (msgError) setMsgError(''); }}
                             onKeyDown={(e) => { if (e.key === 'Enter') sendUpdate(b.id); }}
-                            placeholder={msgError ? msgError : 'Type an update for the client…'}
+                            placeholder={msgError ? msgError : 'Type an update for the clientâ€¦'}
                             className={`field !py-2.5 text-sm ${msgError ? '!border-red-500/60' : ''}`}
                           />
                           <button onClick={() => sendUpdate(b.id)} className="btn-ember px-4 py-2.5 rounded-[2px] text-xs shrink-0">Send</button>
@@ -564,7 +555,7 @@ function TechniciansTab({ technicians, setTechnicians }: { technicians: Technici
                 className={`text-[0.62rem] tracking-wide uppercase px-3 py-2 border rounded-[1px] transition-colors duration-150 ${newTech.available ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`}
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                {newTech.available ? '● Available' : '○ Off Duty'}
+                {newTech.available ? 'â— Available' : 'â—‹ Off Duty'}
               </button>
               <span className="text-xs text-[#4a4a4a]">Set initial availability</span>
             </div>
@@ -615,11 +606,11 @@ function TechniciansTab({ technicians, setTechnicians }: { technicians: Technici
                 <div className="min-w-0">
                   <p className="text-white text-sm font-semibold">{t.name}</p>
                   <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.role}</p>
-                  <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{t.phone}{t.email ? ` · ${t.email}` : ''}</p>
+                  <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{t.phone}{t.email ? ` Â· ${t.email}` : ''}</p>
                   <p className="text-[0.62rem] text-[#4a4a4a] mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                    Login: <span className="text-ember">{t.username || '—'}</span>
+                    Login: <span className="text-ember">{t.username || 'â€”'}</span>
                     {t.password && (
-                      <> · Pw: <span className="text-ember">{showPass ? t.password : '••••••••'}</span>
+                      <> Â· Pw: <span className="text-ember">{showPass ? t.password : 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢'}</span>
                         <button onClick={() => setShowPass(s => !s)} className="ml-2 text-[#3a3a3a] hover:text-white transition-colors duration-150">
                           {showPass ? 'hide' : 'show'}
                         </button>
@@ -706,7 +697,7 @@ function RequestsTab({
                       return (
                         <div key={key} className="flex flex-wrap items-center gap-2 text-xs">
                           <span className="text-[0.6rem] tracking-wide uppercase text-[#4a4a4a] w-16 shrink-0" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>photo</span>
-                          <span className="text-ember">→</span>
+                          <span className="text-ember">â†’</span>
                           {val ? <img src={val} alt="New photo" className="w-10 h-10 rounded-full object-cover border border-[rgba(37,99,235,0.3)]" /> : <span className="text-[#4a4a4a]">Remove photo</span>}
                         </div>
                       );
@@ -714,8 +705,8 @@ function RequestsTab({
                     return (
                       <div key={key} className="flex flex-wrap items-baseline gap-2 text-xs">
                         <span className="text-[0.6rem] tracking-wide uppercase text-[#4a4a4a] w-16 shrink-0" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{key}</span>
-                        <span className="text-[#5a5a5a] line-through">{String(current ?? '—')}</span>
-                        <span className="text-ember">→</span>
+                        <span className="text-[#5a5a5a] line-through">{String(current ?? 'â€”')}</span>
+                        <span className="text-ember">â†’</span>
                         <span className="text-white">{val}</span>
                       </div>
                     );
@@ -873,13 +864,13 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
             <div><Label>Client Name *</Label><input type="text" value={newT.name} onChange={e => setNewT(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Claude Rugema" className="field text-sm" /></div>
             <div><Label>Title</Label><input type="text" value={newT.title} onChange={e => setNewT(p => ({ ...p, title: e.target.value }))} placeholder="e.g. IT Manager" className="field text-sm" /></div>
             <div><Label>Company</Label><input type="text" value={newT.company} onChange={e => setNewT(p => ({ ...p, company: e.target.value }))} placeholder="e.g. Bank of Kigali" className="field text-sm" /></div>
-            <div><Label>Project / Service</Label><input type="text" value={newT.project} onChange={e => setNewT(p => ({ ...p, project: e.target.value }))} placeholder="e.g. IP CCTV — 24 Cameras" className="field text-sm" /></div>
+            <div><Label>Project / Service</Label><input type="text" value={newT.project} onChange={e => setNewT(p => ({ ...p, project: e.target.value }))} placeholder="e.g. IP CCTV â€” 24 Cameras" className="field text-sm" /></div>
             <div><Label>Year</Label><input type="text" value={newT.year} onChange={e => setNewT(p => ({ ...p, year: e.target.value }))} placeholder="e.g. 2025" className="field text-sm" /></div>
             <div>
               <Label>Rating</Label>
               <StarPicker value={newT.rating} onChange={v => setNewT(p => ({ ...p, rating: v }))} />
             </div>
-            <div className="sm:col-span-2"><Label>Quote *</Label><textarea rows={3} value={newT.quote} onChange={e => setNewT(p => ({ ...p, quote: e.target.value }))} placeholder="What did this client say about you…" className="field text-sm resize-none" /></div>
+            <div className="sm:col-span-2"><Label>Quote *</Label><textarea rows={3} value={newT.quote} onChange={e => setNewT(p => ({ ...p, quote: e.target.value }))} placeholder="What did this client say about youâ€¦" className="field text-sm resize-none" /></div>
             <div className="sm:col-span-2 flex items-center gap-3">
               <button
                 type="button"
@@ -887,7 +878,7 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
                 className={`text-[0.62rem] tracking-wide uppercase px-3 py-2 border rounded-[1px] transition-colors duration-150 ${newT.visible ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`}
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                {newT.visible ? '● Visible' : '○ Hidden'}
+                {newT.visible ? 'â— Visible' : 'â—‹ Hidden'}
               </button>
               <span className="text-xs text-[#4a4a4a]">Show on the public site</span>
             </div>
@@ -921,7 +912,7 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 flex-wrap mb-2"><p className="text-sm font-semibold text-white">{t.name}</p><span className="text-[0.6rem] text-ember" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.company}</span></div>
                 <p className="text-xs text-[#5a5a5a] leading-relaxed italic">"{t.quote}"</p>
-                <p className="text-[0.6rem] text-[#3a3a3a] mt-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.project} · {t.year} · {t.rating}/5 stars</p>
+                <p className="text-[0.6rem] text-[#3a3a3a] mt-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.project} Â· {t.year} Â· {t.rating}/5 stars</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => toggleVisible(t.id)} className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1.5 border rounded-[1px] transition-colors duration-150 ${t.visible ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.visible ? 'Visible' : 'Hidden'}</button>
@@ -955,13 +946,13 @@ function SettingsTab({ settings, setSettings }: { settings: SiteSettings; setSet
         <div className="sm:col-span-2"><Label>Email</Label><Field value={settings.email} onChange={v => set('email', v)} /></div>
       </div>
       <button onClick={handleSave} className={`btn-ember px-8 py-3 rounded-[2px] self-start transition-all duration-300 ${saved ? '!bg-emerald-600' : ''}`}>
-        {saved ? '✓ Saved' : 'Save Settings'}
+        {saved ? 'âœ“ Saved' : 'Save Settings'}
       </button>
     </div>
   );
 }
 
-// ─── Founder Profile Tab ──────────────────────────────────────────────────────
+// â”€â”€â”€ Founder Profile Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function FounderProfileTab({
   profile, setProfile,
@@ -1020,9 +1011,9 @@ function FounderProfileTab({
 
       {/* Photo URL */}
       <div>
-        <Label>…or paste a Photo URL</Label>
+        <Label>â€¦or paste a Photo URL</Label>
         <input type="url" value={profile.photoUrl} onChange={e => set('photoUrl', e.target.value)}
-          placeholder="https://… (leave blank to use default)" className="field text-sm" />
+          placeholder="https://â€¦ (leave blank to use default)" className="field text-sm" />
       </div>
 
       {/* Identity */}
@@ -1115,7 +1106,7 @@ function FounderProfileTab({
             value={newDegree.title}
             onChange={e => setNewDegree(p => ({ ...p, title: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && addDegree()}
-            placeholder="Add a degree…"
+            placeholder="Add a degreeâ€¦"
             className="field text-sm"
           />
           <input
@@ -1158,7 +1149,7 @@ function FounderProfileTab({
             value={newAch}
             onChange={e => setNewAch(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && addAchievement()}
-            placeholder="Add a new achievement…"
+            placeholder="Add a new achievementâ€¦"
             className="field text-sm flex-1"
           />
           <button onClick={addAchievement} className="btn-ember px-4 py-2 rounded-[2px] text-xs shrink-0">Add</button>
@@ -1189,7 +1180,7 @@ function FounderProfileTab({
       <div className="bg-[rgba(37,99,235,0.06)] border border-[rgba(37,99,235,0.18)] rounded-[2px] p-5 flex items-start gap-3">
         <i className="bx bx-info-circle text-ember text-lg shrink-0 mt-0.5" />
         <div>
-          <p className="text-xs font-semibold text-ember mb-1">Meet the Founder — Public Page</p>
+          <p className="text-xs font-semibold text-ember mb-1">Meet the Founder â€” Public Page</p>
           <p className="text-xs text-[#5a5a5a] leading-relaxed">
             All information saved here will appear on the public-facing "Meet the Founder" section of the Jean Luc Solutions website. Keep the bio professional and the photo high-resolution.
           </p>
@@ -1207,7 +1198,7 @@ function FounderProfileTab({
   );
 }
 
-// ─── Main export ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function AdminPanel({ onExit }: { onExit: () => void }) {
   const [authed, setAuthed] = useState(false);
@@ -1228,14 +1219,14 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
       <AdminBackground />
 
       <div className="relative z-10 flex flex-1 overflow-hidden">
-        {/* Sidebar — icon-only by default, expands + shows labels on hover */}
+        {/* Sidebar â€” icon-only by default, expands + shows labels on hover */}
         <aside
           className="group/sidebar shrink-0 border-r border-[rgba(255,255,255,0.05)] backdrop-blur-sm flex-col hidden md:flex transition-all duration-300 ease-in-out overflow-hidden"
           style={{ width: '56px', background: 'rgba(10,10,10,0.60)' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.width = '220px'; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.width = '56px'; }}
         >
-          {/* Sidebar header — logo + home button */}
+          {/* Sidebar header â€” logo + home button */}
           <div className="flex items-center gap-2 px-3 py-4 border-b border-[rgba(255,255,255,0.05)] shrink-0">
             <button
               onClick={onExit}
@@ -1290,7 +1281,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
 
           {/* Bottom: CEO profile + Log Out */}
           <div className="border-t border-[rgba(255,255,255,0.05)] pb-2">
-            {/* CEO profile — click to edit */}
+            {/* CEO profile â€” click to edit */}
             <button
               onClick={() => setTab('Founder')}
               title="Edit Founder Profile"
@@ -1308,7 +1299,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
               </div>
               <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 overflow-hidden">
                 <p className="text-[0.72rem] font-semibold text-white whitespace-nowrap leading-tight">{founder.name}</p>
-                <p className="text-[0.58rem] text-[#4a4a4a] whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{founder.title} · JL Solutions</p>
+                <p className="text-[0.58rem] text-[#4a4a4a] whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{founder.title} Â· JL Solutions</p>
               </div>
             </button>
 

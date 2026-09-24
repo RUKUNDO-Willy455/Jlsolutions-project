@@ -4,7 +4,6 @@ import Footer from './components/Footer';
 import LoadingScreen from './components/LoadingScreen';
 import AdminPanel from './components/AdminPanel';
 import TechnicianPanel from './components/TechnicianPanel';
-import FloatingActions from './components/FloatingActions';
 import { useRoute } from './router';
 import HomePage from './pages/Home';
 import ServicesPage from './pages/Services';
@@ -76,7 +75,6 @@ export default function App() {
             <PageView />
           </main>
           <Footer onAdminClick={() => setAdminOpen(true)} onTechClick={() => setTechOpen(true)} />
-          <FloatingActions />
         </>
       )}
     </>
