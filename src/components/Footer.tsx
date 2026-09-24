@@ -10,7 +10,7 @@ import {
   CircleHelp,
 } from 'lucide-react';
 import BrandLogo from './BrandLogo';
-import { PHONE_LINKS, SITE, SOCIAL_LINKS, SUPPORT_MAIL_LINK } from '../data/site';
+import { PHONE_LINKS, SITE, SOCIAL_LINKS } from '../data/site';
 import { SERVICES } from '../data/services';
 import { useI18n } from '../i18n';
 import './Footer.css';
@@ -124,7 +124,7 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
               </a>
             </li>
             <li>
-              <a href={SUPPORT_MAIL_LINK}>
+              <a href="#/contact">
                 <CircleHelp size={15} /> {t('footer.emailQuestion')}
               </a>
             </li>
