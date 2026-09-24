@@ -117,6 +117,12 @@ export const STORAGE_KEYS = {
   testimonials: 'jl.editor.testimonials',
   ratings: 'jl.editor.ratings',
   notifications: 'jl.editor.notifications',
+  adminLastTab: 'jl.portal.admin.lastTab',
+  techLastTab: 'jl.portal.tech.lastTab',
+  adminLastAt: 'jl.portal.admin.lastAt',
+  techLastAt: 'jl.portal.tech.lastAt',
+  adminNotifications: 'jl.portal.admin.notifications',
+  techNotifications: 'jl.portal.tech.notifications',
 };
 
 /**
@@ -272,6 +278,16 @@ export async function authTechnician(
       ) ?? null
     );
   }
+}
+
+/** Read a raw value from localStorage (used for portal session state). */
+export function loadStored<T>(key: string, fallback: T): T {
+  return load(key, fallback);
+}
+
+/** Write a raw value to localStorage (used for portal session state). */
+export function saveStored(key: string, value: unknown) {
+  persistLocal(key, value);
 }
 
 /**

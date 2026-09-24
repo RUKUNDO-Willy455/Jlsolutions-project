@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import jeanlucLogo from '../assets/jeanluc-logo.png';
 import adminBg1 from '../assets/admin-bg-1.jpg';
 import jlCeo from '../assets/jl-ceo.png';
@@ -11,9 +11,14 @@ import {
   seedProfileRequests,
   seedBookings,
   seedTestimonials,
-  seedNotifications,
+  loadStored,
+  saveStored,
 } from '../data/editor';
-import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial, AdminNotification } from '../data/editor';
+import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial } from '../data/editor';
+import { deriveAdminNotifications, markNotificationsSeen, relativeTimeLabel } from '../data/notifications';
+import WelcomeScreen from './WelcomeScreen';
+import PortalSidebar from './PortalSidebar';
+import PortalBrandBar from './PortalBrandBar';
 import { AvatarUpload } from './AvatarUpload';
 
 function AdminBackground() {
@@ -88,81 +93,6 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
       <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{label}</p>
       <p className="text-3xl font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{value}</p>
       {sub && <p className="text-[0.68rem] text-[#4a4a4a] mt-1">{sub}</p>}
-    </div>
-  );
-}
-
-function InboxPanel({
-  notifications,
-  setNotifications,
-  onOpenBooking,
-  onClose,
-}: {
-  notifications: AdminNotification[];
-  setNotifications: React.Dispatch<React.SetStateAction<AdminNotification[]>>;
-  onOpenBooking: () => void;
-  onClose: () => void;
-}) {
-  const unread = notifications.filter(n => !n.read).length;
-  function open(n: AdminNotification) {
-    setNotifications(prev => prev.map(x => (x.id === n.id ? { ...x, read: true } : x)));
-    if (n.kind === 'booking') onOpenBooking();
-    onClose();
-  }
-  function markAll() {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  }
-  return (
-    <div className="fixed inset-0 z-50" onClick={onClose}>
-      <div
-        className="absolute top-[60px] right-2 sm:right-6 w-[min(94vw,380px)] max-h-[480px] overflow-y-auto bg-[#101010] border border-[rgba(255,255,255,0.08)] rounded-[2px] shadow-2xl"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[rgba(255,255,255,0.06)] sticky top-0 bg-[#101010]">
-          <p className="text-[0.62rem] tracking-[0.16em] uppercase text-[#8a8a8a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-            Notifications {unread > 0 && <span className="text-ember">({unread})</span>}
-          </p>
-          {notifications.length > 0 && (
-            <button
-              onClick={markAll}
-              className="text-[0.6rem] tracking-wide uppercase text-ember hover:text-white transition-colors duration-150"
-              style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-            >
-              Mark all read
-            </button>
-          )}
-        </div>
-        {notifications.length === 0 && (
-          <p className="text-sm text-[#4a4a4a] text-center py-10">No notifications yet.</p>
-        )}
-        <div className="flex flex-col">
-          {notifications.map(n => (
-            <button
-              key={n.id}
-              onClick={() => open(n)}
-              className={`text-left px-4 py-3 border-b border-[rgba(255,255,255,0.04)] transition-colors duration-150 ${n.read ? 'hover:bg-[#151515]' : 'bg-[rgba(37,99,235,0.06)] hover:bg-[rgba(37,99,235,0.1)]'}`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-ember shrink-0" />}
-                <span
-                  className={`text-[0.55rem] tracking-wide uppercase px-1.5 py-0.5 border rounded-[1px] ${n.kind === 'booking'
-                    ? 'text-blue-400 border-blue-400/25 bg-blue-400/10'
-                    : n.kind === 'review'
-                      ? 'text-yellow-400 border-yellow-400/25 bg-yellow-400/10'
-                      : 'text-emerald-400 border-emerald-400/25 bg-emerald-400/10'
-                  }`}
-                  style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-                >
-                  {n.kind}
-                </span>
-                <span className="text-[0.58rem] text-[#4a4a4a] ml-auto" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{n.createdAt}</span>
-              </div>
-              <p className="text-xs font-semibold text-white">{n.title}</p>
-              <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5 leading-relaxed">{n.message}</p>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -1288,9 +1218,8 @@ function FounderProfileTab({
 
 export default function AdminPanel({ onExit }: { onExit: () => void }) {
   const [authed, setAuthed] = useState(false);
-  const [tab, setTab] = useState<Tab>('Dashboard');
-  const [showInbox, setShowInbox] = useState(false);
-  const [notifications, setNotifications] = useEditorStore<AdminNotification[]>(STORAGE_KEYS.notifications, seedNotifications);
+  const [started, setStarted] = useState(false);
+  const [tab, setTab] = useState<Tab>(() => loadStored<Tab>(STORAGE_KEYS.adminLastTab, 'Dashboard'));
   const [bookings, setBookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
   const [technicians, setTechnicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians);
   const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
@@ -1299,7 +1228,75 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
   const [settings, setSettings] = useState<SiteSettings>(seedSettings);
   const [founder, setFounder] = useEditorStore<FounderProfile>(STORAGE_KEYS.founder, seedFounder);
 
-  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} onExit={onExit} />;
+  const notifications = useMemo(
+    () => deriveAdminNotifications(bookings, profileRequests),
+    [bookings, profileRequests],
+  );
+  const pendingRequests = useMemo(
+    () => profileRequests.filter(r => r.status === 'pending').length,
+    [profileRequests],
+  );
+  const counts = useMemo(() => {
+    const c = { pending: 0, confirmed: 0, completed: 0, cancelled: 0 };
+    bookings.forEach(b => c[b.status]++);
+    return c;
+  }, [bookings]);
+
+  useEffect(() => {
+    saveStored(STORAGE_KEYS.adminLastTab, tab);
+    saveStored(STORAGE_KEYS.adminLastAt, new Date().toISOString());
+  }, [tab]);
+
+  function enterConsole(resumeTab: string) {
+    markNotificationsSeen('admin', notifications.map(n => n.id));
+    setTab((resumeTab && TABS.includes(resumeTab as Tab) ? resumeTab : 'Dashboard') as Tab);
+    setStarted(true);
+  }
+
+  if (!authed) return <LoginScreen onLogin={() => { setAuthed(true); }} onExit={onExit} />;
+
+  if (!started) {
+    return (
+      <WelcomeScreen
+        role="admin"
+        userName={founder.name}
+        userTitle={founder.title}
+        portalLabel="Admin Console"
+        avatarUrl={founder.photoUrl || jlCeo}
+        tagline="Good to see you. New bookings and technician requests are surfaced here the moment they arrive — plus a one-click resume to where you left off."
+        lastTab={TABS.includes(tab) ? tab : 'Dashboard'}
+        lastSeenLabel={relativeTimeLabel(loadStored<string | null>(STORAGE_KEYS.adminLastAt, null))}
+        notifications={notifications}
+        stats={[
+          { label: 'Total bookings', value: bookings.length },
+          { label: 'Pending', value: counts.pending },
+          { label: 'Confirmed', value: counts.confirmed },
+          { label: 'Technicians free', value: `${technicians.filter(t => t.available).length}/${technicians.length}` },
+        ]}
+        quickLinks={[
+          { label: 'Review bookings', description: 'Confirm, reschedule or message clients', tab: 'Bookings', icon: 'bx-calendar-check' },
+          { label: 'Approve requests', description: `${pendingRequests} technician request${pendingRequests === 1 ? '' : 's'} waiting`, tab: 'Requests', icon: 'bx-envelope-open' },
+          { label: 'Team availability', description: 'Roster, availability, and new hires', tab: 'Technicians', icon: 'bx-group' },
+        ]}
+        sidebarItems={[
+          { tab: 'Dashboard', icon: 'bx-tachometer' },
+          { tab: 'Bookings', icon: 'bx-calendar-check' },
+          { tab: 'Technicians', icon: 'bx-group' },
+          { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingRequests },
+          { tab: 'Founder', icon: 'bx-user-pin' },
+          { tab: 'Services', icon: 'bx-briefcase' },
+          { tab: 'Testimonials', icon: 'bx-message-square-dots' },
+          { tab: 'Settings', icon: 'bx-cog' },
+        ]}
+        personaName={founder.name}
+        personaRole={`${founder.title} · JL Solutions`}
+        personaAvatar={founder.photoUrl || jlCeo}
+        onPersonaClick={() => enterConsole('Founder')}
+        onContinue={enterConsole}
+        onExit={onExit}
+      />
+    );
+  }
 
   return (
     <div className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
@@ -1307,151 +1304,32 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
       <AdminBackground />
 
       <div className="relative z-10 flex flex-1 overflow-hidden">
-        {/* Sidebar â€” icon-only by default, expands + shows labels on hover */}
-        <aside
-          className="group/sidebar shrink-0 border-r border-[rgba(255,255,255,0.05)] backdrop-blur-sm flex-col hidden md:flex transition-all duration-300 ease-in-out overflow-hidden"
-          style={{ width: '56px', background: 'rgba(10,10,10,0.60)' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.width = '220px'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.width = '56px'; }}
-        >
-          {/* Sidebar header â€” logo + home button */}
-          <div className="flex items-center gap-2 px-3 py-4 border-b border-[rgba(255,255,255,0.05)] shrink-0">
-            <button
-              onClick={onExit}
-              title="Back to main site"
-              className="group flex items-center justify-center w-8 h-8 rounded-[2px] hover:bg-[rgba(37,99,235,0.08)] transition-all duration-200 shrink-0"
-            >
-              <i className="bx bx-home text-base text-[#4a4a4a] group-hover:text-ember transition-colors duration-200" />
-            </button>
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setShowInbox(v => !v)}
-                title="Notifications"
-                className="flex items-center justify-center w-8 h-8 rounded-[2px] hover:bg-[rgba(37,99,235,0.08)] transition-all duration-200"
-              >
-                <i className={`bx bx-bell text-base ${notifications.some(n => !n.read) ? 'text-ember' : 'text-[#4a4a4a]'} hover:text-ember transition-colors duration-200`} />
-              </button>
-              {notifications.some(n => !n.read) && (
-                <span className="absolute top-0 right-0 min-w-[16px] h-[16px] px-1 rounded-full bg-ember text-white text-[9px] font-bold flex items-center justify-center" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  {notifications.filter(n => !n.read).length}
-                </span>
-              )}
-            </div>
-            <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 flex items-center gap-2 overflow-hidden">
-              <img src={jeanlucLogo} alt="" className="h-6 w-auto object-contain shrink-0" />
-              <span className="text-[0.6rem] tracking-[0.18em] uppercase text-[#3a3a3a] whitespace-nowrap" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Admin Console</span>
-            </div>
-          </div>
-
-          {/* Nav items */}
-          <div className="flex flex-col flex-1 pt-4">
-            {([
-              { tab: 'Dashboard',    icon: 'bx-tachometer' },
-              { tab: 'Bookings',     icon: 'bx-calendar-check' },
-              { tab: 'Technicians',  icon: 'bx-group' },
-              { tab: 'Requests',     icon: 'bx-envelope-open' },
-              { tab: 'Founder',      icon: 'bx-user-pin' },
-              { tab: 'Services',     icon: 'bx-briefcase' },
-              { tab: 'Testimonials', icon: 'bx-message-square-dots' },
-              { tab: 'Settings',     icon: 'bx-cog' },
-            ] as { tab: Tab; icon: string }[]).map(({ tab: t, icon }) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                title={t}
-                className={`flex items-center gap-3.5 px-4 py-3.5 text-left transition-all duration-150 whitespace-nowrap ${
-                  tab === t
-                    ? 'text-white bg-[rgba(37,99,235,0.14)] border-r-2 border-ember'
-                    : 'text-[#5a5a5a] hover:text-[#ccc] hover:bg-[rgba(255,255,255,0.04)]'
-                }`}
-              >
-                <i className={`bx ${icon} text-xl shrink-0`} />
-                <span className="text-[0.78rem] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 font-medium">
-                  {t}
-                </span>
-                {t === 'Requests' && profileRequests.filter(r => r.status === 'pending').length > 0 && (
-                  <span
-                    className="ml-auto mr-2 min-w-[20px] h-5 px-1.5 rounded-full bg-ember text-[0.6rem] font-bold text-white flex items-center justify-center opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200"
-                    style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-                  >
-                    {profileRequests.filter(r => r.status === 'pending').length}
-                  </span>
-                )}
-                {t === 'Testimonials' && testimonials.filter(x => !x.visible).length > 0 && (
-                  <span
-                    className="ml-auto mr-2 min-w-[20px] h-5 px-1.5 rounded-full bg-yellow-500 text-[0.6rem] font-bold text-black flex items-center justify-center opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200"
-                    style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-                  >
-                    {testimonials.filter(x => !x.visible).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Bottom: CEO profile + Log Out */}
-          <div className="border-t border-[rgba(255,255,255,0.05)] pb-2">
-            {/* CEO profile â€” click to edit */}
-            <button
-              onClick={() => setTab('Founder')}
-              title="Edit Founder Profile"
-              className="flex items-center gap-3 px-3 py-4 overflow-hidden w-full text-left hover:bg-[rgba(37,99,235,0.06)] transition-colors duration-150 group/profile"
-            >
-              <div className="relative shrink-0">
-                <img
-                  src={founder.photoUrl || jlCeo}
-                  alt={founder.name}
-                  className="w-8 h-8 rounded-full object-cover border border-[rgba(37,99,235,0.4)]"
-                />
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#0a0a0a] flex items-center justify-center opacity-0 group-hover/profile:opacity-100 transition-opacity duration-150">
-                  <i className="bx bx-pencil text-[8px] text-ember" />
-                </div>
-              </div>
-              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 overflow-hidden">
-                <p className="text-[0.72rem] font-semibold text-white whitespace-nowrap leading-tight">{founder.name}</p>
-                <p className="text-[0.58rem] text-[#4a4a4a] whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{founder.title} Â· JL Solutions</p>
-              </div>
-            </button>
-
-            {/* Log Out */}
-            <button
-              onClick={() => { setAuthed(false); onExit(); }}
-              title="Log Out"
-              className="flex items-center gap-3.5 px-4 py-3 w-full text-left text-red-400/60 hover:text-red-400 hover:bg-red-900/10 transition-all duration-150 whitespace-nowrap"
-            >
-              <i className="bx bx-log-out text-xl shrink-0" />
-              <span className="text-[0.78rem] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-                Log Out
-              </span>
-            </button>
-          </div>
-        </aside>
-
-        {/* Mobile bottom tab strip */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0a0a]/95 border-t border-[rgba(255,255,255,0.06)] flex overflow-x-auto pb-[env(safe-area-inset-bottom)]">
-          {TABS.map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap transition-colors duration-150 ${tab === t ? 'text-ember border-t border-ember' : 'text-[#4a4a4a]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-              {t}
-              {t === 'Testimonials' && testimonials.filter(x => !x.visible).length > 0 && (
-                <span className="ml-1.5 inline-flex min-w-[18px] h-4 px-1 rounded-full bg-yellow-500 text-[0.55rem] font-bold text-black items-center justify-center align-middle">
-                  {testimonials.filter(x => !x.visible).length}
-                </span>
-              )}
-            </button>
-          ))}
-          <button onClick={() => { setAuthed(false); onExit(); }} className="flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap text-red-400/60" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Log Out</button>
-          <button onClick={() => setShowInbox(v => !v)} className="relative flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap text-[#4a4a4a] hover:text-white" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-            Inbox
-            {notifications.some(n => !n.read) && (
-              <span className="absolute top-1.5 right-3 min-w-[16px] h-[16px] px-1 rounded-full bg-ember text-white text-[9px] font-bold flex items-center justify-center" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                {notifications.filter(n => !n.read).length}
-              </span>
-            )}
-          </button>
-        </div>
+        <PortalSidebar
+          items={[
+            { tab: 'Dashboard', icon: 'bx-tachometer' },
+            { tab: 'Bookings', icon: 'bx-calendar-check' },
+            { tab: 'Technicians', icon: 'bx-group' },
+            { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingRequests },
+            { tab: 'Founder', icon: 'bx-user-pin' },
+            { tab: 'Services', icon: 'bx-briefcase' },
+            { tab: 'Testimonials', icon: 'bx-message-square-dots' },
+            { tab: 'Settings', icon: 'bx-cog' },
+          ]}
+          activeTab={tab}
+          onSelect={(t) => setTab(t as Tab)}
+          portalName="Admin Console"
+          personaName={founder.name}
+          personaRole={`${founder.title} · JL Solutions`}
+          personaAvatar={founder.photoUrl || jlCeo}
+          onPersonaClick={() => setTab('Founder')}
+          onLogout={() => { setAuthed(false); onExit(); }}
+        />
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 pb-24 md:pb-10">
+          <div className="max-w-6xl mx-auto mb-8">
+            <PortalBrandBar label="Admin Console" />
+          </div>
           {tab !== 'Dashboard' && (
             <button
               onClick={() => setTab('Dashboard')}
@@ -1501,14 +1379,6 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
         </main>
       </div>
 
-      {showInbox && (
-        <InboxPanel
-          notifications={notifications}
-          setNotifications={setNotifications}
-          onOpenBooking={() => setTab('Bookings')}
-          onClose={() => setShowInbox(false)}
-        />
-      )}
     </div>
   );
 }

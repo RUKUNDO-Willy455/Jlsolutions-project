@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import jeanlucLogo from '../assets/jeanluc-logo.png';
 import adminBg1 from '../assets/admin-bg-1.jpg';
 import {
@@ -8,9 +8,14 @@ import {
   seedTechnicians,
   seedProfileRequests,
   seedBookings,
-  seedNotifications,
+  loadStored,
+  saveStored,
 } from '../data/editor';
-import type { Technician, ProfileEditRequest, Booking, AdminNotification } from '../data/editor';
+import type { Technician, ProfileEditRequest, Booking } from '../data/editor';
+import { deriveTechNotifications, markNotificationsSeen, relativeTimeLabel } from '../data/notifications';
+import WelcomeScreen from './WelcomeScreen';
+import PortalBrandBar from './PortalBrandBar';
+import PortalSidebar from './PortalSidebar';
 import { AvatarUpload } from './AvatarUpload';
 
 // â”€â”€â”€ Shared bits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -44,8 +49,8 @@ function Label({ children }: { children: React.ReactNode }) {
 }
 function Field({ value, onChange, multiline, type = 'text', placeholder }: { value: string; onChange: (v: string) => void; multiline?: boolean; type?: string; placeholder?: string }) {
   return multiline
-    ? <textarea rows={3} value={value} onChange={e => onChange(e.target.value)} className="field text-sm resize-none" placeholder={placeholder} />
-    : <input type={type} value={value} onChange={e => onChange(e.target.value)} className="field text-sm" placeholder={placeholder} />;
+    ? <textarea rows={3} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="field text-sm resize-none" />
+    : <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="field text-sm" />;
 }
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -199,12 +204,11 @@ const TECH_TABS = ['Dashboard', 'Profile Settings', 'Requests'] as const;
 type TechTab = typeof TECH_TABS[number];
 
 function ProfileSettingsTab({
-  tech, requests, setRequests, setNotifications, onInfo,
+  tech, requests, setRequests, onInfo,
 }: {
   tech: Technician;
   requests: ProfileEditRequest[];
   setRequests: React.Dispatch<React.SetStateAction<ProfileEditRequest[]>>;
-  setNotifications: React.Dispatch<React.SetStateAction<AdminNotification[]>>;
   onInfo: (msg: string) => void;
 }) {
   const [name, setName] = useState(tech.name);
@@ -240,17 +244,6 @@ function ProfileSettingsTab({
       createdAt: new Date().toISOString().split('T')[0],
     };
     setRequests(prev => [req, ...prev]);
-    setNotifications(prev => [
-      {
-        id: `n${Date.now()}`,
-        kind: 'request',
-        title: `Profile change request from ${tech.name}`,
-        message: `Submitted changes: ${Object.keys(changes).join(', ')}.`,
-        createdAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
-        read: false,
-      },
-      ...prev,
-    ]);
     setReason('');
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -343,9 +336,11 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
     setRequests(prev => prev.filter(r => r.id !== id));
   }
 
-  const myBookings = bookings.filter(b => b.technicianId && b.technicianId === tech.id).sort((a, b) => a.date.localeCompare(b.date));
-  const pendingBookings = myBookings.filter(b => b.status === 'pending').length;
-  const activeBookings = myBookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length;
+  const myBookings = bookings
+    .filter(b => b.technicianId && b.technicianId === tech.id && b.status !== 'pending')
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const confirmedBookings = myBookings.filter(b => b.status === 'confirmed').length;
+  const activeBookings = myBookings.filter(b => b.status === 'confirmed' || b.status === 'completed').length;
 
   return (
     <div className="flex flex-col gap-8">
@@ -368,17 +363,17 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="My Bookings" value={activeBookings} sub="assigned" />
-        <StatCard label="Pending" value={pendingBookings} sub="awaiting admin confirm" />
+        <StatCard label="My Bookings" value={activeBookings} sub="assigned & confirmed" />
+        <StatCard label="Confirmed" value={confirmedBookings} sub="on your schedule" />
         <StatCard label="Approved" value={approved} sub="profile edits" />
         <StatCard label="Rejected" value={rejected} sub="profile edits" />
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-[#aaa] mb-4" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Who Requested Me</h3>
+        <h3 className="text-sm font-semibold text-[#aaa] mb-4" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Confirmed Assignments</h3>
         <div className="flex flex-col gap-3">
           {myBookings.length === 0 && (
-            <p className="text-sm text-[#3a3a3a] text-center py-8">No bookings assigned to you yet.</p>
+            <p className="text-sm text-[#3a3a3a] text-center py-8">No confirmed bookings yet. You'll be notified here as soon as the admin confirms your next assignment.</p>
           )}
           {myBookings.map(b => (
             <div key={b.id} className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.06)] rounded-[2px] p-5">
@@ -484,10 +479,10 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
   const [technicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians);
   const [bookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
   const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
-  const [notifications, setNotifications] = useEditorStore<AdminNotification[]>(STORAGE_KEYS.notifications, seedNotifications);
   const [techId, setTechId] = useState<string | null>(null);
-  const [signedIn, setSignedIn] = useState<Technician | null>(null);
-  const [tab, setTab] = useState<TechTab>('Dashboard');
+const [signedIn, setSignedIn] = useState<Technician | null>(null);
+  const [started, setStarted] = useState(false);
+  const [tab, setTab] = useState<TechTab>(() => loadStored<TechTab>(STORAGE_KEYS.techLastTab, 'Dashboard'));
   const [info, setInfo] = useState('');
 
   useEffect(() => {
@@ -499,7 +494,66 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
 
   const tech = signedIn ?? technicians.find(t => t.id === techId);
 
-  if (!tech) return <TechLogin technicians={technicians} onLogin={t => { setSignedIn(t); setTechId(t.id); }} onExit={onExit} />;
+  const notifications = useMemo(
+    () => (tech ? deriveTechNotifications(tech, bookings, profileRequests) : []),
+    [tech, bookings, profileRequests],
+  );
+
+  useEffect(() => {
+    if (techId) {
+      saveStored(STORAGE_KEYS.techLastTab, tab);
+      saveStored(STORAGE_KEYS.techLastAt, new Date().toISOString());
+    }
+  }, [techId, tab]);
+
+  function enterConsole(resumeTab: string) {
+    if (tech) markNotificationsSeen('tech', notifications.map(n => n.id));
+    setTab((resumeTab && TECH_TABS.includes(resumeTab as TechTab) ? resumeTab : 'Dashboard') as TechTab);
+    setStarted(true);
+  }
+
+  if (!tech) return <TechLogin technicians={technicians} onLogin={t => { setSignedIn(t); setTechId(t.id); setStarted(false); }} onExit={onExit} />;
+
+  if (!started) {
+    const myBookings = bookings.filter(b => b.technicianId === tech.id && b.status !== 'pending');
+    const pendingRequests = profileRequests.filter(r => r.technicianId === tech.id && r.status === 'pending').length;
+    const approvedRequests = profileRequests.filter(r => r.technicianId === tech.id && r.status === 'approved').length;
+    return (
+      <WelcomeScreen
+        role="tech"
+        userName={tech.name}
+        userTitle={tech.role}
+        portalLabel="Technician Portal"
+        avatarUrl={tech.photoUrl}
+        tagline="Good to see you back on the tools. You'll only hear about an assignment once the admin confirms it — and you can track the profile changes you've requested."
+        lastTab={TECH_TABS.includes(tab) ? tab : 'Dashboard'}
+        lastSeenLabel={relativeTimeLabel(loadStored<string | null>(STORAGE_KEYS.techLastAt, null))}
+        notifications={notifications}
+        stats={[
+          { label: 'My bookings', value: myBookings.filter(b => b.status === 'confirmed' || b.status === 'completed').length },
+          { label: 'Confirmed', value: myBookings.filter(b => b.status === 'confirmed').length },
+          { label: 'Pending requests', value: pendingRequests },
+          { label: 'Approved changes', value: approvedRequests },
+        ]}
+        quickLinks={[
+          { label: 'My schedule', description: 'Bookings assigned to you', tab: 'Dashboard', icon: 'bx-tachometer' },
+          { label: 'Update profile', description: 'Submit changes for admin approval', tab: 'Profile Settings', icon: 'bx-user-circle' },
+          { label: 'My requests', description: 'Status of your profile change requests', tab: 'Requests', icon: 'bx-envelope-open' },
+        ]}
+        sidebarItems={[
+          { tab: 'Dashboard', icon: 'bx-tachometer' },
+          { tab: 'Profile Settings', icon: 'bx-user-circle' },
+          { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingRequests },
+        ]}
+        personaName={tech.name}
+        personaRole={tech.role}
+        personaAvatar={tech.photoUrl}
+        personaInitials={tech.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+        onContinue={enterConsole}
+        onExit={onExit}
+      />
+    );
+  }
 
   const pendingCount = profileRequests.filter(r => r.technicianId === tech.id && r.status === 'pending').length;
 
@@ -508,90 +562,28 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
       <PanelBackground />
 
       <div className="relative z-10 flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside
-          className="group/sidebar shrink-0 border-r border-[rgba(255,255,255,0.05)] backdrop-blur-sm flex-col hidden md:flex transition-all duration-300 ease-in-out overflow-hidden"
-          style={{ width: '56px', background: 'rgba(10,10,10,0.60)' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.width = '220px'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.width = '56px'; }}
-        >
-          <div className="flex items-center gap-2 px-3 py-4 border-b border-[rgba(255,255,255,0.05)] shrink-0">
-            <button
-              onClick={onExit}
-              title="Back to main site"
-              className="group flex items-center justify-center w-8 h-8 rounded-[2px] hover:bg-[rgba(37,99,235,0.08)] transition-all duration-200 shrink-0"
-            >
-              <i className="bx bx-home text-base text-[#4a4a4a] group-hover:text-ember transition-colors duration-200" />
-            </button>
-            <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 flex items-center gap-2 overflow-hidden">
-              <img src={jeanlucLogo} alt="" className="h-6 w-auto object-contain shrink-0" />
-              <span className="text-[0.6rem] tracking-[0.18em] uppercase text-[#3a3a3a] whitespace-nowrap" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Tech Portal</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col flex-1 pt-4">
-            {([
-              { tab: 'Dashboard', icon: 'bx-tachometer' },
-              { tab: 'Profile Settings', icon: 'bx-user-circle' },
-              { tab: 'Requests', icon: 'bx-envelope-open' },
-            ] as { tab: TechTab; icon: string }[]).map(({ tab: t, icon }) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                title={t}
-                className={`flex items-center gap-3.5 px-4 py-3.5 text-left transition-all duration-150 whitespace-nowrap ${
-                  tab === t
-                    ? 'text-white bg-[rgba(37,99,235,0.14)] border-r-2 border-ember'
-                    : 'text-[#5a5a5a] hover:text-[#ccc] hover:bg-[rgba(255,255,255,0.04)]'
-                }`}
-              >
-                <i className={`bx ${icon} text-xl shrink-0`} />
-                <span className="text-[0.78rem] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 font-medium">{t}</span>
-                {t === 'Requests' && pendingCount > 0 && (
-                  <span className="ml-auto mr-2 min-w-[20px] h-5 px-1.5 rounded-full bg-ember text-[0.6rem] font-bold text-white flex items-center justify-center opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                    {pendingCount}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className="border-t border-[rgba(255,255,255,0.05)] pb-2">
-            <div className="flex items-center gap-3 px-3 py-4 overflow-hidden">
-              {tech.photoUrl ? (
-                <img src={tech.photoUrl} alt={tech.name} className="w-8 h-8 rounded-[1px] object-cover border border-[rgba(37,99,235,0.3)] shrink-0" />
-              ) : (
-                <div className="w-8 h-8 rounded-[1px] bg-[rgba(37,99,235,0.12)] border border-[rgba(37,99,235,0.2)] flex items-center justify-center text-xs font-semibold text-ember shrink-0" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                  {tech.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                </div>
-              )}
-              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 overflow-hidden">
-                <p className="text-[0.72rem] font-semibold text-white whitespace-nowrap leading-tight">{tech.name}</p>
-                <p className="text-[0.58rem] text-[#4a4a4a] whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{tech.role}</p>
-              </div>
-            </div>
-
-            <button
-onClick={() => { setSignedIn(null); setTechId(null); setTab('Dashboard'); onExit(); }}
-              title="Log Out"
-              className="flex items-center gap-3.5 px-4 py-3 w-full text-left text-red-400/60 hover:text-red-400 hover:bg-red-900/10 transition-all duration-150 whitespace-nowrap"
-            >
-              <i className="bx bx-log-out text-xl shrink-0" />
-              <span className="text-[0.78rem] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">Log Out</span>
-            </button>
-          </div>
-        </aside>
-
-        {/* Mobile bottom tab strip */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0a0a]/95 border-t border-[rgba(255,255,255,0.06)] flex overflow-x-auto pb-[env(safe-area-inset-bottom)]">
-          {TECH_TABS.map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap transition-colors duration-150 ${tab === t ? 'text-ember border-t border-ember' : 'text-[#4a4a4a]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t}</button>
-          ))}
-          <button onClick={() => { setSignedIn(null); setTechId(null); setTab('Dashboard'); onExit(); }} className="flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap text-red-400/60" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Log Out</button>
-        </div>
+{/* Shared sidebar + mobile tab strip */}
+        <PortalSidebar
+          items={[
+            { tab: 'Dashboard', icon: 'bx-tachometer' },
+            { tab: 'Profile Settings', icon: 'bx-user-circle' },
+            { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingCount },
+          ]}
+          activeTab={tab}
+          onSelect={(t) => setTab(t as TechTab)}
+          portalName="Tech Portal"
+          personaName={tech.name}
+          personaRole={tech.role}
+          personaAvatar={tech.photoUrl}
+          personaInitials={tech.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+          onLogout={() => { setSignedIn(null); setTechId(null); setTab('Dashboard'); onExit(); }}
+        />
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 pb-24 md:pb-10">
+          <div className="max-w-5xl mx-auto mb-8">
+            <PortalBrandBar label="Technician Portal" />
+          </div>
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
               <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{tab}</h1>
@@ -611,7 +603,7 @@ onClick={() => { setSignedIn(null); setTechId(null); setTab('Dashboard'); onExit
 
             {tab === 'Dashboard'        && <TechDashboard tech={tech} requests={profileRequests} setRequests={setProfileRequests} bookings={bookings} />}
             {tab === 'Profile Settings' && (
-              <ProfileSettingsTab tech={tech} requests={profileRequests} setRequests={setProfileRequests} setNotifications={setNotifications} onInfo={setInfo} />
+               <ProfileSettingsTab tech={tech} requests={profileRequests} setRequests={setProfileRequests} onInfo={setInfo} />
             )}
             {tab === 'Requests'         && <TechRequestsTab tech={tech} requests={profileRequests} setRequests={setProfileRequests} />}
           </div>
