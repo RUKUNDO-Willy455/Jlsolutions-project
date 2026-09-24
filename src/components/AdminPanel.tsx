@@ -13,6 +13,7 @@ import {
 } from '../data/editor';
 import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial } from '../data/editor';
 import { AvatarUpload } from './AvatarUpload';
+import BookingMapModal from './BookingMapModal';
 
 // ─── Auth credentials (frontend demo — replace with real auth in production) ──
 const ADMIN_USER = 'admin';
@@ -294,6 +295,7 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
   const [msgDraft, setMsgDraft] = useState('');
   const [msgError, setMsgError] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+  const [mapBooking, setMapBooking] = useState<Booking | null>(null);
 
   function resetBookings() {
     if (!confirmReset) {
@@ -378,9 +380,17 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                   <td className="px-4 py-3 max-w-[210px]">
                     <p className="text-xs text-[#7a7a7a] truncate">{b.location || '—'}</p>
                     {mapLink(b) && (
-                      <a href={mapLink(b)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[0.6rem] text-ember/80 hover:text-ember transition-colors duration-150">
+                      <button
+                        type="button"
+                        onClick={() => setMapBooking(b)}
+                        className="inline-flex items-center gap-1 text-[0.6rem] text-ember/80 hover:text-ember transition-colors duration-150"
+                        style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                      >
                         <i className="bx bx-map-pin text-[0.8rem]" /> View on map
-                      </a>
+                      </button>
+                    )}
+                    {mapBooking && mapBooking.id === b.id && (
+                      <BookingMapModal booking={mapBooking} onClose={() => setMapBooking(null)} />
                     )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap"><p className="text-xs text-[#7a7a7a]">{b.date}</p><p className="text-[0.62rem] text-[#4a4a4a]">{b.time}</p></td>

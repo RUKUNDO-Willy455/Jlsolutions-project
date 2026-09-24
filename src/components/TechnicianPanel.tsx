@@ -10,6 +10,7 @@ import {
 } from '../data/editor';
 import type { Technician, ProfileEditRequest, Booking } from '../data/editor';
 import { AvatarUpload } from './AvatarUpload';
+import BookingMapModal from './BookingMapModal';
 
 // ─── Shared bits ──────────────────────────────────────────────────────────────
 
@@ -332,6 +333,7 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
   const myBookings = bookings.filter(b => b.technicianId && b.technicianId === tech.id).sort((a, b) => a.date.localeCompare(b.date));
   const pendingBookings = myBookings.filter(b => b.status === 'pending').length;
   const activeBookings = myBookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length;
+  const [mapReq, setMapReq] = useState<Booking | null>(null);
 
   return (
     <div className="flex flex-col gap-8">
@@ -371,6 +373,17 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
               <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                 <div className="min-w-0">
                   <p className="text-white text-sm font-semibold">{b.name}</p>
+                  <button
+                    type="button"
+                    onClick={() => setMapReq(b)}
+                    className="inline-flex items-center gap-1 text-[0.6rem] text-ember/80 hover:text-ember transition-colors duration-150 mt-1"
+                    style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                  >
+                    <i className="bx bx-map-pin text-[0.8rem]" /> View on map
+                  </button>
+                  {mapReq && mapReq.id === b.id && (
+                    <BookingMapModal booking={mapReq} onClose={() => setMapReq(null)} />
+                  )}
                   <p className="text-[0.62rem] text-[#4a4a4a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{b.phone} · {b.id}</p>
                 </div>
                 <span className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1 border rounded-[1px] shrink-0 ${b.status === 'confirmed' ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : b.status === 'pending' ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' : b.status === 'completed' ? 'text-blue-400 bg-blue-400/10 border-blue-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>

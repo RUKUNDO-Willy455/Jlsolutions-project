@@ -18,6 +18,8 @@ interface Props {
   value: { lat: number; lng: number } | null;
   focus?: MapFocus | null;
   fill?: boolean;
+  viewOnly?: boolean;
+  viewOnly?: boolean;
   onChange: (pick: LocationPick | null) => void;
 }
 
@@ -134,7 +136,7 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
 
 type TileState = 'loading' | 'ready' | 'error';
 
-export default function LocationPicker({ value, focus, fill = false, onChange }: Props) {
+export default function LocationPicker({ value, focus, fill = false, viewOnly = false, onChange }: Props) {
   const mapWrap = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -161,6 +163,7 @@ export default function LocationPicker({ value, focus, fill = false, onChange }:
   };
 
   const loadPois = async (lat: number, lng: number, radius: number) => {
+    if (viewOnly) return;
     const req = ++poiReq.current;
     const pois = await fetchNearbyPois(lat, lng, radius);
     if (req !== poiReq.current) return;
@@ -240,7 +243,7 @@ export default function LocationPicker({ value, focus, fill = false, onChange }:
         markerRef.current.setLatLng([lat, lng]);
         return;
       }
-      const mk = L.marker([lat, lng], { icon: PIN, draggable: true }).addTo(map);
+      const mk = L.marker([lat, lng], { icon: PIN, draggable: !viewOnly }).addTo(map);
       mk.on('dragend', () => {
         const ll = mk.getLatLng();
         void emitPick(ll.lat, ll.lng);
@@ -252,6 +255,7 @@ export default function LocationPicker({ value, focus, fill = false, onChange }:
     };
 
     map.on('click', (e: L.LeafletMouseEvent) => {
+      if (viewOnly) return;
       syncMarker(e.latlng.lat, e.latlng.lng, true);
       void emitPick(e.latlng.lat, e.latlng.lng);
     });

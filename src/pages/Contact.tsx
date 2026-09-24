@@ -4,9 +4,9 @@ import { Phone, Mail, MessageCircle, MapPin, Clock3, ArrowRight } from 'lucide-r
 import { PHONE_LINKS, SITE } from '../data/site';
 
 const HOURS = [
-  { days: 'Monday – Friday', time: '07:00 – 19:00' },
-  { days: 'Saturday', time: '08:00 – 18:00' },
-  { days: 'Sunday & Public Holidays', time: 'Emergency call-outs only' },
+  { days: 'Sunday – Thursday', time: '07:00 – 19:00' },
+  { days: 'Friday', time: '08:00 – 13:00' },
+  { days: 'Public Holidays', time: 'Emergency call-outs only' },
 ];
 
 export default function ContactPage() {
@@ -55,7 +55,7 @@ export default function ContactPage() {
               {
                 icon: Phone,
                 label: 'Call us',
-                value: `+${SITE.phone}`,
+                value: `${SITE.phone}`,
                 sub: 'Lines open 07:00 – 19:00',
                 href: PHONE_LINKS.primary,
                 external: false,
@@ -63,7 +63,7 @@ export default function ContactPage() {
               {
                 icon: MessageCircle,
                 label: 'WhatsApp',
-                value: `+${SITE.phone}`,
+                value: `${SITE.phone}`,
                 sub: 'Fastest for photos & quotes',
                 href: PHONE_LINKS.whatsapp,
                 external: true,
