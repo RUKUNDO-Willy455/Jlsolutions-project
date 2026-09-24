@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import LoadingScreen from './components/LoadingScreen';
 import AdminPanel from './components/AdminPanel';
 import TechnicianPanel from './components/TechnicianPanel';
+import AiAssistant from './components/AiAssistant';
 import { useRoute } from './router';
 import HomePage from './pages/Home';
 import ServicesPage from './pages/Services';
@@ -57,6 +58,15 @@ export default function App() {
   const path = useRoute();
 
   useEffect(() => {
+    const boot = document.getElementById('boot-splash');
+    if (boot) {
+      boot.classList.add('is-hidden');
+      const rem = window.setTimeout(() => boot.remove(), 700);
+      return () => window.clearTimeout(rem);
+    }
+  }, []);
+
+  useEffect(() => {
     const t = window.setTimeout(() => setLoading(false), 2600);
     return () => window.clearTimeout(t);
   }, []);
@@ -75,6 +85,7 @@ export default function App() {
             <PageView />
           </main>
           <Footer onAdminClick={() => setAdminOpen(true)} onTechClick={() => setTechOpen(true)} />
+          <AiAssistant />
         </>
       )}
     </>
