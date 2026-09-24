@@ -15,20 +15,50 @@ electrical, solar, networking, access control, etc.).
 
 ```bash
 pnpm install
-pnpm dev       # dev server (already running on port 8443)
-pnpm build     # production build → dist/
-pnpm format    # oxfmt
+pnpm dev:all     # Vite dev server + SQLite API together (http://localhost:8444)
+pnpm dev         # Vite dev server only (API on :3001 must already be running)
+pnpm api         # SQLite API only (http://localhost:3001)
+pnpm build       # production build → dist/
+pnpm start       # serve dist/ + API from one process (node server/index.js)
+pnpm format      # oxfmt
 ```
+
+## Database
+
+The site runs on a **SQLite database** (`server/data/jls.db`, auto-created and
+seeded on first boot) behind a small zero-dependency Node API in `server/`.
+During development Vite proxies `/api/*` to `http://localhost:3001`; in
+production the API server also serves the built `dist/` folder — same URLs, one
+process (`pnpm start`).
+
+**Stack:** `node:sqlite` (Node ≥ 22.5) — no native modules, no extra deps.
+
+| Endpoint | Purpose |
+| --------- | ------- |
+| `GET/PUT /api/bookings` | Booking collection (public booking form + admin dispatch) |
+| `GET/PUT /api/technicians` | Technicians (passwords stored hashed, never returned) |
+| `GET/PUT /api/profile_requests` | Technician profile edit requests |
+| `GET/PUT /api/testimonials`, `/api/ratings` | Testimonial collections |
+| `GET/PUT /api/founder` | Founder profile (singleton row) |
+| `POST /api/auth/admin` | Admin login (`ADMIN_USER` / `ADMIN_PASSWORD` env) |
+| `POST /api/auth/technician` | Technician login (scrypt hash check) |
+
+The existing components are unchanged: `useEditorStore` in `src/data/editor.ts`
+still exposes the same `[value, setter]` API but now reads from the database on
+mount and syncs every change back with a debounced PUT, keeping `localStorage`
+as an instant-read cache and offline fallback.
 
 ---
 
 ## How the database works
 
-There is **no external database server today**. All persistent data lives in the
-browser's `localStorage`, behind a tiny repository layer in `src/data/editor.ts`.
-That file is the *entire* data layer — types, seed rows, storage keys, and the
-read/write hook. Everything below describes both **what the storage does now** and
-**how it maps onto a real database** when the app is moved server-side.
+The source of truth is a **SQLite database** behind the API in `server/` (see
+the schema below — it's the exact target schema the app used to plan for).
+`src/data/editor.ts` defines the types, seed rows and storage keys, and the
+`useEditorStore` read/write hook, which now syncs each collection to the DB
+while keeping a `localStorage` cache for instant paint and offline mode. The
+sections below describe both **what the storage does now** and **how each
+collection maps to the SQLite tables**.
 
 ### 1. Storage keys = tables
 
@@ -61,13 +91,14 @@ useEditorStore<T>(key: string, seed: T): [T, setter]
   edit made in the Admin Console shows up on the public site, and technician
   availability toggles show up in the booking form.
 
-Consequences of this design (i.e. why a real database is needed):
+What the SQLite backend already fixes:
 
-- Data is **per-browser** — a booking submitted on a customer's phone is invisible to
-  the admin on the laptop.
-- No transactions, no concurrency control, no auth beyond a password check in
-  client code.
-- ~5 MB quota; images are downsampled to 512 px JPEG base64 (`fileToDataUrl`) to fit.
+- Data is **shared** — a booking submitted on a customer's phone is visible to
+  the admin on the laptop through the API.
+- Writes go through transactions and a single server-side source of truth;
+  auth checks run against the DB (`POST /api/auth/*`).
+- No localStorage size quota; images are stored as base64 in the DB (or move
+  them to object storage for production).
 
 ### 3. Entities and relations
 
@@ -216,12 +247,12 @@ COMMIT;
 5. One-time read of existing `localStorage` keys on first visit to backfill any
    bookings a customer already submitted from their own browser.
 
-### 7. Security notes for the database version
+### 7. Security notes
 
-- Technician passwords are stored **in plaintext** today (`password` on the
-  `Technician` type and displayed in the admin UI) — hash them before persisting.
-- The admin credential is bundled into the client JS — move it to server env vars.
-- All reads/writes are currently unauthenticated; any visitor can open dev tools and
-  edit `localStorage`. Table-level authorization (admin writes everything,
-  technicians write only their own `profile_requests`, anonymous users only
-  `INSERT bookings`) is required.
+- Technician passwords are now stored as **scrypt hashes** in the DB and never
+  returned by the API. The admin UI shows "password protected" instead of plaintext.
+- The admin credential lives **server-side** (`ADMIN_USER` / `ADMIN_PASSWORD`
+  env, dev defaults `admin` / `jeanluc@2024`). The client falls back to a local
+  check only when the API is unreachable.
+- Collection writes are still open to any visitor (no table-level auth yet);
+  components could be hardened with admin/technician tokens before going live.

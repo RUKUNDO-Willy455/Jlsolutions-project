@@ -34,6 +34,13 @@ react(),
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',
       port: parseInt(process.env.PORT || '8443'),
       strictPort: true,
+      // Proxy API calls to the SQLite backend (server/) during development.
+      proxy: {
+        '/api': {
+          target: process.env.JLS_API_URL || 'http://localhost:3001',
+          changeOrigin: true,
+        },
+      },
       hmr: {
         clientPort: 443,
         protocol: 'wss',
