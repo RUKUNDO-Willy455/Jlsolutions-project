@@ -1,5 +1,6 @@
 import Page from '../components/Page';
 import { SITE } from '../data/site';
+import { useI18n } from '../i18n';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -16,6 +17,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function TermsPage() {
+  const { t } = useI18n();
   return (
     <Page>
       <section className="bg-obsidian pt-32 pb-20 sm:pt-40 sm:pb-24">
@@ -26,64 +28,42 @@ export default function TermsPage() {
               className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
-              Legal
+              {t('leg.kicker')}
             </span>
           </div>
           <h1
             className="text-4xl sm:text-5xl font-semibold leading-tight text-ash"
             style={{ fontFamily: 'Fraunces, Georgia, serif' }}
           >
-            Terms
-            <span className="block italic font-light text-ember">of Service</span>
+            {t('terms.title')}
+            <span className="block italic font-light text-ember">{t('terms.titleEm')}</span>
           </h1>
           <p className="mt-4 text-xs text-[#8f8f8f]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-            Last updated: February 2026
+            {t('leg.updated', { date: 'February 2026' })}
           </p>
 
-          <Section title="1. Services">
-            <p>
-              {SITE.name} provides electrical, security, energy and technology services as
-              described on this website. Listed prices are starting ("from") prices; the final
-              quote is issued after a free site survey and confirmed before work begins.
-            </p>
+          <Section title={t('terms.1t')}>
+            <p>{t('terms.1b', { name: SITE.name })}</p>
           </Section>
 
-          <Section title="2. Bookings & confirmation">
-            <p>
-              Submitting a booking request through this site or WhatsApp requests a service; it is
-              confirmed only when our coordinator contacts you directly. A 24-month workmanship
-              guarantee applies to installation work carried out by our certified technicians.
-            </p>
+          <Section title={t('terms.2t')}>
+            <p>{t('terms.2b')}</p>
           </Section>
 
-          <Section title="3. Pricing & payment">
-            <p>
-              Quotes are valid for 30 days. Payment terms are agreed at confirmation. We use
-              quality, compliant materials in all installations.
-            </p>
+          <Section title={t('terms.3t')}>
+            <p>{t('terms.3b')}</p>
           </Section>
 
-          <Section title="4. Site use">
-            <p>
-              Content on this website is provided for general information and does not constitute
-              professional advice. We may update the site and these terms at any time; continued use
-              means you accept the latest version.
-            </p>
+          <Section title={t('terms.4t')}>
+            <p>{t('terms.4b')}</p>
           </Section>
 
-          <Section title="5. Limitation of liability">
-            <p>
-              To the fullest extent permitted by law, {SITE.name} is not liable for indirect or
-              consequential loss arising from use of this website. Nothing in these terms limits
-              your statutory rights.
-            </p>
+          <Section title={t('terms.5t')}>
+            <p>{t('terms.5b', { name: SITE.name })}</p>
           </Section>
 
-          <Section title="6. Governing law">
-            <p>
-              These terms are governed by the laws of the Republic of Rwanda. Contact us at{' '}
-              {SITE.email} or +{SITE.phone} with any questions.
-            </p>
+          <Section title={t('terms.6t')}>
+            <p>{t('terms.6b', { email: SITE.email, phone: SITE.phone })}</p>
           </Section>
         </div>
       </section>

@@ -1,6 +1,8 @@
 import { useEditorStore, STORAGE_KEYS, seedFounder } from '../data/editor';
+import { useI18n } from '../i18n';
 
 export default function FounderSpecialties() {
+  const { t } = useI18n();
   const [profile] = useEditorStore<typeof seedFounder>(STORAGE_KEYS.founder, seedFounder);
   const certs = profile.degrees.map((d) => d.title.split(' — ')[0].replace('BSc (Hons) ', '').replace('Certified ', ''));
 
@@ -11,7 +13,7 @@ export default function FounderSpecialties() {
           <div className="flex items-center gap-3 mb-12 reveal">
             <span className="w-8 h-px bg-ember" />
             <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-              Certifications Held
+              {t('fs.kicker')}
             </span>
           </div>
 

@@ -7,8 +7,9 @@ import {
   seedTechnicians,
   seedProfileRequests,
   seedBookings,
+  seedNotifications,
 } from '../data/editor';
-import type { Technician, ProfileEditRequest, Booking } from '../data/editor';
+import type { Technician, ProfileEditRequest, Booking, AdminNotification } from '../data/editor';
 import { AvatarUpload } from './AvatarUpload';
 
 // â”€â”€â”€ Shared bits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -40,10 +41,10 @@ function Label({ children }: { children: React.ReactNode }) {
     </p>
   );
 }
-function Field({ value, onChange, multiline, type = 'text' }: { value: string; onChange: (v: string) => void; multiline?: boolean; type?: string }) {
+function Field({ value, onChange, multiline, type = 'text', placeholder }: { value: string; onChange: (v: string) => void; multiline?: boolean; type?: string; placeholder?: string }) {
   return multiline
-    ? <textarea rows={3} value={value} onChange={e => onChange(e.target.value)} className="field text-sm resize-none" />
-    : <input type={type} value={value} onChange={e => onChange(e.target.value)} className="field text-sm" />;
+    ? <textarea rows={3} value={value} onChange={e => onChange(e.target.value)} className="field text-sm resize-none" placeholder={placeholder} />
+    : <input type={type} value={value} onChange={e => onChange(e.target.value)} className="field text-sm" placeholder={placeholder} />;
 }
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -197,11 +198,12 @@ const TECH_TABS = ['Dashboard', 'Profile Settings', 'Requests'] as const;
 type TechTab = typeof TECH_TABS[number];
 
 function ProfileSettingsTab({
-  tech, requests, setRequests, onInfo,
+  tech, requests, setRequests, setNotifications, onInfo,
 }: {
   tech: Technician;
   requests: ProfileEditRequest[];
   setRequests: React.Dispatch<React.SetStateAction<ProfileEditRequest[]>>;
+  setNotifications: React.Dispatch<React.SetStateAction<AdminNotification[]>>;
   onInfo: (msg: string) => void;
 }) {
   const [name, setName] = useState(tech.name);
@@ -237,6 +239,17 @@ function ProfileSettingsTab({
       createdAt: new Date().toISOString().split('T')[0],
     };
     setRequests(prev => [req, ...prev]);
+    setNotifications(prev => [
+      {
+        id: `n${Date.now()}`,
+        kind: 'request',
+        title: `Profile change request from ${tech.name}`,
+        message: `Submitted changes: ${Object.keys(changes).join(', ')}.`,
+        createdAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+        read: false,
+      },
+      ...prev,
+    ]);
     setReason('');
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -470,6 +483,7 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
   const [technicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians);
   const [bookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
   const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
+  const [notifications, setNotifications] = useEditorStore<AdminNotification[]>(STORAGE_KEYS.notifications, seedNotifications);
   const [techId, setTechId] = useState<string | null>(null);
   const [tab, setTab] = useState<TechTab>('Dashboard');
   const [info, setInfo] = useState('');
@@ -595,7 +609,7 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
 
             {tab === 'Dashboard'        && <TechDashboard tech={tech} requests={profileRequests} setRequests={setProfileRequests} bookings={bookings} />}
             {tab === 'Profile Settings' && (
-              <ProfileSettingsTab tech={tech} requests={profileRequests} setRequests={setProfileRequests} onInfo={setInfo} />
+              <ProfileSettingsTab tech={tech} requests={profileRequests} setRequests={setProfileRequests} setNotifications={setNotifications} onInfo={setInfo} />
             )}
             {tab === 'Requests'         && <TechRequestsTab tech={tech} requests={profileRequests} setRequests={setProfileRequests} />}
           </div>

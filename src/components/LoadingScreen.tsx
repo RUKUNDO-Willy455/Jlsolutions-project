@@ -1,6 +1,6 @@
 import BrandLogo from './BrandLogo';
 import { SERVICES } from '../data/services';
-import { SITE } from '../data/site';
+import { useI18n } from '../i18n';
 import './LoadingScreen.css';
 
 interface Props {
@@ -21,6 +21,7 @@ const VEINS = [
 
 /** Premium electric-surge loading screen shown on first visit. */
 export default function LoadingScreen({ visible }: Props) {
+  const { t } = useI18n();
   return (
     <div className={`splash ${visible ? '' : 'splash--hidden'}`} aria-hidden={!visible}>
       <div className="splash__bg" aria-hidden="true" />
@@ -45,7 +46,7 @@ export default function LoadingScreen({ visible }: Props) {
       </div>
 
       <div className="splash__inner">
-        <p className="splash__motto">{SITE.motto}</p>
+        <p className="splash__motto">{t('f.motto')}</p>
       </div>
 
       <div className="splash__ticker" aria-hidden="true">

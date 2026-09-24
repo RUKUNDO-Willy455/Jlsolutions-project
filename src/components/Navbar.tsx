@@ -2,24 +2,58 @@ import { useState, useEffect, useRef } from 'react';
 import jeanlucLogo from '../assets/jeanluc-logo.png';
 import { PHONE_LINKS, SITE } from '../data/site';
 import { useRoute } from '../router';
+import { LOCALE_NAMES, useI18n } from '../i18n';
+import type { Locale } from '../i18n';
 
-const links = [
-  { label: 'Home', href: '#/' },
-  { label: 'Services', href: '#/services' },
-  { label: 'Process', href: '#/process' },
-  { label: 'Founder', href: '#/founder' },
-  { label: 'Pricing', href: '#/pricing' },
-  { label: 'Clients', href: '#/clients' },
-  { label: 'Testimonials', href: '#/testimonials' },
+const LINKS = [
+  { key: 'nav.home', href: '#/' },
+  { key: 'nav.services', href: '#/services' },
+  { key: 'nav.process', href: '#/process' },
+  { key: 'nav.founder', href: '#/founder' },
+  { key: 'nav.pricing', href: '#/pricing' },
+  { key: 'nav.clients', href: '#/clients' },
+  { key: 'nav.testimonials', href: '#/testimonials' },
 ];
 
+function LangSwitcher() {
+  const { locale, setLocale } = useI18n();
+  const locales: Locale[] = ['en', 'fr', 'rw'];
+  return (
+    <div
+      role="group"
+      aria-label={LOCALE_NAMES[locale]}
+      className="flex items-center gap-0.5 border border-[rgba(255,255,255,0.08)] rounded-[2px] px-1 py-0.5"
+    >
+      {locales.map((l) => (
+        <button
+          key={l}
+          type="button"
+          onClick={() => setLocale(l)}
+          title={LOCALE_NAMES[l]}
+          aria-pressed={locale === l}
+          className={`text-[0.62rem] tracking-widest px-1.5 py-1 rounded-[1px] transition-colors duration-200 ${
+            locale === l
+              ? 'text-obsidian bg-ember'
+              : 'text-[#6a6a6a] hover:text-ash'
+          }`}
+          style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+        >
+          {l.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function Navbar() {
+  const { t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const contactRef = useRef<HTMLLIElement>(null);
   const path = useRoute();
+  const links = LINKS.map((l) => ({ label: t(l.key), href: l.href }));
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -120,7 +154,7 @@ export default function Navbar() {
               className="flex items-center gap-1.5 text-[0.8rem] uppercase tracking-[0.12em] text-[#979797] hover:text-ash transition-colors duration-200 py-1"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
-              Contact Us
+              {t('nav.contactUs')}
               <svg
                 viewBox="0 0 12 12"
                 fill="none"
@@ -160,7 +194,7 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Phone</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.phone')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>+{SITE.phone}</p>
                   </div>
                 </a>
@@ -179,7 +213,7 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>WhatsApp</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.whatsapp')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{SITE.whatsappDisplay}</p>
                   </div>
                 </a>
@@ -196,7 +230,7 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Email</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.email')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{SITE.email}</p>
                   </div>
                 </a>
@@ -215,8 +249,8 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Location</p>
-                    <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200">Kigali, Rwanda</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.location')}</p>
+                    <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200">{t('nav.locationValue')}</p>
                   </div>
                 </a>
 
@@ -235,8 +269,8 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Visit page</p>
-                    <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200">Contact & Working Hours</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.visitPageCap')}</p>
+                    <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200">{t('nav.visitPage')}</p>
                   </div>
                 </a>
 
@@ -246,10 +280,15 @@ export default function Navbar() {
                   className="btn-ember px-5 py-3 rounded-[2px] text-center w-full"
                   onClick={() => setContactOpen(false)}
                 >
-                  Book a Technician
+                  {t('nav.book')}
                 </a>
               </div>
             </div>
+          </li>
+
+          {/* Language switch */}
+          <li className="hidden xl:flex items-center">
+            <LangSwitcher />
           </li>
         </ul>
 
@@ -257,7 +296,7 @@ export default function Navbar() {
         <button
           className="xl:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px] overflow-hidden"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
+          aria-label={t('nav.menuToggle')}
         >
           <span className={`block h-[1.5px] w-5 rounded-full transition-all duration-300 origin-center ${menuOpen ? 'rotate-45 translate-y-[7px] bg-ember' : 'bg-[#aaa]'}`} />
           <span className={`block h-[1.5px] w-5 rounded-full bg-[#aaa] transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} />
@@ -288,7 +327,7 @@ export default function Navbar() {
 
           {/* Contact info in mobile menu */}
           <div className="pt-2 pb-1 border-b border-[rgba(255,255,255,0.04)]">
-            <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3a3a3a] mb-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Contact Us</p>
+            <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3a3a3a] mb-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.contactUs')}</p>
             <a href={PHONE_LINKS.primary} className="block text-[0.8rem] text-[#979797] hover:text-ember transition-colors duration-200 py-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               +{SITE.phone}
             </a>
@@ -304,17 +343,20 @@ export default function Navbar() {
               className="block text-[0.8rem] text-ember hover:text-ember-light transition-colors duration-200 py-1.5"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
-              Contact page & hours →
+              {t('nav.visitPage')} →
             </a>
           </div>
 
-          <a
-            href="#/booking"
-            onClick={() => setMenuOpen(false)}
-            className="btn-ember px-5 py-3 rounded-[2px] text-center mt-3"
-          >
-            Book a Technician
-          </a>
+          <div className="flex items-center justify-between mt-3 gap-3">
+            <a
+              href="#/booking"
+              onClick={() => setMenuOpen(false)}
+              className="btn-ember px-5 py-3 rounded-[2px] text-center flex-1"
+            >
+              {t('nav.book')}
+            </a>
+            <LangSwitcher />
+          </div>
         </div>
       </div>
     </header>

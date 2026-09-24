@@ -1,34 +1,24 @@
 import { Check, Info } from 'lucide-react';
-
-const inclusions = [
-  'Free on-site site survey for installations over RWF 500,000',
-  'All equipment and workmanship guaranteed for 24 months',
-  'Certified, RURA-compliant engineers on every installation',
-  'Written quotation before any work begins — no surprises',
-  'Post-install training and full documentation handover',
-  'Priority emergency response for maintenance contract clients',
-];
-
-const faqs = [
-  {
-    q: 'Why does it say "from" rather than a fixed price?',
-    a: 'Every project needs a site survey to lock the true scope — cable routes, wall type, camera count and load. The "from" price gives you an honest starting point; the survey confirms the exact figure.',
-  },
-  {
-    q: 'What is included in the 24-month guarantee?',
-    a: 'Workmanship and the installed equipment itself are covered for two years. If anything fails due to our installation or a defective part, we return and repair it at no charge — including call-out.',
-  },
-  {
-    q: 'Can maintenance contracts be customised?',
-    a: 'Yes. Contracts scale by site count, camera count and response SLA. We build a schedule around your operation — after-hours and weekend cover can be added.',
-  },
-  {
-    q: 'How do I know the technician is qualified?',
-    a: 'Every engineer carries certification in the disciplines they install — CCTV, networking, PCB and access control — and all work is completed by Jean Luc Solutions staff, never subcontracted.',
-  },
-];
+import { useI18n } from '../i18n';
 
 export default function PricingFaq() {
+  const { t } = useI18n();
+  const inclusions = [
+    t('faq.inc0'),
+    t('faq.inc1'),
+    t('faq.inc2'),
+    t('faq.inc3'),
+    t('faq.inc4'),
+    t('faq.inc5'),
+  ];
+
+  const faqs = [
+    { q: t('faq.q0'), a: t('faq.a0') },
+    { q: t('faq.q1'), a: t('faq.a1') },
+    { q: t('faq.q2'), a: t('faq.a2') },
+    { q: t('faq.q3'), a: t('faq.a3') },
+  ];
+
   return (
     <section className="relative bg-obsidian py-20 sm:py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -41,7 +31,7 @@ export default function PricingFaq() {
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Standard Inclusions
+                {t('faq.incKicker')}
               </span>
             </div>
             <ul className="flex flex-col gap-4">
@@ -64,7 +54,7 @@ export default function PricingFaq() {
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Pricing Questions
+                {t('faq.qKicker')}
               </span>
             </div>
             <div className="flex flex-col gap-6">

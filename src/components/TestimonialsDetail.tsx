@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useEditorStore, STORAGE_KEYS, seedTestimonials, seedRatings } from '../data/editor';
-import type { Testimonial, Rating } from '../data/editor';
+import { useEditorStore, STORAGE_KEYS, seedTestimonials, seedRatings, seedNotifications } from '../data/editor';
+import type { Testimonial, Rating, AdminNotification } from '../data/editor';
+import { useI18n } from '../i18n';
 
 function Stars({ count, className }: { count: number; className?: string }) {
   return (
@@ -17,37 +18,46 @@ function Stars({ count, className }: { count: number; className?: string }) {
   );
 }
 
-function RateUsModal({ onClose, onSave }: { onClose: () => void; onSave: (rating: number, name: string) => void }) {
+function RateUsModal({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave: (rating: number, name: string, details: { quote: string; project: string }) => void;
+}) {
+  const { t } = useI18n();
   const [stars, setStars] = useState(0);
   const [hover, setHover] = useState(0);
   const [name, setName] = useState('');
+  const [quote, setQuote] = useState('');
+  const [project, setProject] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   function submit() {
     if (stars < 1 || !name.trim()) return;
-    onSave(stars, name.trim());
+    onSave(stars, name.trim(), { quote: quote.trim(), project: project.trim() });
     setSubmitted(true);
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={onClose}>
       <div
-        className="w-full max-w-sm bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-[2px] p-8"
+        className="w-full max-w-md bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-[2px] p-8 max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {submitted ? (
           <div className="text-center">
             <p className="text-4xl mb-4">✓</p>
-            <p className="text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Thank you, {name}!</p>
+            <p className="text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{t('td.mThanks', { name })}</p>
             <p className="text-xs text-[#5a5a5a] mt-2 leading-relaxed">
-              Your {stars}-star rating has been added to our live breakdown.
+              {t('td.mDone', { stars })}
             </p>
-            <button onClick={onClose} className="btn-ember px-6 py-2.5 rounded-[2px] text-xs mt-6">Close</button>
+            <button onClick={onClose} className="btn-ember px-6 py-2.5 rounded-[2px] text-xs mt-6">{t('td.mClose')}</button>
           </div>
         ) : (
           <>
-            <p className="text-white font-semibold text-lg" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Rate your experience</p>
-            <p className="text-xs text-[#5a5a5a] mt-1">How was your service with Jean Luc Solutions?</p>
+            <p className="text-white font-semibold text-lg" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{t('td.mTitle')}</p>
+            <p className="text-xs text-[#5a5a5a] mt-1">{t('td.mBody')}</p>
 
             {/* Star picker */}
             <div className="flex gap-1.5 my-6">
@@ -61,7 +71,7 @@ function RateUsModal({ onClose, onSave }: { onClose: () => void; onSave: (rating
                     onMouseEnter={() => setHover(i + 1)}
                     onMouseLeave={() => setHover(0)}
                     className={`p-1 -m-1 transition-transform duration-150 hover:scale-110 ${filled ? 'text-ember' : 'text-[#3a3a3a]'}`}
-                    aria-label={`${i + 1} star${i === 4 ? '' : 's'}`}
+                    aria-label={t(i === 4 ? 'td.mStarOne' : 'td.mStarMany', { n: i + 1 })}
                   >
                     <svg viewBox="0 0 12 12" fill="none" className="w-7 h-7">
                       <path
@@ -74,21 +84,49 @@ function RateUsModal({ onClose, onSave }: { onClose: () => void; onSave: (rating
               })}
             </div>
 
-            {/* Name form appears once a star is chosen */}
+            {/* Name + review fields appear once a star is chosen */}
             {stars > 0 && (
-              <div className="mb-5">
-                <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a] mb-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Your name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && name.trim()) submit(); }}
-                  placeholder="e.g. Claude Rugema"
-                  autoFocus
-                  className="field text-sm"
-                />
+              <div className="mb-5 flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                    {t('td.mName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && name.trim() && quote.trim()) submit(); }}
+                    placeholder="e.g. Claude Rugema"
+                    autoFocus
+                    className="field text-sm"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                    {t('td.mReview')}
+                  </label>
+                  <textarea
+                    value={quote}
+                    onChange={e => setQuote(e.target.value)}
+                    rows={4}
+                    placeholder={t('td.mReviewPh')}
+                    className="field text-sm resize-none"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                    {t('td.mProject')}
+                  </label>
+                  <input
+                    type="text"
+                    value={project}
+                    onChange={e => setProject(e.target.value)}
+                    placeholder={t('td.mProjectPh')}
+                    className="field text-sm"
+                  />
+                </div>
               </div>
             )}
 
@@ -98,9 +136,9 @@ function RateUsModal({ onClose, onSave }: { onClose: () => void; onSave: (rating
                 disabled={stars < 1 || !name.trim()}
                 className="btn-ember px-6 py-2.5 rounded-[2px] text-xs disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Submit Rating
+                {t('td.mSubmit')}
               </button>
-              <button onClick={onClose} className="btn-ghost px-6 py-2.5 rounded-[2px] text-xs">Cancel</button>
+              <button onClick={onClose} className="btn-ghost px-6 py-2.5 rounded-[2px] text-xs">{t('td.mCancel')}</button>
             </div>
           </>
         )}
@@ -110,8 +148,10 @@ function RateUsModal({ onClose, onSave }: { onClose: () => void; onSave: (rating
 }
 
 export default function TestimonialsDetail() {
-  const [testimonials] = useEditorStore<Testimonial[]>(STORAGE_KEYS.testimonials, seedTestimonials);
+  const { t } = useI18n();
+  const [testimonials, setTestimonials] = useEditorStore<Testimonial[]>(STORAGE_KEYS.testimonials, seedTestimonials);
   const [ratings, setRatings] = useEditorStore<Rating[]>(STORAGE_KEYS.ratings, seedRatings);
+  const [notifications, setNotifications] = useEditorStore<AdminNotification[]>(STORAGE_KEYS.notifications, seedNotifications);
   const [showRateUs, setShowRateUs] = useState(false);
 
   const visible = testimonials.filter(t => t.visible);
@@ -129,15 +169,41 @@ export default function TestimonialsDetail() {
   const recommend = total ? Math.round((allRatings.filter(r => r >= 4).length / total) * 100) : 0;
 
   const highlights = [
-    { value: `${fiveStarPct}%`, label: 'Five-Star Reviews' },
-    { value: `${total}`, label: 'Verified Reviews' },
-    { value: `${avg.toFixed(1)}`, label: 'Average Rating' },
-    { value: `${recommend}%`, label: 'Would Recommend' },
+    { value: `${fiveStarPct}%`, label: t('td.stat0') },
+    { value: `${total}`, label: t('td.stat1') },
+    { value: `${avg.toFixed(1)}`, label: t('td.stat2') },
+    { value: `${recommend}%`, label: t('td.stat3') },
   ];
 
-  function saveRating(rating: number, name: string) {
-    const r: Rating = { id: `r-${Date.now()}`, name, rating, date: new Date().toISOString().split('T')[0] };
+  function saveRating(rating: number, name: string, details: { quote: string; project: string }) {
+    const now = new Date().toISOString();
+    const r: Rating = { id: `r-${Date.now()}`, name, rating, date: now.split('T')[0] };
     setRatings(prev => [...prev, r]);
+
+    if (details.quote) {
+      const pending: Testimonial = {
+        id: `rv-${Date.now()}`,
+        name,
+        title: '',
+        company: '',
+        quote: details.quote,
+        rating,
+        project: details.project || 'Client Review',
+        year: now.slice(0, 4),
+        visible: false,
+      };
+      setTestimonials(prev => [...prev, pending]);
+
+      const notice: AdminNotification = {
+        id: `n${Date.now()}`,
+        kind: 'review',
+        title: `New client review from ${name}`,
+        message: `${rating}-star review awaiting approval: "${details.quote}"`,
+        createdAt: now,
+        read: false,
+      };
+      setNotifications(prev => [notice, ...prev]);
+    }
   }
 
   return (
@@ -164,27 +230,25 @@ export default function TestimonialsDetail() {
               <div className="flex items-center gap-3 mb-6">
                 <span className="w-8 h-px bg-ember" />
                 <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Rating Breakdown
+                  {t('td.kicker')}
                 </span>
               </div>
               <h2 className="text-4xl lg:text-5xl font-semibold leading-tight text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                What the
-                <span className="block italic font-light text-ember">numbers say.</span>
+                {t('td.h1')}
+                <span className="block italic font-light text-ember">{t('td.hEm')}</span>
               </h2>
               <p className="mt-6 text-[#8f8f8f] text-base leading-relaxed max-w-md">
-                We collect a verified rating after every completed project. Nearly all clients rate us
-                five stars — and when something falls short, we fix it before asking for the review.
+                {t('td.p1')}
               </p>
               <p className="mt-4 text-[#8f8f8f] text-base leading-relaxed max-w-md">
-                That is the number you see below — it comes straight from the real reviews we
-                receive after each job, and it updates live as new ratings come in.
+                {t('td.p2')}
               </p>
             </div>
 
             <div className="flex flex-col gap-4 reveal delay-100">
               {total === 0 ? (
                 <div className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.05)] rounded-[2px] p-6 text-sm text-[#4a4a4a]">
-                  No ratings yet. The breakdown will appear here once the first review is published.
+                  {t('td.empty')}
                 </div>
               ) : (
                 breakdown.map((b) => (
@@ -209,11 +273,10 @@ export default function TestimonialsDetail() {
               {/* Reminder: rate us after a service */}
               <div className="mt-2 bg-[#0f0f0f] border border-[rgba(255,255,255,0.05)] border-l-2 border-l-ember rounded-[2px] p-5 reveal delay-200">
                 <p className="text-sm text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                  Had a service with us?
+                  {t('td.had')}
                 </p>
                 <p className="mt-1.5 text-xs text-[#8f8f8f] leading-relaxed">
-                  After every job we ask for an honest rating. Rating us takes under a minute and
-                  helps other clients choose with confidence — and it keeps our numbers above honest.
+                  {t('td.hadBody')}
                 </p>
                 <div className="mt-3 flex items-center gap-3 flex-wrap">
                   <Stars count={0} className="!text-[#2a2a2a]" />
@@ -227,7 +290,7 @@ export default function TestimonialsDetail() {
                         fill="currentColor"
                       />
                     </svg>
-                    Rate Us
+                    {t('td.leave')}
                   </button>
                 </div>
               </div>

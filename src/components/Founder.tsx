@@ -2,39 +2,41 @@ import { Phone, MessageCircle, Wrench, ShieldCheck, GraduationCap, HeartHandshak
 import { IMAGES } from '../data/images';
 import { PHONE_LINKS } from '../data/site';
 import { useEditorStore, STORAGE_KEYS, seedFounder } from '../data/editor';
+import { useI18n } from '../i18n';
 import './Founder.css';
 
-const VALUES = [
-  {
-    icon: Wrench,
-    title: 'Hands-On Leadership',
-    text: 'Jean Luc still works on jobs himself — installing, wiring and testing alongside the team, not just signing off from the office.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Safety First',
-    text: 'Every installation follows safe working practices, quality materials and clean, tidy finishes that last for years.',
-  },
-  {
-    icon: GraduationCap,
-    title: 'Always Learning',
-    text: 'Technology changes fast, so skills are constantly updated — from new CCTV systems to modern solar and networking gear.',
-  },
-  {
-    icon: HeartHandshake,
-    title: 'Client-First Service',
-    text: 'Clear communication, honest pricing and support after the job is done — the same standard for every single client.',
-  },
-];
-
 export default function Founder() {
+  const { t } = useI18n();
   const [profile] = useEditorStore<typeof seedFounder>(STORAGE_KEYS.founder, seedFounder);
   const portrait = profile.photoUrl || IMAGES.technicians[0];
 
+  const VALUES = [
+    {
+      icon: Wrench,
+      title: t('f.v0t'),
+      text: t('f.v0d'),
+    },
+    {
+      icon: ShieldCheck,
+      title: t('f.v1t'),
+      text: t('f.v1d'),
+    },
+    {
+      icon: GraduationCap,
+      title: t('f.v2t'),
+      text: t('f.v2d'),
+    },
+    {
+      icon: HeartHandshake,
+      title: t('f.v3t'),
+      text: t('f.v3d'),
+    },
+  ];
+
   const stats = [
-    { value: profile.yearsExperience, label: 'Years in the trade' },
-    { value: String(profile.degrees.length), label: 'Degrees & certifications' },
-    { value: String(profile.achievements.length), label: 'Milestones reached' },
+    { value: profile.yearsExperience, label: t('f.stat0') },
+    { value: String(profile.degrees.length), label: t('f.stat1') },
+    { value: String(profile.achievements.length), label: t('f.stat2') },
   ];
 
   return (
@@ -49,11 +51,11 @@ export default function Founder() {
             <div className="flex items-center gap-3 mb-6">
               <span className="w-8 h-px bg-ember" />
               <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                The Founder
+                {t('f.kicker')}
               </span>
             </div>
             <h2 className="text-4xl lg:text-6xl font-semibold leading-[1.02] tracking-tight text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-              Meet<span className="block italic font-light text-ember mt-1"> {profile.name}.</span>
+              {t('f.title')}<span className="block italic font-light text-ember mt-1"> {profile.name}.</span>
             </h2>
             <p className="mt-6 max-w-xl text-[#8f8f8f] text-base leading-relaxed">
               {profile.tagline}
@@ -85,14 +87,14 @@ export default function Founder() {
               <div className="flex items-center gap-3 mb-6">
                 <span className="w-8 h-px bg-ember" />
                 <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  The Story
+                  {t('f.story')}
                 </span>
               </div>
               <div className="founder__bio">
                 {profile.bio.split('\n').filter(Boolean).map((para, i) => (
                   <p key={i}>{para}</p>
                 ))}
-                <p className="founder__motto">Skills. Speed. Sustainability.</p>
+                <p className="founder__motto">{t('f.motto')}</p>
               </div>
             </div>
 
@@ -123,7 +125,7 @@ export default function Founder() {
 
               <div className="flex gap-3 mt-5">
                 <a href={PHONE_LINKS.primary} className="btn-ember flex-[2] items-center justify-center gap-2 px-6 py-3.5 rounded-[2px] flex">
-                  <Phone size={15} /> Call Jean Luc
+                  <Phone size={15} /> {t('f.call')}
                 </a>
                 <a
                   href={PHONE_LINKS.whatsapp}
@@ -143,7 +145,7 @@ export default function Founder() {
               <div className="flex items-center gap-3 mb-12 reveal">
                 <span className="w-8 h-px bg-ember" />
                 <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Degrees & Certifications
+                  {t('f.deg')}
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -184,7 +186,7 @@ export default function Founder() {
                   <div className="flex items-center justify-center gap-3 mb-6">
                     <Target size={16} className="text-ember" strokeWidth={1.8} />
                     <span className="text-[0.62rem] tracking-[0.18em] uppercase text-ember" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                      The Vision
+                      {t('f.vision')}
                     </span>
                   </div>
                   <blockquote className="text-center">
@@ -203,7 +205,7 @@ export default function Founder() {
               <div className="flex items-center gap-3 mb-12 reveal">
                 <span className="w-8 h-px bg-ember" />
                 <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Milestones
+                  {t('f.mile')}
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -226,7 +228,7 @@ export default function Founder() {
             <div className="flex items-center gap-3 mb-12 reveal">
               <span className="w-8 h-px bg-ember" />
               <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                What Guides Him
+                {t('f.values')}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(255,255,255,0.05)]">
@@ -256,8 +258,7 @@ export default function Founder() {
               </div>
               <blockquote className="relative max-w-3xl mx-auto text-center">
                 <p className="text-xl lg:text-2xl font-medium leading-relaxed text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                  “The right way to do a technical job is the only way I know how to do it. If I
-                  wouldn&apos;t want it in my own home, I won&apos;t deliver it to a client.”
+                  {t('f.quote')}
                 </p>
                 <cite className="block mt-6 not-italic text-[0.65rem] tracking-[0.18em] uppercase text-ember" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                   — {profile.name}, {profile.title}

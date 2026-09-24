@@ -1,29 +1,31 @@
 import { ShieldCheck, Award, FileCheck, Zap } from 'lucide-react';
-
-const guarantees = [
-  {
-    icon: ShieldCheck,
-    title: 'Certified Engineers',
-    text: 'Every install is signed off by RURA-compliant, fully certified technicians trained on the exact equipment we deploy.',
-  },
-  {
-    icon: Award,
-    title: '24-Month Warranty',
-    text: 'Workmanship and installed equipment are protected by a two-year guarantee. If it fails, we return and fix it free.',
-  },
-  {
-    icon: FileCheck,
-    title: 'Survey Before Quote',
-    text: 'No project gets a final price without a written site survey so the number we quote is the number you pay.',
-  },
-  {
-    icon: Zap,
-    title: '90-Minute Response',
-    text: 'Emergency call-outs reach Greater Kigali sites in under 90 minutes, 24 hours a day, 365 days a year.',
-  },
-];
+import { useI18n } from '../i18n';
 
 export default function ServiceSpecialties() {
+  const { t } = useI18n();
+  const guarantees = [
+    {
+      icon: ShieldCheck,
+      title: t('spec.0t'),
+      text: t('spec.0d'),
+    },
+    {
+      icon: Award,
+      title: t('spec.1t'),
+      text: t('spec.1d'),
+    },
+    {
+      icon: FileCheck,
+      title: t('spec.2t'),
+      text: t('spec.2d'),
+    },
+    {
+      icon: Zap,
+      title: t('spec.3t'),
+      text: t('spec.3d'),
+    },
+  ];
+
   return (
     <section className="relative bg-surface py-20 sm:py-24 lg:py-32 border-y border-[rgba(255,255,255,0.05)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -33,7 +35,7 @@ export default function ServiceSpecialties() {
             className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
-            Why We Stand Behind Every Job
+            {t('spec.kicker')}
           </span>
         </div>
 

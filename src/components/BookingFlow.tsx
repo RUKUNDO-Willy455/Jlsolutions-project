@@ -4,8 +4,10 @@ import BookingDetail from './BookingDetail';
 import TrackBookingSection from './TrackBookingSection';
 import BookingViewTabs from './BookingViewTabs';
 import type { BookingView } from './BookingViewTabs';
+import { useI18n } from '../i18n';
 
 export default function BookingFlow({ variant }: { variant: 'page' | 'home' }) {
+  const { t } = useI18n();
   const [view, setView] = useState<BookingView>('request');
   const rootRef = useRef<HTMLElement>(null);
   const Heading = variant === 'page' ? 'h1' : 'h2';
@@ -79,15 +81,15 @@ export default function BookingFlow({ variant }: { variant: 'page' | 'home' }) {
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Booking
+                {t('book.flowKicker')}
               </span>
             </div>
             <Heading
               className="text-4xl sm:text-5xl font-semibold leading-tight text-ash reveal delay-100"
               style={{ fontFamily: 'Fraunces, Georgia, serif' }}
             >
-              Book or track
-              <span className="block italic font-light text-ember">your service.</span>
+              {t('book.flowTitle')}
+              <span className="block italic font-light text-ember">{t('book.flowTitleEm')}</span>
             </Heading>
           </div>
           <div className="self-start lg:self-end reveal delay-200">

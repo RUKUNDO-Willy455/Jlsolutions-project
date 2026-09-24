@@ -1,8 +1,10 @@
 import { Link } from '../router';
 import { useEditorStore, STORAGE_KEYS, seedFounder } from '../data/editor';
 import { SITE } from '../data/site';
+import { useI18n } from '../i18n';
 
 export default function Welcome() {
+  const { t } = useI18n();
   const [profile] = useEditorStore<typeof seedFounder>(STORAGE_KEYS.founder, seedFounder);
   const founderName = profile.name;
   return (
@@ -17,7 +19,7 @@ export default function Welcome() {
             className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
-            Welcome to {SITE.name}
+            {t('wel.kicker', { name: SITE.name })}
           </span>
           <span className="w-8 h-px bg-ember" />
         </div>
@@ -26,22 +28,20 @@ export default function Welcome() {
           className="text-4xl lg:text-6xl font-semibold leading-[1.05] tracking-tight text-ash reveal delay-100"
           style={{ fontFamily: 'Fraunces, Georgia, serif' }}
         >
-          Every great system starts
-          <span className="block italic font-light text-ember">with one great technician.</span>
+          {t('wel.title')}
+          <span className="block italic font-light text-ember">{t('wel.titleEm')}</span>
         </h2>
 
         <p className="mt-8 text-[#979797] text-base lg:text-lg leading-relaxed max-w-2xl mx-auto reveal delay-200">
-          {founderName} founded Jean Luc Solutions with a hands-on standard that still guides
-          every job today. Discover the certifications, the story, and the values behind the name —
-          before you book your next installation.
+          {t('wel.body', { founder: founderName })}
         </p>
 
         <div className="mt-12 flex flex-wrap items-center justify-center gap-4 reveal delay-300">
           <Link to="/founder" className="btn-ember px-8 py-4 rounded-[2px] inline-block">
-            Meet the Founder
+            {t('wel.meet')}
           </Link>
           <Link to="/services" className="btn-ghost px-8 py-4 rounded-[2px] inline-block">
-            Explore Services
+            {t('hero.explore')}
           </Link>
         </div>
       </div>

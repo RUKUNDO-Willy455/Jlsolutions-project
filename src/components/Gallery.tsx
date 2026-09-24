@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ALL_PHOTOS } from '../data/images';
+import { useI18n } from '../i18n';
 
 function labelFor(src: string): string {
   const base = src.split('/').pop()?.replace(/\.[a-z0-9]+$/i, '') ?? 'Project photo';
@@ -13,6 +14,7 @@ function labelFor(src: string): string {
 }
 
 export default function Gallery() {
+  const { t } = useI18n();
   const [index, setIndex] = useState<number | null>(null);
 
   const open = (i: number) => setIndex(i);
@@ -44,7 +46,7 @@ export default function Gallery() {
             className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
-            Project Gallery
+            {t('gal.kicker')}
           </span>
         </div>
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12 reveal delay-100">
@@ -52,12 +54,11 @@ export default function Gallery() {
             className="text-4xl lg:text-5xl font-semibold leading-tight text-ash"
             style={{ fontFamily: 'Fraunces, Georgia, serif' }}
           >
-            Real work,
-            <span className="block italic font-light text-ember">real results.</span>
+            {t('gal.h1')}
+            <span className="block italic font-light text-ember">{t('gal.hEm')}</span>
           </h2>
           <p className="lg:max-w-sm text-sm text-[#8a8a8a] leading-relaxed reveal delay-200">
-            A look inside recent installations across Kigali — from camera networks to full smart
-            builds. Click any photo to view it full-screen.
+            {t('gal.body')}
           </p>
         </div>
 
@@ -69,7 +70,7 @@ export default function Gallery() {
               onClick={() => open(i)}
               className="group relative overflow-hidden rounded-[2px] bg-[#111] focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{ aspectRatio: '4/3' }}
-              aria-label={`Open photo: ${labelFor(src)}`}
+              aria-label={t('gal.open', { label: labelFor(src) })}
             >
               <img
                 src={src}
@@ -94,7 +95,7 @@ export default function Gallery() {
           className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8"
           role="dialog"
           aria-modal="true"
-          aria-label="Photo lightbox"
+          aria-label={t('gal.lightbox')}
           onClick={close}
         >
           <div className="relative w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
@@ -109,7 +110,7 @@ export default function Gallery() {
               <button
                 type="button"
                 onClick={close}
-                aria-label="Close gallery"
+                aria-label={t('gal.close')}
                 className="w-10 h-10 flex items-center justify-center rounded-full border border-[rgba(255,255,255,0.15)] text-[#aaa] hover:text-white hover:border-white/40 transition-colors duration-200"
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
@@ -128,7 +129,7 @@ export default function Gallery() {
             <button
               type="button"
               onClick={prev}
-              aria-label="Previous photo"
+              aria-label={t('gal.prev')}
               className="absolute -left-3 sm:left-0 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.14)] text-[#aaa] hover:text-white hover:border-ember transition-colors duration-200"
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
@@ -138,7 +139,7 @@ export default function Gallery() {
             <button
               type="button"
               onClick={next}
-              aria-label="Next photo"
+              aria-label={t('gal.next')}
               className="absolute -right-3 sm:right-0 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.14)] text-[#aaa] hover:text-white hover:border-ember transition-colors duration-200"
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">

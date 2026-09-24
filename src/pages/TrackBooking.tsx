@@ -1,7 +1,9 @@
 import Page from '../components/Page';
 import TrackBookingSection from '../components/TrackBookingSection';
+import { useI18n } from '../i18n';
 
 export default function TrackBookingPage() {
+  const { t } = useI18n();
   return (
     <Page>
       {/* Header */}
@@ -13,19 +15,18 @@ export default function TrackBookingPage() {
               className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
-              Track My Booking
+              {t('track.kicker')}
             </span>
           </div>
           <h1
             className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.02] text-ash max-w-2xl reveal delay-100"
             style={{ fontFamily: 'Fraunces, Georgia, serif' }}
           >
-            Where does your booking
-            <span className="block italic font-light text-ember">stand right now?</span>
+            {t('track.title')}
+            <span className="block italic font-light text-ember">{t('track.titleEm')}</span>
           </h1>
           <p className="mt-6 max-w-xl text-base lg:text-lg text-[#8a8a8a] leading-relaxed reveal delay-200">
-            Enter the booking reference you received at checkout plus your phone number. You can
-            follow the status and any updates the team sends you — no account needed.
+            {t('track.sub')}
           </p>
         </div>
       </section>

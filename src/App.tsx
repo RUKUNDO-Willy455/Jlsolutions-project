@@ -5,6 +5,8 @@ import LoadingScreen from './components/LoadingScreen';
 import AdminPanel from './components/AdminPanel';
 import TechnicianPanel from './components/TechnicianPanel';
 import { useRoute } from './router';
+import { useSeo } from './hooks/useSeo';
+import { I18nProvider } from './i18n';
 import HomePage from './pages/Home';
 import ServicesPage from './pages/Services';
 import ProcessPage from './pages/Process';
@@ -51,10 +53,20 @@ function PageView() {
 }
 
 export default function App() {
+  return (
+    <I18nProvider>
+      <Shell />
+    </I18nProvider>
+  );
+}
+
+function Shell() {
   const [loading, setLoading] = useState(true);
   const [adminOpen, setAdminOpen] = useState(false);
   const [techOpen, setTechOpen] = useState(false);
   const path = useRoute();
+
+  useSeo(path);
 
   useEffect(() => {
     const t = window.setTimeout(() => setLoading(false), 2600);

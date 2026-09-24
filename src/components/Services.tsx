@@ -1,63 +1,58 @@
 import { useState } from 'react';
-
-const services = [
-  {
-    number: '01',
-    title: 'CCTV & Surveillance',
-    description:
-      'End-to-end IP and analogue camera systems for residential, commercial, and industrial sites. HD to 4K resolution, night vision, and cloud recording.',
-    image: '/images/cctv.jpeg',
-    alt: 'Security surveillance camera installed outdoors',
-    tags: ['IP Cameras', 'NVR/DVR', 'Night Vision', 'Cloud Storage'],
-  },
-  {
-    number: '02',
-    title: 'PCB Repair & Diagnostics',
-    description:
-      'Micro-level board repair using precision soldering, component replacement, and oscilloscope diagnostics. We recover what others declare dead.',
-    image: '/images/pcb-repair-diagnostics.jpg',
-    alt: 'Printed circuit board close-up with electronic components',
-    tags: ['Component-Level', 'BGA Rework', 'Firmware Restore', 'Data Recovery'],
-  },
-  {
-    number: '03',
-    title: 'Network Infrastructure',
-    description:
-      'Structured cabling, fibre optic runs, and enterprise Wi-Fi deployment. From server room design to last-mile connectivity.',
-    image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1400&h=900&fit=crop&auto=format&q=80',
-    alt: 'Network server rack with patch cables',
-    tags: ['Cat6A / Fibre', 'VLANs', 'Enterprise Wi-Fi', 'Load Balancing'],
-  },
-  {
-    number: '04',
-    title: 'Access Control Systems',
-    description:
-      'Biometric readers, smart card gates, and remote door management. Layered security with full audit trails and integration into existing CCTV.',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&h=900&fit=crop&auto=format&q=80',
-    alt: 'Modern access control panel and biometric reader',
-    tags: ['Biometrics', 'Smart Card', 'Intercom', 'Remote Access'],
-  },
-  {
-    number: '05',
-    title: 'Preventive Maintenance',
-    description:
-      'Scheduled inspection, firmware updates, cleaning cycles, and thermal imaging checks to ensure zero unplanned downtime.',
-    image: '/images/pcb-repair-diagnostics.jpg',
-    alt: 'Technician performing electronic equipment maintenance',
-    tags: ['SLA Contracts', 'Thermal Scan', 'Firmware OTA', '24hr Reports'],
-  },
-  {
-    number: '06',
-    title: 'Emergency Response',
-    description:
-      'Rapid-deployment field technicians available around the clock. Average on-site response time under 90 minutes in Greater Kigali.',
-    image: '/images/onsite-darkmode-logo.png',
-    alt: 'Emergency technical response crew on site',
-    tags: ['<90min Response', 'Priority Line', 'Weekend Cover', 'Nation-wide'],
-  },
-];
+import { useI18n } from '../i18n';
 
 export default function Services() {
+  const { t } = useI18n();
+  const services = [
+    {
+      number: '01',
+      title: t('srv.1title'),
+      description: t('srv.1desc'),
+      image: '/images/cctv.jpeg',
+      alt: 'Security surveillance camera installed outdoors',
+      tags: [t('srv.1t0'), t('srv.1t1'), t('srv.1t2'), t('srv.1t3')],
+    },
+    {
+      number: '02',
+      title: t('srv.2title'),
+      description: t('srv.2desc'),
+      image: '/images/pcb-repair-diagnostics.jpg',
+      alt: 'Printed circuit board close-up with electronic components',
+      tags: [t('srv.2t0'), t('srv.2t1'), t('srv.2t2'), t('srv.2t3')],
+    },
+    {
+      number: '03',
+      title: t('srv.3title'),
+      description: t('srv.3desc'),
+      image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1400&h=900&fit=crop&auto=format&q=80',
+      alt: 'Network server rack with patch cables',
+      tags: [t('srv.3t0'), t('srv.3t1'), t('srv.3t2'), t('srv.3t3')],
+    },
+    {
+      number: '04',
+      title: t('srv.4title'),
+      description: t('srv.4desc'),
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&h=900&fit=crop&auto=format&q=80',
+      alt: 'Modern access control panel and biometric reader',
+      tags: [t('srv.4t0'), t('srv.4t1'), t('srv.4t2'), t('srv.4t3')],
+    },
+    {
+      number: '05',
+      title: t('srv.5title'),
+      description: t('srv.5desc'),
+      image: '/images/pcb-repair-diagnostics.jpg',
+      alt: 'Technician performing electronic equipment maintenance',
+      tags: [t('srv.5t0'), t('srv.5t1'), t('srv.5t2'), t('srv.5t3')],
+    },
+    {
+      number: '06',
+      title: t('srv.6title'),
+      description: t('srv.6desc'),
+      image: '/images/onsite-darkmode-logo.png',
+      alt: 'Emergency technical response crew on site',
+      tags: [t('srv.6t0'), t('srv.6t1'), t('srv.6t2'), t('srv.6t3')],
+    },
+  ];
   const [active, setActive] = useState(0);
   const current = services[active];
   const go = (dir: 1 | -1) => setActive((a) => (a + dir + services.length) % services.length);
@@ -101,15 +96,15 @@ export default function Services() {
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                What We Do
+                {t('srv.kicker')}
               </span>
             </div>
             <h2
               className="text-4xl lg:text-5xl xl:text-6xl font-semibold leading-tight text-ash"
               style={{ fontFamily: 'Fraunces, Georgia, serif' }}
             >
-              Six disciplines.
-              <span className="block italic font-light text-ember">One team.</span>
+              {t('srv.h1')}
+              <span className="block italic font-light text-ember">{t('srv.hEm')}</span>
             </h2>
           </div>
 
@@ -209,7 +204,7 @@ export default function Services() {
                   href="#/booking"
                   className="btn-ember text-[0.65rem] px-4 py-2 rounded-[1px] shrink-0"
                 >
-                  Book
+                  {t('srv.book')}
                 </a>
               </div>
             </div>
@@ -235,7 +230,7 @@ export default function Services() {
               <button
                 type="button"
                 onClick={() => go(-1)}
-                aria-label="Previous service"
+                aria-label={t('srv.prev')}
                 className="w-9 h-9 flex items-center justify-center rounded-full border border-[rgba(255,255,255,0.12)] text-[#979797] hover:text-ash hover:border-ember/50 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-200"
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 ml-0.5">
@@ -248,7 +243,7 @@ export default function Services() {
                   <button
                     key={i}
                     onClick={() => setActive(i)}
-                    aria-label={`Go to service ${i + 1}`}
+                    aria-label={t('srv.goTo', { n: i + 1 })}
                     aria-current={i === active ? 'true' : undefined}
                     className={`transition-all duration-300 rounded-full ${
                       i === active
@@ -262,7 +257,7 @@ export default function Services() {
               <button
                 type="button"
                 onClick={() => go(1)}
-                aria-label="Next service"
+                aria-label={t('srv.next')}
                 className="w-9 h-9 flex items-center justify-center rounded-full border border-[rgba(255,255,255,0.12)] text-[#979797] hover:text-ash hover:border-ember/50 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-200"
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 mr-0.5">

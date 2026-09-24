@@ -92,6 +92,20 @@ export interface Rating {
   date: string;
 }
 
+/**
+ * Inbox item shown to the admin console. Created whenever something on the
+ * public site needs attention (new booking, profile request, client review).
+ */
+export interface AdminNotification {
+  id: string;
+  kind: 'booking' | 'request' | 'review';
+  title: string;
+  message: string;
+  bookingRef?: string;
+  createdAt: string;
+  read: boolean;
+}
+
 // ─── Storage keys ─────────────────────────────────────────────────────────────
 
 export const STORAGE_KEYS = {
@@ -102,6 +116,7 @@ export const STORAGE_KEYS = {
   nextBookingRef: 'jl.editor.nextBookingRef',
   testimonials: 'jl.editor.testimonials',
   ratings: 'jl.editor.ratings',
+  notifications: 'jl.editor.notifications',
 };
 
 // ─── Seed data ────────────────────────────────────────────────────────────────
@@ -117,6 +132,8 @@ export const seedTechnicians: Technician[] = [
 export const seedProfileRequests: ProfileEditRequest[] = [];
 
 export const seedRatings: Rating[] = [];
+
+export const seedNotifications: AdminNotification[] = [];
 
 export const seedBookings: Booking[] = [
   { id: 'BK001', name: 'Emmanuel Nkurunziza', phone: '+250 788 445 678', service: 'CCTV & Surveillance Installation', location: 'KG 7 Ave, Kiyovu, Kigali', date: '2026-09-24', time: '10:00 – 12:00', technician: 'Jean Luc Habimana', technicianId: 'jean', status: 'confirmed', createdAt: '2026-09-20', lat: -1.95099, lng: 30.0639, updates: [{ id: 'u1', text: 'Booking received — we will call you to confirm your technician and time slot.', from: 'admin', createdAt: '2026-09-20 09:12' }, { id: 'u2', text: 'Confirmed — Jean Luc Habimana will arrive on Sep 24 between 10:00 and 12:00.', from: 'admin', createdAt: '2026-09-20 09:58' }] },
@@ -176,6 +193,15 @@ function persist(key: string, value: unknown) {
   } catch {
     /* storage full or unavailable */
   }
+}
+
+/**
+ * Synchronous read of the current persisted value. Components that live for a
+ * long time (track page polling, admin console) use this to pick up changes
+ * written by another tab without re-mounting.
+ */
+export function readEditorStore<T>(key: string, fallback: T): T {
+  return load(key, fallback);
 }
 
 /**

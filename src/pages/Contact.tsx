@@ -2,16 +2,18 @@ import { useState } from 'react';
 import Page from '../components/Page';
 import { Phone, Mail, MessageCircle, MapPin, Clock3, ArrowRight } from 'lucide-react';
 import { PHONE_LINKS, SITE } from '../data/site';
-
-const HOURS = [
-  { days: 'Sunday – Thursday', time: '07:00 – 19:00' },
-  { days: 'Friday', time: '08:00 – 13:00' },
-  { days: 'Public Holidays', time: 'Emergency call-outs only' },
-];
+import { useI18n } from '../i18n';
 
 export default function ContactPage() {
+  const { t } = useI18n();
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
+
+  const hours = [
+    { days: t('contact.hSunThu'), time: t('contact.hSunThuTime') },
+    { days: t('contact.hFri'), time: t('contact.hFriTime') },
+    { days: t('contact.hHoliday'), time: t('contact.hHolidayTime') },
+  ];
 
   const waHref = `https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(
     message.trim()
@@ -30,19 +32,18 @@ export default function ContactPage() {
               className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
-              Get In Touch
+              {t('contact.kicker')}
             </span>
           </div>
           <h1
             className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.02] text-ash max-w-2xl reveal delay-100"
             style={{ fontFamily: 'Fraunces, Georgia, serif' }}
           >
-            Talk to the team
-            <span className="block italic font-light text-ember">behind the work.</span>
+            {t('contact.title')}
+            <span className="block italic font-light text-ember">{t('contact.titleEm')}</span>
           </h1>
           <p className="mt-6 max-w-xl text-base lg:text-lg text-[#8a8a8a] leading-relaxed reveal delay-200">
-            Questions, quotes, or an emergency call-out — reach us however you prefer. We respond
-            within 30 minutes during working hours.
+            {t('contact.body')}
           </p>
         </div>
       </section>
@@ -54,33 +55,33 @@ export default function ContactPage() {
             {[
               {
                 icon: Phone,
-                label: 'Call us',
+                label: t('contact.call'),
                 value: `${SITE.phone}`,
-                sub: 'Lines open 07:00 – 19:00',
+                sub: t('contact.callSub'),
                 href: PHONE_LINKS.primary,
                 external: false,
               },
               {
                 icon: MessageCircle,
-                label: 'WhatsApp',
+                label: t('contact.whatsapp'),
                 value: `${SITE.phone}`,
-                sub: 'Fastest for photos & quotes',
+                sub: t('contact.whatsappSub'),
                 href: PHONE_LINKS.whatsapp,
                 external: true,
               },
               {
                 icon: Mail,
-                label: 'Email',
+                label: t('contact.email'),
                 value: SITE.email,
-                sub: 'Replies within one working day',
+                sub: t('contact.emailSub'),
                 href: PHONE_LINKS.mail,
                 external: false,
               },
               {
                 icon: MapPin,
-                label: 'Serving',
-                value: 'Kigali, Rwanda',
-                sub: 'Greater Kigali + scheduled visits to Musanze, Huye, Rubavu',
+                label: t('contact.serving'),
+                value: t('contact.servingValue'),
+                sub: t('contact.servingSub'),
                 href: 'https://maps.google.com/?q=Gasabo,Kigali,Rwanda',
                 external: true,
               },
@@ -92,8 +93,7 @@ export default function ContactPage() {
                     <Icon size={20} strokeWidth={1.8} />
                   </div>
                   <div className="min-w-0">
-                    <p
-                      className="text-[0.6rem] tracking-[0.16em] uppercase text-[#5a5a5a] mb-1"
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#5a5a5a] mb-1"
                       style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                     >
                       {c.label}
@@ -135,9 +135,9 @@ export default function ContactPage() {
                   className="text-[0.6rem] tracking-[0.16em] uppercase text-[#5a5a5a] mb-3"
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
-                  Working Hours
+                  {t('contact.hours')}
                 </p>
-                {HOURS.map((h) => (
+                {hours.map((h) => (
                   <div key={h.days} className="flex items-baseline justify-between gap-4 py-1.5 border-b border-[rgba(255,255,255,0.05)] last:border-0">
                     <span className="text-sm text-ash">{h.days}</span>
                     <span className="text-xs text-[#8a8a8a] text-right" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
@@ -152,11 +152,10 @@ export default function ContactPage() {
           {/* Right: message form -> WhatsApp */}
           <div className="lg:sticky lg:top-28 rounded-[2px] border border-[rgba(255,255,255,0.07)] bg-obsidian p-8 lg:p-10 reveal delay-100">
             <h2 className="text-2xl lg:text-3xl font-semibold text-ash mb-2" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-              Send a message
+              {t('contact.formTitle')}
             </h2>
             <p className="text-sm text-[#8a8a8a] mb-8 leading-relaxed">
-              Describe what you need — a quote, an emergency, or a question. Your message opens
-              directly in WhatsApp so we reply fast.
+              {t('contact.formBody')}
             </p>
 
             <div className="flex flex-col gap-5">
@@ -165,14 +164,14 @@ export default function ContactPage() {
                   className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]"
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
-                  Your name
+                  {t('contact.yourName')}
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   autoComplete="name"
-                  placeholder="e.g. Claude Rugema"
+                  placeholder={t('contact.namePlaceholder')}
                   className="field"
                 />
               </div>
@@ -182,13 +181,13 @@ export default function ContactPage() {
                   className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]"
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
-                  Message
+                  {t('contact.message')}
                 </label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={6}
-                  placeholder="I need a CCTV quote for a small office in Nyarutarama…"
+                  placeholder={t('contact.messagePlaceholder')}
                   className="field resize-none"
                 />
               </div>
@@ -200,10 +199,10 @@ export default function ContactPage() {
                 className="btn-ember py-4 px-6 rounded-[2px] flex items-center justify-center gap-2"
               >
                 <MessageCircle size={16} />
-                Send via WhatsApp
+                {t('contact.sendWhatsApp')}
               </a>
               <a href={PHONE_LINKS.primary} className="btn-ghost py-4 px-6 rounded-[2px] text-center">
-                Or call +{SITE.phone}
+                {t('contact.orCall').replace('{phone}', SITE.phone)}
               </a>
             </div>
           </div>
@@ -219,7 +218,7 @@ export default function ContactPage() {
               className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
-              Where We Serve
+              {t('contact.whereWeServe')}
             </span>
           </div>
           <div className="relative rounded-[2px] overflow-hidden border border-[rgba(255,255,255,0.07)]">

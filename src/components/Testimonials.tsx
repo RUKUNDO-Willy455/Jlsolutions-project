@@ -1,9 +1,11 @@
 import { useEditorStore, STORAGE_KEYS, seedTestimonials } from '../data/editor';
 import type { Testimonial } from '../data/editor';
+import { useI18n } from '../i18n';
 
 function Stars({ count }: { count: number }) {
+  const { t } = useI18n();
   return (
-    <div className="flex gap-1" role="img" aria-label={`Rated ${count} out of 5 stars`}>
+    <div className="flex gap-1" role="img" aria-label={t('test.starsAria', { count })}>
       {Array.from({ length: 5 }).map((_, i) => {
         const pct = Math.max(0, Math.min(1, count - i));
         const isEmpty = pct === 0;
@@ -36,6 +38,7 @@ function Stars({ count }: { count: number }) {
 }
 
 export default function Testimonials() {
+  const { t } = useI18n();
   const [testimonials] = useEditorStore<Testimonial[]>(STORAGE_KEYS.testimonials, seedTestimonials);
   const visible = testimonials.filter(t => t.visible);
   const avg = visible.length
@@ -54,15 +57,15 @@ export default function Testimonials() {
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Client Feedback
+                {t('test.kicker')}
               </span>
             </div>
             <h2
               className="text-4xl lg:text-5xl font-semibold leading-tight text-ash reveal delay-100"
               style={{ fontFamily: 'Fraunces, Georgia, serif' }}
             >
-              What our clients
-              <span className="block italic font-light text-ember">say about us.</span>
+              {t('test.title')}
+              <span className="block italic font-light text-ember">{t('test.titleEm')}</span>
             </h2>
           </div>
 
@@ -79,7 +82,9 @@ export default function Testimonials() {
                 className="text-[0.6rem] tracking-[0.12em] uppercase text-[#4a4a4a] mt-1"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                {visible.length} Review{visible.length === 1 ? '' : 's'}
+                {visible.length === 1
+                  ? t('test.reviewCountOne', { count: visible.length })
+                  : t('test.reviewCountMany', { count: visible.length })}
               </p>
             </div>
             <div className="w-px h-12 bg-[rgba(255,255,255,0.06)] hidden sm:block" />
@@ -94,7 +99,7 @@ export default function Testimonials() {
                 className="text-[0.6rem] tracking-[0.12em] uppercase text-[#4a4a4a] mt-1"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Reviews
+                {t('test.reviewsCap')}
               </p>
             </div>
           </div>
@@ -158,7 +163,7 @@ export default function Testimonials() {
             className="text-sm text-[#4a4a4a] text-center py-16"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
-            No client reviews published yet.
+            {t('test.empty')}
           </p>
         )}
       </div>

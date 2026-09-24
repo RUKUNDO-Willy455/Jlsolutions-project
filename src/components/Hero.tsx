@@ -1,59 +1,61 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-
-const slides = [
-  {
-    tag: '01 — CCTV & Surveillance',
-    headline: ['Precision', 'for Critical', 'Systems.'],
-    accentLine: 1,
-    body: "Rwanda's premier CCTV installation and IP camera networks — HD to 4K resolution, night vision, cloud recording, and full site coverage across Kigali.",
-    image: '/images/cctv.jpeg',
-    transition: 'horizontal',
-  },
-  {
-    tag: '02 — PCB Repair & Diagnostics',
-    headline: ['Component-level', 'Repair.', 'Zero Compromise.'],
-    accentLine: 1,
-    body: 'Micro-level board recovery using precision soldering, BGA rework, and oscilloscope diagnostics. We recover what others declare dead.',
-    image: '/images/pcb-repair-diagnostics.jpg',
-    transition: 'vertical',
-  },
-  {
-    tag: '03 — Network Infrastructure',
-    headline: ['Enterprise', 'Connectivity,', 'Built to Last.'],
-    accentLine: 1,
-    body: 'Structured Cat6A cabling, fibre optic runs, and enterprise Wi-Fi deployment — from server room design to last-mile connectivity, done right.',
-    image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1600&h=1000&fit=crop&auto=format&q=75',
-    transition: 'horizontal',
-  },
-  {
-    tag: '04 — Access Control Systems',
-    headline: ['Layered', 'Security.', 'Full Control.'],
-    accentLine: 1,
-    body: 'Biometric readers, smart card gates, and remote door management with full audit trails — seamlessly integrated with your existing CCTV network.',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=1000&fit=crop&auto=format&q=75',
-    transition: 'vertical',
-  },
-  {
-    tag: '05 — Preventive Maintenance',
-    headline: ['Zero', 'Unplanned', 'Downtime.'],
-    accentLine: 0,
-    body: 'Scheduled inspections, firmware OTA updates, thermal imaging checks, and SLA-backed service cycles that keep your systems at peak performance.',
-    image: 'https://images.unsplash.com/photo-1581092921461-39b9d08a9b21?w=1600&h=1000&fit=crop&auto=format&q=75',
-    transition: 'horizontal',
-  },
-  {
-    tag: '06 — Emergency Response',
-    headline: ['On-site', 'Under', '90 Minutes.'],
-    accentLine: 2,
-    body: 'Rapid-deployment field technicians available 24/7. Average response under 90 minutes anywhere in Greater Kigali, every day of the year.',
-    image: '/images/onsite-darkmode-logo.png',
-    transition: 'vertical',
-  },
-];
+import { useI18n } from '../i18n';
 
 const INTERVAL = 6000;
 
 export default function Hero() {
+  const { t } = useI18n();
+  const slides = [
+    {
+      tag: t('hero.s0.tag'),
+      headline: [t('hero.s0.h0'), t('hero.s0.h1'), t('hero.s0.h2')],
+      accentLine: 1,
+      body: t('hero.s0.body'),
+      image: '/images/cctv.jpeg',
+      transition: 'horizontal',
+    },
+    {
+      tag: t('hero.s1.tag'),
+      headline: [t('hero.s1.h0'), t('hero.s1.h1'), t('hero.s1.h2')],
+      accentLine: 1,
+      body: t('hero.s1.body'),
+      image: '/images/pcb-repair-diagnostics.jpg',
+      transition: 'vertical',
+    },
+    {
+      tag: t('hero.s2.tag'),
+      headline: [t('hero.s2.h0'), t('hero.s2.h1'), t('hero.s2.h2')],
+      accentLine: 1,
+      body: t('hero.s2.body'),
+      image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1600&h=1000&fit=crop&auto=format&q=75',
+      transition: 'horizontal',
+    },
+    {
+      tag: t('hero.s3.tag'),
+      headline: [t('hero.s3.h0'), t('hero.s3.h1'), t('hero.s3.h2')],
+      accentLine: 1,
+      body: t('hero.s3.body'),
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=1000&fit=crop&auto=format&q=75',
+      transition: 'vertical',
+    },
+    {
+      tag: t('hero.s4.tag'),
+      headline: [t('hero.s4.h0'), t('hero.s4.h1'), t('hero.s4.h2')],
+      accentLine: 0,
+      body: t('hero.s4.body'),
+      image: 'https://images.unsplash.com/photo-1581092921461-39b9d08a9b21?w=1600&h=1000&fit=crop&auto=format&q=75',
+      transition: 'horizontal',
+    },
+    {
+      tag: t('hero.s5.tag'),
+      headline: [t('hero.s5.h0'), t('hero.s5.h1'), t('hero.s5.h2')],
+      accentLine: 2,
+      body: t('hero.s5.body'),
+      image: '/images/onsite-darkmode-logo.png',
+      transition: 'vertical',
+    },
+  ];
+
   const [active, setActive] = useState(0);
   const [dir, setDir] = useState<'next' | 'prev'>('next');
   const [animating, setAnimating] = useState(false);
@@ -172,16 +174,16 @@ export default function Hero() {
             className="flex flex-wrap items-center gap-4 mb-16"
             style={{ animation: `${getEnterAnim()} 0.8s cubic-bezier(0.16,1,0.3,1) 500ms both` }}
           >
-            <a href="#/booking" className="btn-ember px-8 py-4 rounded-[2px]">Book a Technician</a>
-            <a href="#/services" className="btn-ghost px-8 py-4 rounded-[2px]">Explore Services</a>
+            <a href="#/booking" className="btn-ember px-8 py-4 rounded-[2px]">{t('hero.book')}</a>
+            <a href="#/services" className="btn-ghost px-8 py-4 rounded-[2px]">{t('hero.explore')}</a>
           </div>
 
           {/* Stats */}
           <div className="flex flex-wrap gap-10">
             {[
-              { value: '99.8%', label: 'Uptime SLA' },
-              { value: '24/7', label: 'Support' },
-              { value: '15yr', label: 'Experience' },
+              { value: '99.8%', label: t('hero.statUptime') },
+              { value: '24/7', label: t('hero.statSupport') },
+              { value: '15yr', label: t('hero.statExperience') },
             ].map((stat, si) => (
               <div
                 key={`${active}-stat-${stat.label}`}

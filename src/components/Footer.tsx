@@ -12,6 +12,7 @@ import {
 import BrandLogo from './BrandLogo';
 import { PHONE_LINKS, SITE, SOCIAL_LINKS, SUPPORT_MAIL_LINK } from '../data/site';
 import { SERVICES } from '../data/services';
+import { useI18n } from '../i18n';
 import './Footer.css';
 
 const SOCIALS = [
@@ -22,19 +23,20 @@ const SOCIALS = [
 ];
 
 const COMPANY_LINKS = [
-  { label: 'Home', href: '#/' },
-  { label: 'Founder', href: '#/founder' },
-  { label: 'Services', href: '#/services' },
-  { label: 'Pricing', href: '#/pricing' },
-  { label: 'Process', href: '#/process' },
-  { label: 'Clients', href: '#/clients' },
-  { label: 'Testimonials', href: '#/testimonials' },
-  { label: 'Book Now', href: '#/booking' },
-  { label: 'Track Booking', href: '#/track' },
-  { label: 'Contact', href: '#/contact' },
+  { key: 'nav.home', href: '#/' },
+  { key: 'nav.founder', href: '#/founder' },
+  { key: 'nav.services', href: '#/services' },
+  { key: 'nav.pricing', href: '#/pricing' },
+  { key: 'nav.process', href: '#/process' },
+  { key: 'nav.clients', href: '#/clients' },
+  { key: 'nav.testimonials', href: '#/testimonials' },
+  { key: 'nav.book', href: '#/booking' },
+  { key: 'nav.track', href: '#/track' },
+  { key: 'nav.contact', href: '#/contact' },
 ];
 
 export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: () => void; onTechClick?: () => void }) {
+  const { t } = useI18n();
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
@@ -51,11 +53,10 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
             </span>
           </a>
 
-          <p className="footer__motto">{SITE.motto}</p>
+          <p className="footer__motto">{t('footer.motto')}</p>
 
           <p className="footer__desc">
-            Professional electrical, security, energy and technology solutions for modern homes
-            and businesses.
+            {t('footer.desc')}
           </p>
 
           <ul className="footer__socials" aria-label="Social media">
@@ -77,18 +78,18 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
         </div>
 
         <div className="footer__col">
-          <h4>Company</h4>
+          <h4>{t('footer.company')}</h4>
           <ul>
             {COMPANY_LINKS.map((l) => (
-              <li key={l.href.concat(l.label)}>
-                <a href={l.href}>{l.label}</a>
+              <li key={l.href.concat(l.key)}>
+                <a href={l.href}>{t(l.key)}</a>
               </li>
             ))}
           </ul>
         </div>
 
         <div className="footer__col">
-          <h4>Services</h4>
+          <h4>{t('footer.services')}</h4>
           <ul>
             {SERVICES.map((s) => (
               <li key={s.slug}>
@@ -99,7 +100,7 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
         </div>
 
         <div className="footer__col">
-          <h4>Reach Us</h4>
+          <h4>{t('footer.reachUs')}</h4>
           <ul className="footer__contact">
             <li>
               <a href={PHONE_LINKS.primary}>
@@ -109,12 +110,12 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
             <li>
               <a href={PHONE_LINKS.alt}>
                 <Phone size={15} /> {SITE.phoneAlt}
-                <span className="footer__contact-tag">Alt</span>
+                <span className="footer__contact-tag">{t('footer.alt')}</span>
               </a>
             </li>
             <li>
               <a href={PHONE_LINKS.whatsapp} target="_blank" rel="noreferrer">
-                <MessageCircle size={15} /> Chat on WhatsApp
+                <MessageCircle size={15} /> {t('footer.chatWhatsapp')}
               </a>
             </li>
             <li>
@@ -124,7 +125,7 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
             </li>
             <li>
               <a href={SUPPORT_MAIL_LINK}>
-                <CircleHelp size={15} /> Having an issue? Ask us
+                <CircleHelp size={15} /> {t('footer.emailQuestion')}
               </a>
             </li>
           </ul>
@@ -153,13 +154,13 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
           <div className="footer__bar-meta">
             <p>© {new Date().getFullYear()} {SITE.name}. All Rights Reserved.</p>
             <nav aria-label="Legal">
-              <a href="#/privacy">Privacy Policy</a>
+              <a href="#/privacy">{t('footer.privacy')}</a>
               <span aria-hidden="true">·</span>
-              <a href="#/terms">Terms of Service</a>
+              <a href="#/terms">{t('footer.terms')}</a>
             </nav>
           </div>
           <button type="button" className="footer__top" onClick={scrollTop}>
-            Back to top <ArrowUp size={14} />
+            {t('footer.backToTop')} <ArrowUp size={14} />
           </button>
         </div>
       </div>

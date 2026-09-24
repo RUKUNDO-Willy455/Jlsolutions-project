@@ -1,29 +1,31 @@
 import { Radio, AlarmClock, ShieldCheck, MapPin } from 'lucide-react';
-
-const steps = [
-  {
-    icon: Radio,
-    title: 'We Confirm Within 30 Minutes',
-    text: 'A coordinator calls you to verify the service, technician and time slot before it is locked in.',
-  },
-  {
-    icon: AlarmClock,
-    title: 'Technician Arrives on Schedule',
-    text: 'You get a live call when the engineer is 15 minutes away — no wasted waiting windows.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Signed Commission Report',
-    text: 'Every job ends with a test and a sign-off sheet you keep, plus a 24-month workmanship guarantee.',
-  },
-  {
-    icon: MapPin,
-    title: 'Full Kigali & Beyond Coverage',
-    text: 'Primary service in Greater Kigali, with scheduled visits to Musanze, Huye, Rubavu and more.',
-  },
-];
+import { useI18n } from '../i18n';
 
 export default function BookingDetail() {
+  const { t } = useI18n();
+  const steps = [
+    {
+      icon: Radio,
+      title: t('bd.s0t'),
+      text: t('bd.s0d'),
+    },
+    {
+      icon: AlarmClock,
+      title: t('bd.s1t'),
+      text: t('bd.s1d'),
+    },
+    {
+      icon: ShieldCheck,
+      title: t('bd.s2t'),
+      text: t('bd.s2d'),
+    },
+    {
+      icon: MapPin,
+      title: t('bd.s3t'),
+      text: t('bd.s3d'),
+    },
+  ];
+
   return (
     <section className="bg-obsidian py-20 sm:py-24 lg:py-32 border-t border-[rgba(255,255,255,0.05)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -33,7 +35,7 @@ export default function BookingDetail() {
             className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
-            What Happens Next
+            {t('bd.kicker')}
           </span>
         </div>
 

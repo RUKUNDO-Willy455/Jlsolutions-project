@@ -19,7 +19,6 @@ interface Props {
   focus?: MapFocus | null;
   fill?: boolean;
   viewOnly?: boolean;
-  viewOnly?: boolean;
   onChange: (pick: LocationPick | null) => void;
 }
 

@@ -1,17 +1,20 @@
-const sectors = [
-  { name: 'Banks & Fintech', desc: 'Surveillance, server rooms and branch security for financial institutions across Rwanda.', count: '12+' },
-  { name: 'Telecoms', desc: 'Cell-site infrastructure, structured cabling and network monitoring for carriers.', count: '2' },
-  { name: 'Government', desc: 'Compliant installations for public institutions with strict procurement and audit standards.', count: '8+' },
-  { name: 'Hospitality', desc: 'Access control and CCTV for hotels, convention centres and mixed-use properties.', count: '9+' },
-];
-
-const stats = [
-  { value: '30+', label: 'Institutional Clients' },
-  { value: '10', label: 'Sectors Served' },
-  { value: '15yr', label: 'Field Experience' },
-];
+import { useI18n } from '../i18n';
 
 export default function ClientsDetail() {
+  const { t } = useI18n();
+  const sectors = [
+    { name: t('cd.0name'), desc: t('cd.0desc'), count: '12+' },
+    { name: t('cd.1name'), desc: t('cd.1desc'), count: '2' },
+    { name: t('cd.2name'), desc: t('cd.2desc'), count: '8+' },
+    { name: t('cd.3name'), desc: t('cd.3desc'), count: '9+' },
+  ];
+
+  const stats = [
+    { value: '30+', label: t('cd.stat0') },
+    { value: '10', label: t('cd.stat1') },
+    { value: '15yr', label: t('cd.stat2') },
+  ];
+
   return (
     <>
       {/* Stats strip */}
@@ -45,7 +48,7 @@ export default function ClientsDetail() {
               className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
-              Sectors We Serve
+              {t('cd.kicker')}
             </span>
           </div>
 

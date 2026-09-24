@@ -10,8 +10,9 @@ import {
   seedProfileRequests,
   seedBookings,
   seedTestimonials,
+  seedNotifications,
 } from '../data/editor';
-import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial } from '../data/editor';
+import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial, AdminNotification } from '../data/editor';
 import { AvatarUpload } from './AvatarUpload';
 
 // â”€â”€â”€ Auth credentials (frontend demo â€” replace with real auth in production) â”€â”€
@@ -90,6 +91,81 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
       <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{label}</p>
       <p className="text-3xl font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{value}</p>
       {sub && <p className="text-[0.68rem] text-[#4a4a4a] mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+function InboxPanel({
+  notifications,
+  setNotifications,
+  onOpenBooking,
+  onClose,
+}: {
+  notifications: AdminNotification[];
+  setNotifications: React.Dispatch<React.SetStateAction<AdminNotification[]>>;
+  onOpenBooking: () => void;
+  onClose: () => void;
+}) {
+  const unread = notifications.filter(n => !n.read).length;
+  function open(n: AdminNotification) {
+    setNotifications(prev => prev.map(x => (x.id === n.id ? { ...x, read: true } : x)));
+    if (n.kind === 'booking') onOpenBooking();
+    onClose();
+  }
+  function markAll() {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }
+  return (
+    <div className="fixed inset-0 z-50" onClick={onClose}>
+      <div
+        className="absolute top-[60px] right-2 sm:right-6 w-[min(94vw,380px)] max-h-[70vh] overflow-y-auto bg-[#101010] border border-[rgba(255,255,255,0.08)] rounded-[2px] shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[rgba(255,255,255,0.06)] sticky top-0 bg-[#101010]">
+          <p className="text-[0.62rem] tracking-[0.16em] uppercase text-[#8a8a8a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            Notifications {unread > 0 && <span className="text-ember">({unread})</span>}
+          </p>
+          {notifications.length > 0 && (
+            <button
+              onClick={markAll}
+              className="text-[0.6rem] tracking-wide uppercase text-ember hover:text-white transition-colors duration-150"
+              style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+            >
+              Mark all read
+            </button>
+          )}
+        </div>
+        {notifications.length === 0 && (
+          <p className="text-sm text-[#4a4a4a] text-center py-10">No notifications yet.</p>
+        )}
+        <div className="flex flex-col">
+          {notifications.map(n => (
+            <button
+              key={n.id}
+              onClick={() => open(n)}
+              className={`text-left px-4 py-3 border-b border-[rgba(255,255,255,0.04)] transition-colors duration-150 ${n.read ? 'hover:bg-[#151515]' : 'bg-[rgba(37,99,235,0.06)] hover:bg-[rgba(37,99,235,0.1)]'}`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-ember shrink-0" />}
+                <span
+                  className={`text-[0.55rem] tracking-wide uppercase px-1.5 py-0.5 border rounded-[1px] ${n.kind === 'booking'
+                    ? 'text-blue-400 border-blue-400/25 bg-blue-400/10'
+                    : n.kind === 'review'
+                      ? 'text-yellow-400 border-yellow-400/25 bg-yellow-400/10'
+                      : 'text-emerald-400 border-emerald-400/25 bg-emerald-400/10'
+                  }`}
+                  style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                >
+                  {n.kind}
+                </span>
+                <span className="text-[0.58rem] text-[#4a4a4a] ml-auto" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{n.createdAt}</span>
+              </div>
+              <p className="text-xs font-semibold text-white">{n.title}</p>
+              <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5 leading-relaxed">{n.message}</p>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -891,7 +967,7 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
         </div>
       )}
 
-      {testimonials.map(t => (
+      {[...testimonials].sort((a, b) => Number(a.visible) - Number(b.visible)).map(t => (
         <div key={t.id} className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.06)] rounded-[2px] p-5">
           {editing === t.id && draft ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -910,12 +986,20 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
           ) : (
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 flex-wrap mb-2"><p className="text-sm font-semibold text-white">{t.name}</p><span className="text-[0.6rem] text-ember" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.company}</span></div>
+                <div className="flex items-center gap-3 flex-wrap mb-2">
+                  <p className="text-sm font-semibold text-white">{t.name}</p>
+                  <span className="text-[0.6rem] text-ember" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.company}</span>
+                  {!t.visible && (
+                    <span className="text-[0.55rem] tracking-wide uppercase px-2 py-0.5 border border-yellow-400/25 bg-yellow-400/10 text-yellow-400 rounded-[1px]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      pending approval
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-[#5a5a5a] leading-relaxed italic">"{t.quote}"</p>
                 <p className="text-[0.6rem] text-[#3a3a3a] mt-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.project} Â· {t.year} Â· {t.rating}/5 stars</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => toggleVisible(t.id)} className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1.5 border rounded-[1px] transition-colors duration-150 ${t.visible ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.visible ? 'Visible' : 'Hidden'}</button>
+                <button onClick={() => toggleVisible(t.id)} className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1.5 border rounded-[1px] transition-colors duration-150 ${t.visible ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/25 hover:bg-yellow-400/20'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.visible ? 'Visible' : 'Publish'}</button>
                 <button onClick={() => startEdit(t)} className="text-[0.65rem] text-[#5a5a5a] hover:text-white transition-colors duration-150 px-3 py-1.5 border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.18)] rounded-[1px]">Edit</button>
                 <button onClick={() => remove(t.id)} className="text-[0.65rem] text-[#4a4a4a] hover:text-red-400 transition-colors duration-150 px-3 py-1.5 border border-[rgba(255,255,255,0.04)] hover:border-red-800/40 rounded-[1px]">Remove</button>
               </div>
@@ -1203,6 +1287,8 @@ function FounderProfileTab({
 export default function AdminPanel({ onExit }: { onExit: () => void }) {
   const [authed, setAuthed] = useState(false);
   const [tab, setTab] = useState<Tab>('Dashboard');
+  const [showInbox, setShowInbox] = useState(false);
+  const [notifications, setNotifications] = useEditorStore<AdminNotification[]>(STORAGE_KEYS.notifications, seedNotifications);
   const [bookings, setBookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
   const [technicians, setTechnicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians);
   const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
@@ -1235,6 +1321,20 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
             >
               <i className="bx bx-home text-base text-[#4a4a4a] group-hover:text-ember transition-colors duration-200" />
             </button>
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setShowInbox(v => !v)}
+                title="Notifications"
+                className="flex items-center justify-center w-8 h-8 rounded-[2px] hover:bg-[rgba(37,99,235,0.08)] transition-all duration-200"
+              >
+                <i className={`bx bx-bell text-base ${notifications.some(n => !n.read) ? 'text-ember' : 'text-[#4a4a4a]'} hover:text-ember transition-colors duration-200`} />
+              </button>
+              {notifications.some(n => !n.read) && (
+                <span className="absolute top-0 right-0 min-w-[16px] h-[16px] px-1 rounded-full bg-ember text-white text-[9px] font-bold flex items-center justify-center" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                  {notifications.filter(n => !n.read).length}
+                </span>
+              )}
+            </div>
             <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 flex items-center gap-2 overflow-hidden">
               <img src={jeanlucLogo} alt="" className="h-6 w-auto object-contain shrink-0" />
               <span className="text-[0.6rem] tracking-[0.18em] uppercase text-[#3a3a3a] whitespace-nowrap" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Admin Console</span>
@@ -1273,6 +1373,14 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
                     style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                   >
                     {profileRequests.filter(r => r.status === 'pending').length}
+                  </span>
+                )}
+                {t === 'Testimonials' && testimonials.filter(x => !x.visible).length > 0 && (
+                  <span
+                    className="ml-auto mr-2 min-w-[20px] h-5 px-1.5 rounded-full bg-yellow-500 text-[0.6rem] font-bold text-black flex items-center justify-center opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200"
+                    style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                  >
+                    {testimonials.filter(x => !x.visible).length}
                   </span>
                 )}
               </button>
@@ -1320,9 +1428,24 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
         {/* Mobile bottom tab strip */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0a0a]/95 border-t border-[rgba(255,255,255,0.06)] flex overflow-x-auto pb-[env(safe-area-inset-bottom)]">
           {TABS.map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap transition-colors duration-150 ${tab === t ? 'text-ember border-t border-ember' : 'text-[#4a4a4a]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t}</button>
+            <button key={t} onClick={() => setTab(t)} className={`flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap transition-colors duration-150 ${tab === t ? 'text-ember border-t border-ember' : 'text-[#4a4a4a]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              {t}
+              {t === 'Testimonials' && testimonials.filter(x => !x.visible).length > 0 && (
+                <span className="ml-1.5 inline-flex min-w-[18px] h-4 px-1 rounded-full bg-yellow-500 text-[0.55rem] font-bold text-black items-center justify-center align-middle">
+                  {testimonials.filter(x => !x.visible).length}
+                </span>
+              )}
+            </button>
           ))}
           <button onClick={() => { setAuthed(false); onExit(); }} className="flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap text-red-400/60" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Log Out</button>
+          <button onClick={() => setShowInbox(v => !v)} className="relative flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap text-[#4a4a4a] hover:text-white" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            Inbox
+            {notifications.some(n => !n.read) && (
+              <span className="absolute top-1.5 right-3 min-w-[16px] h-[16px] px-1 rounded-full bg-ember text-white text-[9px] font-bold flex items-center justify-center" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                {notifications.filter(n => !n.read).length}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Content */}
@@ -1375,6 +1498,15 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
           </div>
         </main>
       </div>
+
+      {showInbox && (
+        <InboxPanel
+          notifications={notifications}
+          setNotifications={setNotifications}
+          onOpenBooking={() => setTab('Bookings')}
+          onClose={() => setShowInbox(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1,36 +1,43 @@
 import { useState, useEffect, useRef, Fragment, lazy, Suspense, Component } from 'react';
 import type { ReactNode } from 'react';
 import { Check, MapPin } from 'lucide-react';
-import { useEditorStore, STORAGE_KEYS, seedTechnicians, seedBookings } from '../data/editor';
-import type { Booking } from '../data/editor';
+import { useEditorStore, STORAGE_KEYS, seedTechnicians, seedBookings, seedNotifications } from '../data/editor';
+import type { AdminNotification, Booking } from '../data/editor';
 import { PHONE_LINKS, SITE } from '../data/site';
 import type { LocationPick } from './LocationPicker';
+import { useI18n } from '../i18n';
+import { formatRwMobile, isValidRwMobile } from '../utils/phone';
+import { findFreeTechnician, isSlotTaken, isTechFree } from '../utils/availability';
 
 const LocationPicker = lazy(() => import('./LocationPicker'));
 
-class MapBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class MapBoundary extends Component<
+  { children: ReactNode; t: (k: string, v?: Record<string, string | number>) => string },
+  { failed: boolean }
+> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
   render() {
+    const { t, children } = this.props;
     if (this.state.failed) {
       return (
         <div className="relative h-80 w-full flex flex-col items-center justify-center gap-4 bg-[#0e0e0e]">
           <p className="text-[0.7rem] tracking-[0.16em] uppercase text-[#8a8a8a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-            The map could not be loaded.
+            {t('book.mapFail')}
           </p>
           <button
             type="button"
             onClick={() => this.setState({ failed: false })}
             className="btn-ember px-5 py-2.5 rounded-[2px] text-[0.7rem]"
           >
-            Retry
+            {t('book.mapRetry')}
           </button>
         </div>
       );
     }
-    return this.props.children;
+    return children;
   }
 }
 
@@ -170,43 +177,33 @@ async function searchRwanda(q: string): Promise<LocationSuggestion[]> {
 
 const ANY_ID = 'any';
 
-const validateDetails = (f: typeof defaultForm) => {
+const validateDetails = (f: typeof defaultForm, t: (k: string, v?: Record<string, string | number>) => string) => {
   const e: Record<string, string> = {};
-  if (!f.service) e.service = 'Please select a service type.';
+  if (!f.service) e.service = t('book.errService');
   if (!f.location.trim() && !(f.lat != null && f.lng != null))
-    e.location = 'Add your address or drop a pin on the Rwanda map.';
-  if (!f.date) e.date = 'Please pick a preferred date.';
-  if (!f.time) e.time = 'Please choose a time window.';
+    e.location = t('book.errAddress');
+  if (!f.date) e.date = t('book.errDate');
+  if (!f.time) e.time = t('book.errTime');
   return e;
 };
 
-const validateContact = (f: typeof defaultForm) => {
+const validateContact = (f: typeof defaultForm, t: (k: string, v?: Record<string, string | number>) => string) => {
   const e: Record<string, string> = {};
-  if (!f.name.trim()) e.name = 'Please enter your full name.';
-  const digits = f.phone.replace(/\D/g, '');
-  if (!f.phone.trim()) e.phone = 'Please enter a phone number.';
-  else if (digits.length < 9) e.phone = 'Please enter a valid phone number.';
+  if (!f.name.trim()) e.name = t('book.errName');
+  if (!f.phone.trim()) e.phone = t('book.errPhone');
+  else if (!isValidRwMobile(f.phone)) e.phone = t('book.errPhoneInvalid');
   return e;
-};
-
-const PROCESS = [
-  { no: '01', label: 'Details' },
-  { no: '02', label: 'Contact' },
-  { no: '03', label: 'Confirm' },
-];
-
-const STEP_COPY: Record<number, string> = {
-  1: 'Service & schedule',
-  2: 'Your contact details',
-  3: 'Review & confirm booking',
 };
 
 export default function BookingForm({ onTrack, nested }: { onTrack?: () => void; nested?: boolean }) {
+  const { t, locale } = useI18n();
   const [technicians] = useEditorStore(STORAGE_KEYS.technicians, seedTechnicians);
   const [bookings, setBookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
+  const [notifications, setNotifications] = useEditorStore(STORAGE_KEYS.notifications, seedNotifications);
   const [form, setForm] = useState({ ...defaultForm });
   const [submitted, setSubmitted] = useState(false);
   const [lastRef, setLastRef] = useState('');
+  const [copied, setCopied] = useState(false);
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [mapOpen, setMapOpen] = useState(false);
@@ -215,6 +212,12 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
   const [sugLoading, setSugLoading] = useState(false);
   const sugTimer = useRef<number | null>(null);
   const searchToken = useRef(0);
+
+  const PROCESS = [
+    { no: '01', label: t('book.step1') },
+    { no: '02', label: t('book.step2') },
+    { no: '03', label: t('book.step3') },
+  ];
 
   async function runSearch(q: string) {
     const token = ++searchToken.current;
@@ -301,7 +304,17 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const name = e.target.name;
-    setForm((prev) => ({ ...prev, [name]: e.target.value }));
+    const value = e.target.value;
+    setForm((prev) => {
+      const next = { ...prev, [name]: value };
+      if ((name === 'date' || name === 'time') && next.technician !== ANY_ID) {
+        const sel = technicians.find((x) => x.id === next.technician);
+        if (sel && !isTechFree(sel, next.date, next.time, bookings)) {
+          next.technician = ANY_ID;
+        }
+      }
+      return next;
+    });
     setErrors((prev) => {
       if (!prev[name]) return prev;
       const next = { ...prev };
@@ -324,23 +337,29 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
   }
 
   function handleContinue() {
-    const nextErrors = validateDetails(form);
+    const nextErrors = validateDetails(form, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length === 0) setStep(2);
   }
 
   function handleContinueContact() {
-    const nextErrors = validateContact(form);
+    const nextErrors = validateContact(form, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length === 0) setStep(3);
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const nextErrors = validateContact(form);
+    const nextErrors = validateContact(form, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-    const tech = options.find(t => t.id === form.technician);
+    const chosen = options.find((x) => x.id === form.technician);
+    const tech =
+      chosen && chosen.id !== ANY_ID
+        ? chosen
+        : (findFreeTechnician(technicians, form.date, form.time, bookings)
+          ?? technicians.find((x) => x.available)
+          ?? null);
     const raw = localStorage.getItem(STORAGE_KEYS.nextBookingRef);
     let n = raw ? parseInt(raw, 10) : 0;
     if (!n || Number.isNaN(n) || n < 1) {
@@ -376,12 +395,23 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
         },
       ],
     };
-    setBookings(prev => [booking, ...prev]);
+    const notice: AdminNotification = {
+      id: `n${Date.now()}`,
+      kind: 'booking',
+      title: `New booking ${ref}`,
+      message: `${booking.name} requested ${booking.service} for ${booking.date} at ${booking.time}.`,
+      bookingRef: ref,
+      createdAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+      read: false,
+    };
+    setNotifications((prev) => [notice, ...prev]);
+    setBookings((prev) => [booking, ...prev]);
     setSubmitted(true);
   }
 
   const today = new Date().toISOString().split('T')[0];
-  const options = [{ id: ANY_ID, name: 'Best Available', role: 'Auto-assign technician', available: true }, ...technicians];
+  const options = [{ id: ANY_ID, name: t('book.bestAvailable'), role: t('book.autoAssign'), available: true, photoUrl: '' }, ...technicians];
+  const freeTech = findFreeTechnician(technicians, form.date, form.time, bookings);
 
   const waLink = submitted
     ? `https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(
@@ -392,6 +422,53 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
         }Date: ${form.date} · ${form.time}\nName: ${form.name}\nPhone: ${form.phone}`,
       )}`
     : '';
+
+  function handleCopyRef() {
+    if (!navigator.clipboard?.writeText) return;
+    navigator.clipboard
+      .writeText(lastRef)
+      .then(() => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1600);
+      })
+      .catch(() => {});
+  }
+
+  function handlePrint() {
+    const w = window.open('', '_blank');
+    if (!w) return;
+    const rows: Array<[string, string]> = [
+      [t('book.srv'), form.service || '—'],
+      [t('book.loc'), form.location || '—'],
+      ...(form.lat != null && form.lng != null
+        ? [[t('book.mapPin'), `https://www.google.com/maps?q=${form.lat.toFixed(6)},${form.lng.toFixed(6)}`] as [string, string]]
+        : []),
+      [t('book.dateShort'), form.date || '—'],
+      [t('book.timeShort'), form.time || '—'],
+      [t('book.fullName'), form.name || '—'],
+      [t('book.phoneShort'), form.phone || '—'],
+    ];
+    w.document.write(`<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${SITE.name} — ${lastRef}</title>
+<style>
+  body{font-family:Georgia,serif;color:#111;margin:40px 48px;max-width:640px;}
+  .brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#666;}
+  h1{margin:6px 0 2px;font-size:28px;}
+  .ref{margin:14px 0 22px;padding:12px 16px;border:2px solid #111;display:inline-block;font-family:monospace;font-size:15px;}
+  table{width:100%;border-collapse:collapse;margin-top:8px;}
+  td{padding:9px 12px;border-bottom:1px solid #ddd;font-size:14px;vertical-align:top;}
+  td:first-child{color:#666;width:140px;text-transform:uppercase;font-size:11px;letter-spacing:1px;}
+  .foot{margin-top:26px;font-size:11px;color:#888;}
+</style></head><body>
+<p class="brand">${SITE.name}</p>
+<h1>Booking ${lastRef}</h1>
+<p class="ref">${lastRef}</p>
+<table>${rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
+<p class="foot">Keep this confirmation for your records. Questions? Call +${SITE.phone} or WhatsApp +${SITE.whatsappNumber}.</p>
+</body></html>`);
+    w.document.close();
+    w.focus();
+    w.print();
+  }
 
   return (
     <section id="booking" className={`bg-surface border-t border-[rgba(255,255,255,0.05)] ${nested ? 'py-16 sm:py-20 lg:py-24' : 'py-20 sm:py-24 lg:py-40'}`}>
@@ -405,23 +482,31 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Book a Visit
+                {t('book.kicker')}
               </span>
             </div>
             <h2
               className="text-4xl lg:text-5xl font-semibold leading-tight text-ash mb-5 reveal delay-100"
               style={{ fontFamily: 'Fraunces, Georgia, serif' }}
             >
-              Schedule your
-              <span className="block italic font-light text-ember">expert today.</span>
+              {t('book.title')}
+              <span className="block italic font-light text-ember">{t('book.titleEm')}</span>
             </h2>
             <p className="text-[#8f8f8f] text-base leading-relaxed max-w-sm mb-8 reveal delay-200">
-              Pick your preferred technician, service type, and time window. We confirm within 30 minutes.
+              {t('book.sub')}
             </p>
 
             {/* Technician cards */}
             <div className="flex flex-col gap-2 reveal delay-300">
-              {options.map((tech) => (
+              {options.map((tech) => {
+                const slotBusy = tech.id !== ANY_ID && isSlotTaken(tech.id, form.date, form.time, bookings);
+                const disabled = !tech.available || slotBusy;
+                const badge = !tech.available
+                  ? t('book.offDuty')
+                  : slotBusy
+                    ? t('book.busy')
+                    : t('book.available');
+                return (
                 <button
                   key={tech.id}
                   type="button"
@@ -430,8 +515,8 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     form.technician === tech.id
                       ? 'border-ember bg-[rgba(37,99,235,0.08)]'
                       : 'border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.14)] bg-surface-2 hover:bg-surface-3'
-                  } ${!tech.available ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                  disabled={!tech.available}
+                  } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                  disabled={disabled}
                 >
                   {/* Avatar */}
                   {tech.photoUrl ? (
@@ -467,16 +552,19 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                   </div>
                   <span
                     className={`text-[0.55rem] tracking-[0.14em] uppercase px-2 py-1 rounded-[1px] ${
-                      tech.available
-                        ? 'text-emerald-400 bg-emerald-900/20 border border-emerald-900/40'
-                        : 'text-[#4a4a4a] bg-surface-3'
+                      !tech.available
+                        ? 'text-[#4a4a4a] bg-surface-3'
+                        : slotBusy
+                          ? 'text-yellow-400/90 bg-yellow-400/10 border border-yellow-400/20'
+                          : 'text-emerald-400 bg-emerald-900/20 border border-emerald-900/40'
                     }`}
                     style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                   >
-                    {tech.available ? 'Available' : 'Booked'}
+                    {badge}
                   </span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -491,40 +579,39 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                 </div>
                 <div>
                   <h3 className="text-2xl font-semibold text-ash mb-3" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                    Booking received.
+                    {t('book.submittedTitle')}
                   </h3>
                   <p className="text-[#8f8f8f] text-sm leading-relaxed max-w-xs">
-                    We'll confirm your appointment with <span className="text-ash">{form.name || 'you'}</span> via SMS to{' '}
-                    <span className="text-ash">{form.phone || 'your number'}</span> within 30 minutes.
+                    {t('book.submittedBody', { name: form.name || 'you', phone: form.phone || 'your number' })}
                   </p>
                 </div>
                 <div className="border border-ember/30 bg-ember/5 rounded-[2px] px-5 py-4 w-full max-w-sm flex items-center justify-between gap-4">
                   <div>
                     <p className="text-[0.55rem] tracking-[0.16em] uppercase text-[#8a8a8a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                      Your booking reference
+                      {t('book.refLabel')}
                     </p>
                     <p className="text-2xl font-semibold text-ember mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                       {lastRef}
                     </p>
                   </div>
                   <p className="text-[0.62rem] text-[#6a6a6a] max-w-[120px] leading-snug text-right">
-                    Keep this to track your booking in the Track tab.
+                    {t('book.refHint')}
                   </p>
                 </div>
                 <div className="border border-[rgba(255,255,255,0.06)] rounded-[2px] p-6 w-full max-w-sm">
                   <dl className="flex flex-col gap-3">
 {[
-                        { label: 'Service', value: form.service || '—' },
-                        { label: 'Location', value: form.location || '—' },
+                        { label: t('book.srv'), value: form.service || '—' },
+                        { label: t('book.loc'), value: form.location || '—' },
                         {
-                          label: 'Map Pin',
+                          label: t('book.mapPin'),
                           value:
                             form.lat != null && form.lng != null
                               ? `(${form.lat.toFixed(5)}, ${form.lng.toFixed(5)})`
                               : '—',
                         },
-                        { label: 'Date', value: form.date || '—' },
-                        { label: 'Time', value: form.time || '—' },
+                        { label: t('book.dateShort'), value: form.date || '—' },
+                        { label: t('book.timeShort'), value: form.time || '—' },
                       ].map((row) => (
                       <div key={row.label} className="flex gap-4 items-baseline">
                         <dt
@@ -548,21 +635,27 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
                       <path d="M8 1.5A6.5 6.5 0 001.5 8c0 1.2.32 2.3.88 3.3L1.5 14.5l3.3-.84A6.47 6.47 0 008 14.5 6.5 6.5 0 108 1.5zm3.06 9.2c-.13.36-.75.7-1.04.72-.29.03-.62.19-2.08-.43-1.89-.8-3.1-2.87-3.2-3-.08-.14-.75-1-.75-1.9 0-.9.48-1.35.64-1.53.16-.18.36-.22.48-.22h.35c.11 0 .26-.04.4.3l.55 1.35c.04.1.07.2 0 .32-.06.13-.1.2-.2.32l-.3.35c-.1.1-.2.2-.09.39.11.2.5.82 1.07 1.33.73.66 1.35.87 1.54.97.2.09.31.08.42-.05l.66-.76c.13-.16.26-.13.43-.08l1.36.64c.2.1.33.15.38.23.05.1.05.5-.08.86z" fill="#22c55e" stroke="#22c55e" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    Send booking via WhatsApp
+                    {t('book.sendWhatsApp')}
                   </a>
+                  <button type="button" onClick={handlePrint} className="btn-ghost px-6 py-3 rounded-[2px] inline-flex items-center justify-center">
+                    {t('book.print')}
+                  </button>
+                  <button type="button" onClick={handleCopyRef} className="btn-ghost px-6 py-3 rounded-[2px] inline-flex items-center justify-center">
+                    {copied ? t('book.copied') : t('book.copyRef')}
+                  </button>
                 </div>
                 <a
                   href="#/track"
                   onClick={onTrack ? (e) => { e.preventDefault(); onTrack(); } : undefined}
                   className="text-xs text-[#6a6a6a] hover:text-ember transition-colors duration-200 mt-1 underline underline-offset-4 decoration-[rgba(255,255,255,0.15)]"
                 >
-                  Track {lastRef}'s status & updates →
+                  {t('book.trackLink', { ref: lastRef })} →
                 </a>
                 <button
                   onClick={() => { setSubmitted(false); setForm(defaultForm); setStep(1); setErrors({}); }}
                   className="btn-ghost px-6 py-3 rounded-[2px]"
                 >
-                  Book Another
+                  {t('book.bookAnother')}
                 </button>
               </div>
             ) : (
@@ -615,7 +708,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     className="text-[0.6rem] tracking-[0.14em] uppercase text-[#4a4a4a] mt-3"
                     style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                   >
-                    Step {step} of {PROCESS.length} · {STEP_COPY[step]}
+                    {t('book.stepOf', { step, total: PROCESS.length, title: t(`book.step${step}Title`) })}
                   </p>
                 </div>
 
@@ -624,7 +717,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     {/* Service type */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                        Service Type *
+                        {t('book.service')}
                       </label>
                       <select
                         name="service"
@@ -634,7 +727,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         aria-invalid={!!errors.service}
                         className={`field ${errors.service ? '!border-red-500/70' : ''}`}
                       >
-                        <option value="">Select a service</option>
+                        <option value="">{t('book.servicePlaceholder')}</option>
                         {serviceTypes.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                       {errors.service && <p className="text-[0.65rem] text-red-400 mt-1">{errors.service}</p>}
@@ -643,7 +736,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     {/* Location */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                        Address / Landmark
+                        {t('book.address')}
                       </label>
                       <div className="relative">
                         <input
@@ -653,19 +746,19 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                           onChange={(e) => handleLocationInput(e.target.value)}
                           onBlur={() => setShowSug(false)}
                           autoComplete="off"
-                          placeholder="Search your area or a nearby business — e.g. Gasabo, Nyarutarama, Kigali Marriott…"
+                          placeholder={t('book.addressPlaceholder')}
                           className={`field ${errors.location ? '!border-red-500/70' : ''}`}
                         />
                         {showSug && (
                           <div className="absolute inset-x-0 top-full mt-1.5 z-40 rounded-[2px] border border-[rgba(255,255,255,0.1)] bg-[#121212] shadow-[0_18px_40px_rgba(0,0,0,0.55)] overflow-hidden max-h-64 overflow-y-auto">
                             {sugLoading && (
                               <p className="px-4 py-2.5 text-[0.7rem] text-[#6a6a6a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                                Searching Rwanda…
+                                {t('book.searching')}
                               </p>
                             )}
                             {!sugLoading && suggestions.length === 0 && (
                               <p className="px-4 py-2.5 text-[0.7rem] text-[#6a6a6a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                                No matches in Rwanda — try another name.
+                                {t('book.noMatches')}
                               </p>
                             )}
                             {suggestions.map((s, i) => (
@@ -690,11 +783,11 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                          Precise Location
+                          {t('book.precise')}
                         </span>
                         {form.lat != null && form.lng != null && (
                           <span className="inline-flex items-center gap-1.5 text-[0.6rem] tracking-[0.12em] uppercase text-emerald-400 bg-emerald-900/20 border border-emerald-900/40 px-2 py-1 rounded-[1px]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                            <MapPin size={11} /> Pinned
+                            <MapPin size={11} /> {t('book.pinned')}
                           </span>
                         )}
                       </div>
@@ -708,20 +801,20 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                       >
                         <span className="flex items-center gap-2.5 text-[0.8rem] text-ash">
                           <MapPin size={15} className="text-ember" />
-                          {mapOpen ? 'Hide location map' : 'Show location map'}
+                          {mapOpen ? t('book.hideMap') : t('book.showMap')}
                         </span>
                         <span className="text-[0.6rem] tracking-[0.12em] uppercase text-[#7a7a7a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                          Rwanda only
+                          {t('book.rwOnly')}
                         </span>
                       </button>
 
                       {mapOpen && (
                         <div id="location-map-panel" className="rounded-[2px] overflow-hidden border border-[rgba(255,255,255,0.1)]">
-                          <MapBoundary>
+                          <MapBoundary t={t}>
                             <Suspense
                               fallback={
                                 <div className="h-80 w-full flex items-center justify-center text-[0.7rem] tracking-[0.16em] uppercase text-[#5a5a5a] animate-pulse bg-[#0e0e0e]">
-                                  Loading Rwanda map…
+                                  {t('book.mapLoading')}
                                 </div>
                               }
                             >
@@ -754,7 +847,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                             className="shrink-0 text-[0.6rem] tracking-[0.12em] uppercase text-[#8a8a8a] hover:text-red-400 transition-colors duration-200"
                             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                           >
-                            Remove pin
+                            {t('book.removePin')}
                           </button>
                         </div>
                       )}
@@ -763,7 +856,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     {/* Date */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                        Preferred Date *
+                        {t('book.date')}
                       </label>
                       <input
                         type="date"
@@ -782,7 +875,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     {/* Time */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                        Preferred Time Window *
+                        {t('book.time')}
                       </label>
                       <select
                         name="time"
@@ -792,22 +885,31 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         aria-invalid={!!errors.time}
                         className={`field ${errors.time ? '!border-red-500/70' : ''}`}
                       >
-                        <option value="">Select a time slot</option>
-                        {timeSlots.map((t) => <option key={t} value={t}>{t}</option>)}
+                        <option value="">{t('book.timePlaceholder')}</option>
+                        {timeSlots.map((t2) => <option key={t2} value={t2}>{t2}</option>)}
                       </select>
                       {errors.time && <p className="text-[0.65rem] text-red-400 mt-1">{errors.time}</p>}
+                      {form.date && form.time && form.technician === ANY_ID && (
+                        <p className="text-[0.65rem] text-[#8a8a8a] leading-relaxed">
+                          {freeTech ? (
+                            <span className="text-emerald-400/90">✓ {t('book.autoAssignHint', { name: freeTech.name, role: freeTech.role })}</span>
+                          ) : (
+                            <span className="text-yellow-400/90">⚠ {t('book.slotFull')}</span>
+                          )}
+                        </p>
+                      )}
                     </div>
 
                     {/* Notes */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                        Additional Notes
+                        {t('book.notes')}
                       </label>
                       <textarea
                         name="notes"
                         value={form.notes}
                         onChange={handleChange}
-                        placeholder="Describe the issue or scope of work…"
+                        placeholder={t('book.notesPlaceholder')}
                         rows={3}
                         className="field resize-none"
                       />
@@ -818,7 +920,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                       onClick={handleContinue}
                       className="btn-ember py-4 px-6 rounded-[2px] mt-2"
                     >
-                      Continue to Contact →
+                      {t('book.continue')}
                     </button>
                   </>
                 )}
@@ -827,7 +929,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                   <>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                        Full Name *
+                        {t('book.name')}
                       </label>
                       <input
                         type="text"
@@ -837,7 +939,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         required
                         aria-invalid={!!errors.name}
                         autoComplete="name"
-                        placeholder="Your full name"
+                        placeholder={t('book.namePlaceholder')}
                         className={`field ${errors.name ? '!border-red-500/70' : ''}`}
                       />
                       {errors.name && <p className="text-[0.65rem] text-red-400 mt-1">{errors.name}</p>}
@@ -845,20 +947,34 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                        Phone Number *
+                        {t('book.phone')}
                       </label>
                       <input
                         type="tel"
                         name="phone"
                         value={form.phone}
                         onChange={handleChange}
+                        onBlur={() => {
+                          if (isValidRwMobile(form.phone)) {
+                            setForm((prev) => ({ ...prev, phone: formatRwMobile(form.phone) }));
+                          }
+                        }}
                         required
                         aria-invalid={!!errors.phone}
                         autoComplete="tel"
-                        placeholder="+250 788 000 000"
+                        placeholder={t('book.phonePlaceholder')}
                         className={`field ${errors.phone ? '!border-red-500/70' : ''}`}
                       />
                       {errors.phone && <p className="text-[0.65rem] text-red-400 mt-1">{errors.phone}</p>}
+                      {form.phone && (
+                        isValidRwMobile(form.phone) ? (
+                          <p className="text-[0.65rem] text-emerald-400/90 mt-1">
+                            ✓ {formatRwMobile(form.phone)} — {t('book.phoneHint')}
+                          </p>
+                        ) : (
+                          <p className="text-[0.65rem] text-yellow-400/80 mt-1">{t('book.errPhoneInvalid')}</p>
+                        )
+                      )}
                     </div>
 
                     <div className="flex gap-3 mt-2">
@@ -867,14 +983,14 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         onClick={() => { setStep(1); setErrors({}); }}
                         className="btn-ghost flex-1 py-4 rounded-[2px]"
                       >
-                        ← Back
+                        {t('book.back')}
                       </button>
                       <button
                         type="button"
                         onClick={handleContinueContact}
                         className="btn-ember flex-[2] py-4 rounded-[2px]"
                       >
-                        Review Booking →
+                        {t('book.review')}
                       </button>
                     </div>
                   </>
@@ -888,22 +1004,22 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         className="text-[0.6rem] tracking-[0.14em] uppercase text-[#4a4a4a] mb-1"
                         style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                       >
-                        Booking Summary
+                        {t('book.summary')}
                       </p>
                       {[
-                        { label: 'Service', value: form.service },
-                        { label: 'Location', value: form.location },
+                        { label: t('book.srv'), value: form.service },
+                        { label: t('book.loc'), value: form.location },
                         {
-                          label: 'Map Pin',
+                          label: t('book.mapPin'),
                           value:
                             form.lat != null && form.lng != null
                               ? form.place || `${form.lat.toFixed(5)}, ${form.lng.toFixed(5)}`
                               : '',
                         },
-                        { label: 'Date & Time', value: form.date && form.time ? `${form.date} · ${form.time}` : '' },
-                        { label: 'Name', value: form.name },
-                        { label: 'Phone', value: form.phone },
-                        { label: 'Technician', value: options.find(t => t.id === form.technician)?.name || 'Not selected' },
+                        { label: t('book.sched'), value: form.date && form.time ? `${form.date} · ${form.time}` : '' },
+                        { label: t('book.fullName'), value: form.name },
+                        { label: t('book.phoneShort'), value: form.phone },
+                        { label: t('book.technician'), value: options.find(x => x.id === form.technician)?.name || t('book.notSelected') },
                       ].map((row) => row.value ? (
                         <div key={row.label} className="flex gap-4 items-baseline">
                           <dt
@@ -918,7 +1034,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     </div>
 
                     <p className="text-[0.7rem] text-[#5a5a5a] leading-relaxed" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                      We confirm within 30 minutes. You can also share this booking via WhatsApp after confirming.
+                      {t('book.confirmNote')}
                     </p>
 
                     <div className="flex gap-3 mt-2">
@@ -927,13 +1043,13 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         onClick={() => { setStep(2); setErrors({}); }}
                         className="btn-ghost flex-1 py-4 rounded-[2px]"
                       >
-                        ← Back
+                        {t('book.back')}
                       </button>
                       <button
                         type="submit"
                         className="btn-ember flex-[2] py-4 rounded-[2px]"
                       >
-                        Confirm Booking
+                        {t('book.confirm')}
                       </button>
                     </div>
                   </>

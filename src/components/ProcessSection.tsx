@@ -1,27 +1,30 @@
-const process = [
-  {
-    step: '01',
-    title: 'Site Survey',
-    desc: 'Our engineers conduct a full RF and structural survey before a single cable is pulled.',
-  },
-  {
-    step: '02',
-    title: 'System Design',
-    desc: 'A custom blueprint detailing camera placement, cable routes, and network topology.',
-  },
-  {
-    step: '03',
-    title: 'Installation',
-    desc: 'Certified technicians execute with minimal disruption to your operations.',
-  },
-  {
-    step: '04',
-    title: 'Commission & Handover',
-    desc: 'Full system test, client training, and documentation before sign-off.',
-  },
-];
+import { useI18n } from '../i18n';
 
 export default function ProcessSection() {
+  const { t } = useI18n();
+  const process = [
+    {
+      step: '01',
+      title: t('pro.0t'),
+      desc: t('pro.0d'),
+    },
+    {
+      step: '02',
+      title: t('pro.1t'),
+      desc: t('pro.1d'),
+    },
+    {
+      step: '03',
+      title: t('pro.2t'),
+      desc: t('pro.2d'),
+    },
+    {
+      step: '04',
+      title: t('pro.3t'),
+      desc: t('pro.3d'),
+    },
+  ];
+
   return (
     <section id="process" className="bg-obsidian py-20 sm:py-24 lg:py-40">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -34,18 +37,18 @@ export default function ProcessSection() {
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Our Process
+                {t('pro.kicker')}
               </span>
             </div>
             <h2
               className="text-4xl lg:text-5xl font-semibold leading-tight text-ash reveal delay-100"
               style={{ fontFamily: 'Fraunces, Georgia, serif' }}
             >
-              How every
-              <span className="block italic font-light text-ember">project runs.</span>
+              {t('pro.h1')}
+              <span className="block italic font-light text-ember">{t('pro.hEm')}</span>
             </h2>
             <p className="text-[#8f8f8f] text-base leading-relaxed mt-8 max-w-sm reveal delay-200">
-              A repeatable four-phase method refined over 10 years of field deployments across Kigali, Musanze, Huye, and Rubavu — from a single camera to a 400-point installation.
+              {t('pro.body')}
             </p>
 
             {/* Image */}

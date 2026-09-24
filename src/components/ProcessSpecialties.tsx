@@ -1,29 +1,31 @@
 import { ClipboardCheck, DraftingCompass, Wrench, BadgeCheck } from 'lucide-react';
-
-const extras = [
-  {
-    icon: ClipboardCheck,
-    title: 'What We Bring Home',
-    text: 'Every survey produces a written report you keep — camera coverage maps, cable routes, load calculations and the exact bill of materials.',
-  },
-  {
-    icon: DraftingCompass,
-    title: 'Design Tools',
-    text: 'We model sites in CAD before touching a wall, so camera angles, dead zones and cable paths are proven on screen first.',
-  },
-  {
-    icon: Wrench,
-    title: 'Tooling & Test Gear',
-    text: 'Fluke network certifiers, fusion splicers, thermal imagers and spectrum analysers travel to every job — no guessing, ever.',
-  },
-  {
-    icon: BadgeCheck,
-    title: 'Sign-Off Standard',
-    text: 'A commission test sheet is attached to every project file. Clients sign it only after every channel, door and circuit is verified.',
-  },
-];
+import { useI18n } from '../i18n';
 
 export default function ProcessSpecialties() {
+  const { t } = useI18n();
+  const extras = [
+    {
+      icon: ClipboardCheck,
+      title: t('ps.0t'),
+      text: t('ps.0d'),
+    },
+    {
+      icon: DraftingCompass,
+      title: t('ps.1t'),
+      text: t('ps.1d'),
+    },
+    {
+      icon: Wrench,
+      title: t('ps.2t'),
+      text: t('ps.2d'),
+    },
+    {
+      icon: BadgeCheck,
+      title: t('ps.3t'),
+      text: t('ps.3d'),
+    },
+  ];
+
   return (
     <section className="relative bg-surface py-20 sm:py-24 lg:py-32 border-y border-[rgba(255,255,255,0.05)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -33,7 +35,7 @@ export default function ProcessSpecialties() {
             className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
-            Not Just a Process — Proof Behind It
+            {t('ps.kicker')}
           </span>
         </div>
 

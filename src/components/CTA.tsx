@@ -1,4 +1,7 @@
+import { useI18n } from '../i18n';
+
 export default function CTA() {
+  const { t } = useI18n();
   return (
     <section className="relative bg-surface overflow-hidden py-20 sm:py-24 lg:py-40 border-t border-[rgba(255,255,255,0.05)]">
       {/* Background image with strong overlay */}
@@ -26,34 +29,29 @@ export default function CTA() {
                 className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                Get Started Today
+                {t('cta.kicker')}
               </span>
             </div>
             <h2
               className="text-4xl lg:text-6xl font-semibold leading-[0.95] text-ash reveal delay-100"
               style={{ fontFamily: 'Fraunces, Georgia, serif' }}
             >
-              Your systems
+              {t('cta.h1')}
               <br />
-              deserve the
-              <span className="block italic font-light text-ember mt-1">best hands.</span>
+              {t('cta.h2')}
+              <span className="block italic font-light text-ember mt-1">{t('cta.hEm')}</span>
             </h2>
           </div>
 
           {/* Right */}
           <div className="flex flex-col gap-8 reveal delay-200">
             <p className="text-[#979797] text-base leading-relaxed">
-              Whether it's a single camera or a city-wide surveillance network across Kigali, Musanze, or Rubavu — we bring the same precision, the same certifications, and the same guarantee.
+              {t('cta.body')}
             </p>
 
             {/* Feature list */}
             <ul className="flex flex-col gap-4">
-              {[
-                'Free site survey for installations over RWF 500,000',
-                'All work guaranteed for 24 months',
-                'Emergency response within 90 minutes in Greater Kigali',
-                'Fully certified and RURA-compliant engineers',
-              ].map((item) => (
+              {[t('cta.feat1'), t('cta.feat2'), t('cta.feat3'), t('cta.feat4')].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-ember shrink-0" />
                   <span className="text-sm text-[#8a8a8a] leading-snug">{item}</span>
@@ -63,10 +61,10 @@ export default function CTA() {
 
             <div className="flex flex-wrap gap-4 pt-2">
               <a href="#/booking" className="btn-ember px-8 py-4 rounded-[2px]">
-                Book a Technician
+                {t('cta.book')}
               </a>
               <a href="tel:+250788123456" className="btn-ghost px-8 py-4 rounded-[2px]">
-                Call Us Now
+                {t('cta.call')}
               </a>
             </div>
           </div>
@@ -75,10 +73,9 @@ export default function CTA() {
         {/* Bottom metrics strip */}
         <div className="mt-20 pt-10 border-t border-[rgba(255,255,255,0.05)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 reveal delay-300">
           {[
-            // { value: 'RWF 2B+', label: 'Equipment Secured' },
-            { value: '50+', label: 'Satisfied clients' },
-            { value: '0', label: 'Security Breaches on Our Systems' },
-            { value: '10yr', label: 'Combined Engineering Experience' },
+            { value: '50+', label: t('cta.statClients') },
+            { value: '0', label: t('cta.statBreaches') },
+            { value: '10yr', label: t('cta.statExperience') },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col gap-2">
               <span

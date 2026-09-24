@@ -1,15 +1,19 @@
+import { useI18n } from '../i18n';
+
 const clients = [
-  { name: 'Bank of Kigali', sector: 'Financial Services', since: '2012' },
-  { name: 'MTN Rwanda', sector: 'Telecommunications', since: '2015' },
-  { name: 'Rwanda Development Board', sector: 'Public Sector', since: '2010' },
-  { name: 'BPR Bank Rwanda', sector: 'Banking', since: '2018' },
-  { name: 'Kigali Convention Centre', sector: 'Hospitality', since: '2016' },
-  { name: 'Rwanda Revenue Authority', sector: 'Government', since: '2011' },
-  { name: 'Airtel Rwanda', sector: 'Telecommunications', since: '2019' },
-  { name: 'Irembo Ltd', sector: 'E-Government', since: '2014' },
+  { name: 'Bank of Kigali', since: '2012' },
+  { name: 'MTN Rwanda', since: '2015' },
+  { name: 'Rwanda Development Board', since: '2010' },
+  { name: 'BPR Bank Rwanda', since: '2018' },
+  { name: 'Kigali Convention Centre', since: '2016' },
+  { name: 'Rwanda Revenue Authority', since: '2011' },
+  { name: 'Airtel Rwanda', since: '2019' },
+  { name: 'Irembo Ltd', since: '2014' },
 ];
 
 export default function ClientsSection() {
+  const { t } = useI18n();
+
   return (
     <section id="clients" className="bg-surface py-20 sm:py-24 lg:py-32 border-y border-[rgba(255,255,255,0.05)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -19,7 +23,7 @@ export default function ClientsSection() {
             className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
-            Trusted By
+            {t('cl.kicker')}
           </span>
         </div>
 
@@ -53,7 +57,7 @@ export default function ClientsSection() {
                   className="text-[0.65rem] tracking-wide text-[#5a5a5a] mt-1"
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
-                  {client.sector}
+                  {t(`cl.sec${i}`)}
                 </p>
               </div>
             </div>
