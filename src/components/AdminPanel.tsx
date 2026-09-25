@@ -115,7 +115,7 @@ function InboxPanel({
   return (
     <div className="fixed inset-0 z-50" onClick={onClose}>
       <div
-        className="absolute top-[60px] right-2 sm:right-6 w-[min(94vw,380px)] max-h-[70vh] overflow-y-auto bg-[#101010] border border-[rgba(255,255,255,0.08)] rounded-[2px] shadow-2xl"
+        className="absolute top-[60px] right-2 sm:right-6 w-[min(94vw,380px)] max-h-[480px] overflow-y-auto bg-[#101010] border border-[rgba(255,255,255,0.08)] rounded-[2px] shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[rgba(255,255,255,0.06)] sticky top-0 bg-[#101010]">

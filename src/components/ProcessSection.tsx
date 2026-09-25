@@ -54,7 +54,7 @@ export default function ProcessSection() {
             {/* Image */}
             <div className="mt-12 relative h-64 rounded-[2px] overflow-hidden bg-surface reveal delay-300">
               <img
-                src="/images/jeanluc technician.jpeg"
+                src="/images/jeanluc-technician.jpeg"
                 alt="Technician reviewing installation plans"
                 loading="lazy"
                 decoding="async"

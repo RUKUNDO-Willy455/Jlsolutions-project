@@ -70,15 +70,6 @@ function Shell() {
   useSeo(path);
 
   useEffect(() => {
-    const boot = document.getElementById('boot-splash');
-    if (boot) {
-      boot.classList.add('is-hidden');
-      const rem = window.setTimeout(() => boot.remove(), 700);
-      return () => window.clearTimeout(rem);
-    }
-  }, []);
-
-  useEffect(() => {
     const t = window.setTimeout(() => setLoading(false), 2600);
     return () => window.clearTimeout(t);
   }, []);

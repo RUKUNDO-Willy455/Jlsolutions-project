@@ -676,10 +676,16 @@ const en: Record<string, string> = {
   'gal.body':
     'A look inside recent installations across Kigali — from camera networks to full smart builds. Click any photo to view it full-screen.',
   'gal.open': 'Open photo: {label}',
-  'gal.lightbox': 'Photo lightbox',
+  'gal.play': 'Play video: {label}',
+  'gal.vidKicker': 'Field Videos',
+  'gal.vidH1': 'See us',
+  'gal.vidEm': 'work.',
+  'gal.vidBody':
+    'Short clips of the Jean Luc Solutions team installing, wiring and commissioning real projects — take a look inside the work.',
+  'gal.lightbox': 'Media lightbox',
   'gal.close': 'Close gallery',
-  'gal.prev': 'Previous photo',
-  'gal.next': 'Next photo',
+  'gal.prev': 'Previous item',
+  'gal.next': 'Next item',
 
   // Floating actions
   'fa.call': 'Call us now',
@@ -1319,10 +1325,16 @@ const fr: typeof en = {
   'gal.body':
     'Un aperçu des installations récentes à travers Kigali — des réseaux de caméras aux installations intelligentes complètes. Cliquez sur une photo pour l\'afficher en plein écran.',
   'gal.open': 'Ouvrir la photo : {label}',
-  'gal.lightbox': 'Visionneuse de photos',
+  'gal.play': 'Lire la vidéo : {label}',
+  'gal.vidKicker': 'Vidéos terrain',
+  'gal.vidH1': 'Voyez-nous',
+  'gal.vidEm': 'au travail.',
+  'gal.vidBody':
+    'De courts extraits de l\'équipe Jean Luc Solutions qui installe, câble et met en service de vrais projets — un aperçu du métier.',
+  'gal.lightbox': 'Visionneuse de médias',
   'gal.close': 'Fermer la galerie',
-  'gal.prev': 'Photo précédente',
-  'gal.next': 'Photo suivante',
+  'gal.prev': 'Élément précédent',
+  'gal.next': 'Élément suivant',
 
   'fa.call': 'Appelez-nous maintenant',
   'fa.callAria': 'Appeler {name}',
@@ -1958,10 +1970,16 @@ const rw: typeof en = {
   'gal.body':
     'Reba mu mirimo ya vuba i Kigali — kuva kuri network z\'amakamera kugeza ku bikorwa by\'ubwenge byuzuye. Kanda foto yose kugira ngo uyirebe yuzuye.',
   'gal.open': 'Fungura foto: {label}',
-  'gal.lightbox': 'Aho kurebaho amafoto',
+  'gal.play': 'Kina videwo: {label}',
+  'gal.vidKicker': 'Videwo z\'imurimo',
+  'gal.vidH1': 'Durebe',
+  'gal.vidEm': 'tukora.',
+  'gal.vidBody':
+    'Amashusho magufi y\'itsinda rya Jean Luc Solutions rikora imirimo nyayo — reba ko dufata akazi.',
+  'gal.lightbox': 'Aho kurebaho amafoto na videwo',
   'gal.close': 'Funga amafoto',
-  'gal.prev': 'Foto ibanzirije',
-  'gal.next': 'Foto ikurikira',
+  'gal.prev': 'Ikibanza kiki cyabanjirije',
+  'gal.next': 'Ikibanza gikurikira',
 
   'fa.call': 'Twahamagare nonaha',
   'fa.callAria': 'Hamagara {name}',

@@ -42,7 +42,7 @@ function RateUsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={onClose}>
       <div
-        className="w-full max-w-md bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-[2px] p-8 max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-[2px] p-8 max-h-[620px] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {submitted ? (
