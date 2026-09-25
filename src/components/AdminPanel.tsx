@@ -4,6 +4,7 @@ import adminBg1 from '../assets/admin-bg-1.jpg';
 import jlCeo from '../assets/jl-ceo.png';
 import {
   useEditorStore,
+  authAdmin,
   STORAGE_KEYS,
   seedFounder,
   seedTechnicians,
@@ -14,10 +15,6 @@ import {
 } from '../data/editor';
 import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial, AdminNotification } from '../data/editor';
 import { AvatarUpload } from './AvatarUpload';
-
-// â”€â”€â”€ Auth credentials (frontend demo â€” replace with real auth in production) â”€â”€
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'jeanluc@2024';
 
 function AdminBackground() {
   return (
@@ -183,14 +180,17 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
     e.preventDefault();
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    const started = Date.now();
+    void authAdmin(user.trim(), pass).then(async ok => {
+      const elapsed = Date.now() - started;
+      if (elapsed < 700) await new Promise(r => setTimeout(r, 700 - elapsed));
+      if (ok) {
         onLogin();
       } else {
         setError('Invalid username or password.');
         setLoading(false);
       }
-    }, 700);
+    });
   }
 
   return (
@@ -685,12 +685,14 @@ function TechniciansTab({ technicians, setTechnicians }: { technicians: Technici
                   <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{t.phone}{t.email ? ` Â· ${t.email}` : ''}</p>
                   <p className="text-[0.62rem] text-[#4a4a4a] mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                     Login: <span className="text-ember">{t.username || 'â€”'}</span>
-                    {t.password && (
+                    {t.password ? (
                       <> Â· Pw: <span className="text-ember">{showPass ? t.password : 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢'}</span>
                         <button onClick={() => setShowPass(s => !s)} className="ml-2 text-[#3a3a3a] hover:text-white transition-colors duration-150">
                           {showPass ? 'hide' : 'show'}
                         </button>
                       </>
+                    ) : (
+                      <> Â· <span className="text-[#2a2a2a]">password protected</span></>
                     )}
                   </p>
                 </div>

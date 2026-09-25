@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,6 +119,20 @@ export const STORAGE_KEYS = {
   notifications: 'jl.editor.notifications',
 };
 
+/**
+ * Maps a storage key (collection) to its REST endpoint. The dev server proxies
+ * `/api/*` to the SQLite backend (`server/`); in production the API server
+ * serves the built app and the same routes.
+ */
+const API_ENDPOINT: Record<string, string> = {
+  [STORAGE_KEYS.founder]: '/api/founder',
+  [STORAGE_KEYS.technicians]: '/api/technicians',
+  [STORAGE_KEYS.profileRequests]: '/api/profile-requests',
+  [STORAGE_KEYS.bookings]: '/api/bookings',
+  [STORAGE_KEYS.testimonials]: '/api/testimonials',
+  [STORAGE_KEYS.ratings]: '/api/ratings',
+};
+
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
 export const seedTechnicians: Technician[] = [
@@ -187,11 +201,76 @@ function load<T>(key: string, fallback: T): T {
   return fallback;
 }
 
-function persist(key: string, value: unknown) {
+function persistLocal(key: string, value: unknown) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
     /* storage full or unavailable */
+  }
+}
+
+async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+  });
+  const data = (await res.json()) as T & { error?: string };
+  if (!res.ok) {
+    const err = new Error(data?.error ?? `Request to ${url} failed (${res.status})`) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+async function fetchCollection<T>(key: string): Promise<T | null> {
+  const endpoint = API_ENDPOINT[key];
+  if (!endpoint) return null;
+  return apiJson<T>(endpoint);
+}
+
+async function pushCollection<T>(key: string, value: T): Promise<void> {
+  const endpoint = API_ENDPOINT[key];
+  if (!endpoint) return;
+  await apiJson(endpoint, { method: 'PUT', body: JSON.stringify(value) });
+}
+
+/** Authenticates the admin against the backend. Falls back to the legacy
+ *  client-side check only when the API is unreachable (offline dev mode),
+ *  never on an HTTP 401 (invalid credentials). */
+export async function authAdmin(username: string, password: string): Promise<boolean> {
+  try {
+    const r = await apiJson<{ ok: boolean }>('/api/auth/admin', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    });
+    return r.ok;
+  } catch (err) {
+    if ((err as Error & { status?: number }).status !== undefined) return false;
+    return username === 'admin' && password === 'jeanluc@2024';
+  }
+}
+
+/** Authenticates a technician against the backend (passwords are hashed in
+ *  the DB). Falls back to a local check only when the API is unreachable. */
+export async function authTechnician(
+  username: string,
+  password: string,
+  fallbackTechs: Technician[],
+): Promise<Technician | null> {
+  try {
+    const r = await apiJson<{ ok: boolean; technician?: Technician }>('/api/auth/technician', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    });
+    return r.ok ? (r.technician ?? null) : null;
+  } catch (err) {
+    if ((err as Error & { status?: number }).status !== undefined) return null;
+    return (
+      fallbackTechs.find(
+        t => t.username.trim().toLowerCase() === username.trim().toLowerCase() && t.password === password,
+      ) ?? null
+    );
   }
 }
 
@@ -205,16 +284,46 @@ export function readEditorStore<T>(key: string, fallback: T): T {
 }
 
 /**
- * React state synced to localStorage. Every component that mounts with the same
- * key reads the latest saved value, so edits made in the Admin Console are
- * reflected on the public site, and technician availability stays in sync with
- * the booking form.
+ * React state that mirrors a database collection through the API while keeping
+ * localStorage as an instant-read cache (offline fallback when the API is down).
+ *
+ * - **Read:** rendered immediately from localStorage for paint speed, then
+ *   reconciled with the server's latest value (server is the source of truth).
+ * - **Write:** every change is written to localStorage (cache) and synced to
+ *   the backend (debounced PUT) — components keep using the same setter API as
+ *   before, so the booking form, admin console and tech portal need no changes.
  */
 export function useEditorStore<T>(key: string, seed: T): [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => load(key, seed));
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    persist(key, value);
+    let cancelled = false;
+    fetchCollection<T>(key)
+      .then(data => {
+        if (cancelled || data == null) return;
+        initializedRef.current = true;
+        setValue(data);
+        persistLocal(key, data);
+      })
+      .catch(() => {
+        // API unreachable → keep the localStorage copy (offline mode).
+        initializedRef.current = true;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [key]);
+
+  useEffect(() => {
+    if (!initializedRef.current) return;
+    const timer = window.setTimeout(() => {
+      persistLocal(key, value);
+      pushCollection(key, value).catch(() => {
+        /* offline — the localStorage copy stays authoritative until the API returns */
+      });
+    }, 400);
+    return () => window.clearTimeout(timer);
   }, [key, value]);
 
   return [value, setValue];

@@ -3,6 +3,7 @@ import jeanlucLogo from '../assets/jeanluc-logo.png';
 import adminBg1 from '../assets/admin-bg-1.jpg';
 import {
   useEditorStore,
+  authTechnician,
   STORAGE_KEYS,
   seedTechnicians,
   seedProfileRequests,
@@ -75,17 +76,17 @@ function TechLogin({
     e.preventDefault();
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      const tech = technicians.find(
-        t => t.username.trim().toLowerCase() === user.trim().toLowerCase() && t.password === pass,
-      );
+    const started = Date.now();
+    void authTechnician(user.trim(), pass, technicians).then(async tech => {
+      const elapsed = Date.now() - started;
+      if (elapsed < 700) await new Promise(r => setTimeout(r, 700 - elapsed));
       if (tech) {
         onLogin(tech);
       } else {
         setError('Invalid username or password.');
         setLoading(false);
       }
-    }, 700);
+    });
   }
 
   return (
@@ -485,6 +486,7 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
   const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
   const [notifications, setNotifications] = useEditorStore<AdminNotification[]>(STORAGE_KEYS.notifications, seedNotifications);
   const [techId, setTechId] = useState<string | null>(null);
+  const [signedIn, setSignedIn] = useState<Technician | null>(null);
   const [tab, setTab] = useState<TechTab>('Dashboard');
   const [info, setInfo] = useState('');
 
@@ -495,9 +497,9 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
     }
   }, [info]);
 
-  const tech = technicians.find(t => t.id === techId);
+  const tech = signedIn ?? technicians.find(t => t.id === techId);
 
-  if (!tech) return <TechLogin technicians={technicians} onLogin={t => setTechId(t.id)} onExit={onExit} />;
+  if (!tech) return <TechLogin technicians={technicians} onLogin={t => { setSignedIn(t); setTechId(t.id); }} onExit={onExit} />;
 
   const pendingCount = profileRequests.filter(r => r.technicianId === tech.id && r.status === 'pending').length;
 
@@ -570,7 +572,7 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
             </div>
 
             <button
-              onClick={() => { setTechId(null); setTab('Dashboard'); onExit(); }}
+onClick={() => { setSignedIn(null); setTechId(null); setTab('Dashboard'); onExit(); }}
               title="Log Out"
               className="flex items-center gap-3.5 px-4 py-3 w-full text-left text-red-400/60 hover:text-red-400 hover:bg-red-900/10 transition-all duration-150 whitespace-nowrap"
             >
@@ -585,7 +587,7 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
           {TECH_TABS.map(t => (
             <button key={t} onClick={() => setTab(t)} className={`flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap transition-colors duration-150 ${tab === t ? 'text-ember border-t border-ember' : 'text-[#4a4a4a]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t}</button>
           ))}
-          <button onClick={() => { setTechId(null); setTab('Dashboard'); onExit(); }} className="flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap text-red-400/60" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Log Out</button>
+          <button onClick={() => { setSignedIn(null); setTechId(null); setTab('Dashboard'); onExit(); }} className="flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap text-red-400/60" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>Log Out</button>
         </div>
 
         {/* Content */}
