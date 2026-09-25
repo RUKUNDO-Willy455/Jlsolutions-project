@@ -1322,6 +1322,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
           personaRole={`${founder.title} · JL Solutions`}
           personaAvatar={founder.photoUrl || jlCeo}
           onPersonaClick={() => setTab('Founder')}
+          onHome={onExit}
           onLogout={() => { setAuthed(false); onExit(); }}
         />
 

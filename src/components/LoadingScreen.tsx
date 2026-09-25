@@ -54,7 +54,7 @@ export default function LoadingScreen({ visible }: Props) {
           {[0, 1].map((dup) =>
             SERVICES.map((s) => (
               <span key={`${dup}-${s.slug}`} className="splash__ticker-item">
-                {s.short} <i>✦</i>
+                {t(`psvc.${s.slug}.t`)} <i>✦</i>
               </span>
             )),
           )}

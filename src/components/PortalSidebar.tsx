@@ -16,6 +16,7 @@ interface PortalSidebarProps {
   personaAvatar?: string;
   personaInitials?: string;
   onPersonaClick?: () => void;
+  onHome: () => void;
   onLogout: () => void;
 }
 
@@ -29,6 +30,7 @@ export default function PortalSidebar({
   personaAvatar,
   personaInitials,
   onPersonaClick,
+  onHome,
   onLogout,
 }: PortalSidebarProps) {
   return (
@@ -42,13 +44,14 @@ export default function PortalSidebar({
       >
         {/* Header — logo + home button */}
         <div className="flex items-center gap-2 px-3 py-4 border-b border-[rgba(255,255,255,0.05)] shrink-0">
-          <a
-            href="#/"
+          <button
+            type="button"
+            onClick={onHome}
             title="Back to main site"
             className="group flex items-center justify-center w-8 h-8 rounded-[2px] hover:bg-[rgba(37,99,235,0.08)] transition-all duration-200 shrink-0"
           >
             <i className="bx bx-home text-base text-[#4a4a4a] group-hover:text-ember transition-colors duration-200" />
-          </a>
+          </button>
           <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 flex items-center gap-2 overflow-hidden">
             <img src={jeanlucLogo} alt="" className="h-6 w-auto object-contain shrink-0" />
             <span className="text-[0.6rem] tracking-[0.18em] uppercase text-[#3a3a3a] whitespace-nowrap" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{portalName}</span>

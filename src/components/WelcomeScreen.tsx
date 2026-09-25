@@ -123,6 +123,7 @@ export default function WelcomeScreen({
           personaAvatar={personaAvatar}
           personaInitials={personaInitials}
           onPersonaClick={onPersonaClick}
+          onHome={onExit}
           onLogout={onExit}
         />
 

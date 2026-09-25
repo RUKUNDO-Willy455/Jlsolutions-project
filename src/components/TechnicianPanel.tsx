@@ -576,6 +576,7 @@ const [signedIn, setSignedIn] = useState<Technician | null>(null);
           personaRole={tech.role}
           personaAvatar={tech.photoUrl}
           personaInitials={tech.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+          onHome={onExit}
           onLogout={() => { setSignedIn(null); setTechId(null); setTab('Dashboard'); onExit(); }}
         />
 
