@@ -11,10 +11,11 @@ import {
   seedProfileRequests,
   seedBookings,
   seedTestimonials,
+  seedRatings,
   loadStored,
   saveStored,
 } from '../data/editor';
-import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial } from '../data/editor';
+import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial, Rating } from '../data/editor';
 import { deriveAdminNotifications, markNotificationsSeen, relativeTimeLabel } from '../data/notifications';
 import WelcomeScreen from './WelcomeScreen';
 import PortalSidebar from './PortalSidebar';
@@ -82,10 +83,10 @@ const statusColor: Record<Booking['status'], string> = {
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{children}</p>;
 }
-function Field({ value, onChange, multiline, type = 'text' }: { value: string; onChange: (v: string) => void; multiline?: boolean; type?: string }) {
+function Field({ value, onChange, multiline, type = 'text', readOnly }: { value: string; onChange: (v: string) => void; multiline?: boolean; type?: string; readOnly?: boolean }) {
   return multiline
-    ? <textarea rows={3} value={value} onChange={e => onChange(e.target.value)} className="field text-sm resize-none" />
-    : <input type={type} value={value} onChange={e => onChange(e.target.value)} className="field text-sm" />;
+    ? <textarea rows={3} value={value} readOnly={readOnly} onChange={e => onChange(e.target.value)} className={`field text-sm resize-none ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`} />
+    : <input type={type} value={value} readOnly={readOnly} onChange={e => onChange(e.target.value)} className={`field text-sm ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`} />;
 }
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -345,21 +346,62 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
     const d = phone.replace(/\D/g, '');
     return d.startsWith('250') ? d : d.length === 9 ? `250${d}` : d;
   };
+  function exportCsv() {
+    const headers = ['Ref', 'Client', 'Phone', 'Service', 'Location', 'Map Pin', 'Date', 'Time', 'Technician', 'Status', 'Created', 'Updates'];
+    const rows = bookings.map((b) => [
+      b.id,
+      b.name,
+      b.phone,
+      b.service,
+      b.location,
+      b.lat != null && b.lng != null ? `https://maps.google.com/?q=${b.lat},${b.lng}` : '',
+      b.date,
+      b.time,
+      b.technician,
+      b.status,
+      b.createdAt ?? '',
+      (b.updates ?? []).map((u) => `${u.createdAt ?? ''} [${u.from}] ${u.text}`).join(' | '),
+    ]);
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = [headers, ...rows].map((r) => r.map(esc).join(',')).join('\r\n');
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `jl-bookings-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-xs text-[#5a5a5a]">{bookings.length} bookings total</p>
-        <button
-          onClick={resetBookings}
-          className={`text-[0.58rem] tracking-wide uppercase px-3 py-1.5 rounded-[1px] border transition-colors duration-150 ${
-            confirmReset
-              ? 'text-red-400 bg-red-400/10 border-red-400/40'
-              : 'text-[#5a5a5a] border-[rgba(255,255,255,0.08)] hover:text-red-400 hover:border-red-400/30'
-          }`}
-          style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-        >
-          {confirmReset ? 'Confirm â€” delete ALL bookings' : 'Reset bookings'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportCsv}
+            disabled={bookings.length === 0}
+            className={`text-[0.58rem] tracking-wide uppercase px-3 py-1.5 rounded-[1px] border transition-colors duration-150 inline-flex items-center gap-1.5 ${
+              bookings.length === 0
+                ? 'text-[#3a3a3a] border-[rgba(255,255,255,0.04)] cursor-not-allowed'
+                : 'text-[#5a5a5a] border-[rgba(255,255,255,0.08)] hover:text-ember hover:border-ember/30'
+            }`}
+            style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+          >
+            <i className="bx bx-download text-[0.85rem]" /> Export CSV
+          </button>
+          <button
+            onClick={resetBookings}
+            className={`text-[0.58rem] tracking-wide uppercase px-3 py-1.5 rounded-[1px] border transition-colors duration-150 ${
+              confirmReset
+                ? 'text-red-400 bg-red-400/10 border-red-400/40'
+                : 'text-[#5a5a5a] border-[rgba(255,255,255,0.08)] hover:text-red-400 hover:border-red-400/30'
+            }`}
+            style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+          >
+            {confirmReset ? 'Confirm — delete ALL bookings' : 'Reset bookings'}
+          </button>
+        </div>
       </div>
       {bookings.length === 0 && (
         <p className="text-sm text-[#3a3a3a] text-center py-12">No bookings yet. New bookings from the site will appear here.</p>
@@ -799,12 +841,21 @@ function ServicesTab({ services, setServices }: { services: Service[]; setServic
   );
 }
 
-function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+function StarPicker({ value, onChange, readOnly }: { value: number; onChange: (v: number) => void; readOnly?: boolean }) {
   return (
     <div className="flex items-center gap-1.5">
       {Array.from({ length: 5 }).map((_, i) => {
         const filled = i < value;
-        return (
+        return readOnly ? (
+          <span key={i} className={`p-0.5 -m-0.5 ${filled ? 'text-ember' : 'text-[#3a3a3a] opacity-50'}`}>
+            <svg viewBox="0 0 12 12" fill="none" className="w-4 h-4">
+              <path
+                d="M6 1l1.24 2.5L10 3.89l-2 1.95.47 2.75L6 7.25 3.53 8.59 4 5.84 2 3.89l2.76-.39L6 1z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+        ) : (
           <button
             key={i}
             type="button"
@@ -910,9 +961,14 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
               <div><Label>Year</Label><Field value={draft.year} onChange={v => setDraft(d => d ? { ...d, year: v } : d)} /></div>
               <div>
                 <Label>Rating</Label>
-                <StarPicker value={draft.rating} onChange={v => setDraft(d => d ? { ...d, rating: v } : d)} />
+                <StarPicker value={draft.rating} onChange={v => setDraft(d => d ? { ...d, rating: v } : d)} readOnly={draft.source === 'user'} />
               </div>
-              <div className="sm:col-span-2"><Label>Quote</Label><Field value={draft.quote} onChange={v => setDraft(d => d ? { ...d, quote: v } : d)} multiline /></div>
+              <div className="sm:col-span-2"><Label>Quote</Label><Field value={draft.quote} onChange={v => setDraft(d => d ? { ...d, quote: v } : d)} multiline readOnly={draft.source === 'user'} /></div>
+              {draft.source === 'user' && (
+                <p className="sm:col-span-2 text-[0.6rem] text-[#6a6a6a] italic" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                  Client-submitted review — rating and review text are locked. You can still publish or remove it.
+                </p>
+              )}
               <div className="sm:col-span-2 flex gap-3"><button onClick={save} className="btn-ember px-5 py-2 rounded-[2px] text-xs">Save</button><button onClick={() => { setEditing(null); setDraft(null); }} className="btn-ghost px-5 py-2 rounded-[2px] text-xs">Cancel</button></div>
             </div>
           ) : (
@@ -921,6 +977,11 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
                 <div className="flex items-center gap-3 flex-wrap mb-2">
                   <p className="text-sm font-semibold text-white">{t.name}</p>
                   <span className="text-[0.6rem] text-ember" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.company}</span>
+                  {t.source === 'user' && (
+                    <span className="text-[0.55rem] tracking-wide uppercase px-2 py-0.5 border border-ember/25 bg-ember/10 text-ember rounded-[1px]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      client-submitted · locked
+                    </span>
+                  )}
                   {!t.visible && (
                     <span className="text-[0.55rem] tracking-wide uppercase px-2 py-0.5 border border-yellow-400/25 bg-yellow-400/10 text-yellow-400 rounded-[1px]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                       pending approval
@@ -1225,12 +1286,17 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
   const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
   const [services, setServices] = useState<Service[]>(seedServices);
   const [testimonials, setTestimonials] = useEditorStore<Testimonial[]>(STORAGE_KEYS.testimonials, seedTestimonials);
+  const [ratings] = useEditorStore<Rating[]>(STORAGE_KEYS.ratings, seedRatings);
   const [settings, setSettings] = useState<SiteSettings>(seedSettings);
   const [founder, setFounder] = useEditorStore<FounderProfile>(STORAGE_KEYS.founder, seedFounder);
 
   const notifications = useMemo(
-    () => deriveAdminNotifications(bookings, profileRequests),
-    [bookings, profileRequests],
+    () => deriveAdminNotifications(bookings, profileRequests, testimonials, ratings),
+    [bookings, profileRequests, testimonials, ratings],
+  );
+  const pendingReviews = useMemo(
+    () => testimonials.filter(t => !t.visible).length,
+    [testimonials],
   );
   const pendingRequests = useMemo(
     () => profileRequests.filter(r => r.status === 'pending').length,
@@ -1263,7 +1329,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
         userTitle={founder.title}
         portalLabel="Admin Console"
         avatarUrl={founder.photoUrl || jlCeo}
-        tagline="Good to see you. New bookings and technician requests are surfaced here the moment they arrive — plus a one-click resume to where you left off."
+        tagline="Good to see you. New bookings, client reviews, and technician requests are surfaced here the moment they arrive — plus a one-click resume to where you left off."
         lastTab={TABS.includes(tab) ? tab : 'Dashboard'}
         lastSeenLabel={relativeTimeLabel(loadStored<string | null>(STORAGE_KEYS.adminLastAt, null))}
         notifications={notifications}
@@ -1275,6 +1341,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
         ]}
         quickLinks={[
           { label: 'Review bookings', description: 'Confirm, reschedule or message clients', tab: 'Bookings', icon: 'bx-calendar-check' },
+          { label: 'Publish reviews', description: `${pendingReviews} new client review${pendingReviews === 1 ? '' : 's'} waiting`, tab: 'Testimonials', icon: 'bx-message-square-dots' },
           { label: 'Approve requests', description: `${pendingRequests} technician request${pendingRequests === 1 ? '' : 's'} waiting`, tab: 'Requests', icon: 'bx-envelope-open' },
           { label: 'Team availability', description: 'Roster, availability, and new hires', tab: 'Technicians', icon: 'bx-group' },
         ]}
@@ -1285,7 +1352,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
           { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingRequests },
           { tab: 'Founder', icon: 'bx-user-pin' },
           { tab: 'Services', icon: 'bx-briefcase' },
-          { tab: 'Testimonials', icon: 'bx-message-square-dots' },
+          { tab: 'Testimonials', icon: 'bx-message-square-dots', badge: pendingReviews },
           { tab: 'Settings', icon: 'bx-cog' },
         ]}
         personaName={founder.name}
@@ -1312,7 +1379,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
             { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingRequests },
             { tab: 'Founder', icon: 'bx-user-pin' },
             { tab: 'Services', icon: 'bx-briefcase' },
-            { tab: 'Testimonials', icon: 'bx-message-square-dots' },
+            { tab: 'Testimonials', icon: 'bx-message-square-dots', badge: pendingReviews },
             { tab: 'Settings', icon: 'bx-cog' },
           ]}
           activeTab={tab}

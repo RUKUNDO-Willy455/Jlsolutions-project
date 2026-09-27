@@ -1,3 +1,5 @@
+import { MessageCircle, Phone } from 'lucide-react';
+import { PHONE_LINKS } from '../data/site';
 import { useI18n } from '../i18n';
 
 export default function CTA() {
@@ -63,7 +65,17 @@ export default function CTA() {
               <a href="#/booking" className="btn-ember px-8 py-4 rounded-[2px]">
                 {t('cta.book')}
               </a>
-              <a href="tel:+250788123456" className="btn-ghost px-8 py-4 rounded-[2px]">
+              <a
+                href={PHONE_LINKS.whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-ghost px-8 py-4 rounded-[2px] inline-flex items-center gap-2.5"
+              >
+                <MessageCircle size={17} className="text-emerald-400" />
+                {t('cta.whatsapp')}
+              </a>
+              <a href={PHONE_LINKS.primary} className="btn-ghost px-8 py-4 rounded-[2px] inline-flex items-center gap-2.5">
+                <Phone size={16} />
                 {t('cta.call')}
               </a>
             </div>

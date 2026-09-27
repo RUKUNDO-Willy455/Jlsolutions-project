@@ -56,6 +56,27 @@ const timeSlots = [
   '14:00 – 16:00', '16:00 – 18:00', '18:00 – 20:00',
 ];
 
+const todayStr = () => new Date().toISOString().split('T')[0];
+
+function slotTimes(s: string): [Date, Date] | null {
+  const m = s.match(/(\d{2}):(\d{2})[^\d]*(\d{2}):(\d{2})/);
+  if (!m) return null;
+  const now = new Date();
+  return [
+    new Date(now.getFullYear(), now.getMonth(), now.getDate(), +m[1], +m[2]),
+    new Date(now.getFullYear(), now.getMonth(), now.getDate(), +m[3], +m[4]),
+  ];
+}
+
+function availableTimeSlots(date: string): string[] {
+  if (date !== todayStr()) return timeSlots;
+  const now = new Date();
+  return timeSlots.filter((s) => {
+    const t = slotTimes(s);
+    return t ? t[1] > now : false;
+  });
+}
+
 const defaultForm = {
   location: '',
   date: '',
@@ -183,6 +204,7 @@ const validateDetails = (f: typeof defaultForm, t: (k: string, v?: Record<string
   if (!f.location.trim() && !(f.lat != null && f.lng != null))
     e.location = t('book.errAddress');
   if (!f.date) e.date = t('book.errDate');
+  else if (f.date < todayStr()) e.date = t('book.errPastDate');
   if (!f.time) e.time = t('book.errTime');
   return e;
 };
@@ -307,6 +329,12 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
     const value = e.target.value;
     setForm((prev) => {
       const next = { ...prev, [name]: value };
+      if (name === 'date') {
+        const available = availableTimeSlots(next.date);
+        if (next.time && !available.includes(next.time)) {
+          next.time = '';
+        }
+      }
       if ((name === 'date' || name === 'time') && next.technician !== ANY_ID) {
         const sel = technicians.find((x) => x.id === next.technician);
         if (sel && !isTechFree(sel, next.date, next.time, bookings)) {
@@ -409,7 +437,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
     setSubmitted(true);
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayStr();
   const options = [{ id: ANY_ID, name: t('book.bestAvailable'), role: t('book.autoAssign'), available: true, photoUrl: '' }, ...technicians];
   const freeTech = findFreeTechnician(technicians, form.date, form.time, bookings);
 
@@ -886,7 +914,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         className={`field ${errors.time ? '!border-red-500/70' : ''}`}
                       >
                         <option value="">{t('book.timePlaceholder')}</option>
-                        {timeSlots.map((t2) => <option key={t2} value={t2}>{t2}</option>)}
+                        {availableTimeSlots(form.date).map((t2) => <option key={t2} value={t2}>{t2}</option>)}
                       </select>
                       {errors.time && <p className="text-[0.65rem] text-red-400 mt-1">{errors.time}</p>}
                       {form.date && form.time && form.technician === ANY_ID && (

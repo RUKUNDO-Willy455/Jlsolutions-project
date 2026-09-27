@@ -17,6 +17,6 @@ export interface GalleryVideo {
  * { src: v('electrical-wiring.mp4'), poster: '/images/electrical-installation.jpeg' },
  */
 export const ALL_VIDEOS: GalleryVideo[] = [
-  { src: v('believer.mp4') },
-  { src: v('billie-jean.mp4') },
+  { src: v('believer.mp4'), poster: '/images/posters/believer-poster.jpg' },
+  { src: v('billie-jean.mp4'), poster: '/images/posters/billie-jean-poster.jpg' },
 ];

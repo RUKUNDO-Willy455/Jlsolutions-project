@@ -18,130 +18,157 @@ function Stars({ count, className }: { count: number; className?: string }) {
   );
 }
 
-function RateUsModal({
-  onClose,
+function InlineRateForm({
+  onCancel,
   onSave,
 }: {
-  onClose: () => void;
-  onSave: (rating: number, name: string, details: { quote: string; project: string }) => void;
+  onCancel: () => void;
+  onSave: (rating: number, name: string, details: { title: string; company: string; quote: string; project: string }) => void;
 }) {
   const { t } = useI18n();
   const [stars, setStars] = useState(0);
   const [hover, setHover] = useState(0);
   const [name, setName] = useState('');
+  const [title, setTitle] = useState('');
+  const [company, setCompany] = useState('');
   const [quote, setQuote] = useState('');
   const [project, setProject] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   function submit() {
     if (stars < 1 || !name.trim()) return;
-    onSave(stars, name.trim(), { quote: quote.trim(), project: project.trim() });
+    onSave(stars, name.trim(), { title: title.trim(), company: company.trim(), quote: quote.trim(), project: project.trim() });
     setSubmitted(true);
   }
 
+  if (submitted) {
+    return (
+      <div className="mt-5 border-t border-[rgba(255,255,255,0.06)] pt-5 text-center">
+        <p className="text-4xl mb-4">✓</p>
+        <p className="text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+          {t('td.mThanks', { name })}
+        </p>
+        <p className="text-xs text-[#5a5a5a] mt-2 leading-relaxed">{t('td.mDone', { stars })}</p>
+        <button onClick={onCancel} className="btn-ghost px-5 py-2.5 rounded-[2px] text-xs mt-5">
+          {t('td.mClose')}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={onClose}>
-      <div
-        className="w-full max-w-md bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-[2px] p-8 max-h-[620px] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        {submitted ? (
-          <div className="text-center">
-            <p className="text-4xl mb-4">✓</p>
-            <p className="text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{t('td.mThanks', { name })}</p>
-            <p className="text-xs text-[#5a5a5a] mt-2 leading-relaxed">
-              {t('td.mDone', { stars })}
-            </p>
-            <button onClick={onClose} className="btn-ember px-6 py-2.5 rounded-[2px] text-xs mt-6">{t('td.mClose')}</button>
+    <div className="mt-5 border-t border-[rgba(255,255,255,0.06)] pt-5">
+      <p className="text-sm text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+        {t('td.mTitle')}
+      </p>
+      <p className="text-xs text-[#5a5a5a] mt-1">{t('td.mBody')}</p>
+
+      {/* Star picker */}
+      <div className="flex gap-1.5 my-5">
+        {Array.from({ length: 5 }).map((_, i) => {
+          const filled = (hover || stars) > i;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setStars(i + 1)}
+              onMouseEnter={() => setHover(i + 1)}
+              onMouseLeave={() => setHover(0)}
+              className={`p-1 -m-1 transition-transform duration-150 hover:scale-110 ${filled ? 'text-ember' : 'text-[#3a3a3a]'}`}
+              aria-label={t(i === 4 ? 'td.mStarOne' : 'td.mStarMany', { n: i + 1 })}
+            >
+              <svg viewBox="0 0 12 12" fill="none" className="w-7 h-7">
+                <path
+                  d="M6 1l1.24 2.5L10 3.89l-2 1.95.47 2.75L6 7.25 3.53 8.59 4 5.84 2 3.89l2.76-.39L6 1z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Name + review fields appear once a star is chosen */}
+      {stars > 0 && (
+        <div className="mb-5 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              {t('td.mName')}
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && name.trim() && quote.trim()) submit(); }}
+              placeholder="e.g. Claude Rugema"
+              autoFocus
+              className="field text-sm"
+            />
           </div>
-        ) : (
-          <>
-            <p className="text-white font-semibold text-lg" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{t('td.mTitle')}</p>
-            <p className="text-xs text-[#5a5a5a] mt-1">{t('td.mBody')}</p>
 
-            {/* Star picker */}
-            <div className="flex gap-1.5 my-6">
-              {Array.from({ length: 5 }).map((_, i) => {
-                const filled = (hover || stars) > i;
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setStars(i + 1)}
-                    onMouseEnter={() => setHover(i + 1)}
-                    onMouseLeave={() => setHover(0)}
-                    className={`p-1 -m-1 transition-transform duration-150 hover:scale-110 ${filled ? 'text-ember' : 'text-[#3a3a3a]'}`}
-                    aria-label={t(i === 4 ? 'td.mStarOne' : 'td.mStarMany', { n: i + 1 })}
-                  >
-                    <svg viewBox="0 0 12 12" fill="none" className="w-7 h-7">
-                      <path
-                        d="M6 1l1.24 2.5L10 3.89l-2 1.95.47 2.75L6 7.25 3.53 8.59 4 5.84 2 3.89l2.76-.39L6 1z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              {t('td.mRole')}
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder={t('td.mRolePh')}
+              className="field text-sm"
+            />
+          </div>
 
-            {/* Name + review fields appear once a star is chosen */}
-            {stars > 0 && (
-              <div className="mb-5 flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                    {t('td.mName')}
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && name.trim() && quote.trim()) submit(); }}
-                    placeholder="e.g. Claude Rugema"
-                    autoFocus
-                    className="field text-sm"
-                  />
-                </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              {t('td.mCompany')}
+            </label>
+            <input
+              type="text"
+              value={company}
+              onChange={e => setCompany(e.target.value)}
+              placeholder={t('td.mCompanyPh')}
+              className="field text-sm"
+            />
+          </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                    {t('td.mReview')}
-                  </label>
-                  <textarea
-                    value={quote}
-                    onChange={e => setQuote(e.target.value)}
-                    rows={4}
-                    placeholder={t('td.mReviewPh')}
-                    className="field text-sm resize-none"
-                  />
-                </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              {t('td.mReview')}
+            </label>
+            <textarea
+              value={quote}
+              onChange={e => setQuote(e.target.value)}
+              rows={4}
+              placeholder={t('td.mReviewPh')}
+              className="field text-sm resize-none"
+            />
+          </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                    {t('td.mProject')}
-                  </label>
-                  <input
-                    type="text"
-                    value={project}
-                    onChange={e => setProject(e.target.value)}
-                    placeholder={t('td.mProjectPh')}
-                    className="field text-sm"
-                  />
-                </div>
-              </div>
-            )}
+          <div className="flex flex-col gap-1.5">
+            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              {t('td.mProject')}
+            </label>
+            <input
+              type="text"
+              value={project}
+              onChange={e => setProject(e.target.value)}
+              placeholder={t('td.mProjectPh')}
+              className="field text-sm"
+            />
+          </div>
+        </div>
+      )}
 
-            <div className="flex gap-3">
-              <button
-                onClick={submit}
-                disabled={stars < 1 || !name.trim()}
-                className="btn-ember px-6 py-2.5 rounded-[2px] text-xs disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {t('td.mSubmit')}
-              </button>
-              <button onClick={onClose} className="btn-ghost px-6 py-2.5 rounded-[2px] text-xs">{t('td.mCancel')}</button>
-            </div>
-          </>
-        )}
+      <div className="flex gap-3">
+        <button
+          onClick={submit}
+          disabled={stars < 1 || !name.trim()}
+          className="btn-ember px-6 py-2.5 rounded-[2px] text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {t('td.mSubmit')}
+        </button>
+        <button onClick={onCancel} className="btn-ghost px-6 py-2.5 rounded-[2px] text-xs">{t('td.mCancel')}</button>
       </div>
     </div>
   );
@@ -175,7 +202,7 @@ export default function TestimonialsDetail() {
     { value: `${recommend}%`, label: t('td.stat3') },
   ];
 
-  function saveRating(rating: number, name: string, details: { quote: string; project: string }) {
+  function saveRating(rating: number, name: string, details: { title: string; company: string; quote: string; project: string }) {
     const now = new Date().toISOString();
     const r: Rating = { id: `r-${Date.now()}`, name, rating, date: now.split('T')[0] };
     setRatings(prev => [...prev, r]);
@@ -184,13 +211,15 @@ export default function TestimonialsDetail() {
       const pending: Testimonial = {
         id: `rv-${Date.now()}`,
         name,
-        title: '',
-        company: '',
+        title: details.title || '',
+        company: details.company || '',
         quote: details.quote,
         rating,
         project: details.project || 'Client Review',
         year: now.slice(0, 4),
         visible: false,
+        createdAt: now,
+        source: 'user',
       };
       setTestimonials(prev => [...prev, pending]);
 
@@ -271,35 +300,37 @@ export default function TestimonialsDetail() {
               )}
 
               {/* Reminder: rate us after a service */}
-              <div className="mt-2 bg-[#0f0f0f] border border-[rgba(255,255,255,0.05)] border-l-2 border-l-ember rounded-[2px] p-5 reveal delay-200">
+              <div className="mt-2 bg-[#0f0f0f] border border-[rgba(255,255,255,0.05)] border-l-2 border-l-ember rounded-[2px] p-5 reveal delay-200" id="rate-us">
                 <p className="text-sm text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
                   {t('td.had')}
                 </p>
                 <p className="mt-1.5 text-xs text-[#8f8f8f] leading-relaxed">
                   {t('td.hadBody')}
                 </p>
-                <div className="mt-3 flex items-center gap-3 flex-wrap">
-                  <Stars count={0} className="!text-[#2a2a2a]" />
-                  <button
-                    onClick={() => setShowRateUs(true)}
-                    className="btn-ember px-5 py-2.5 rounded-[2px] text-xs flex items-center gap-2"
-                  >
-                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
-                      <path
-                        d="M6 1l1.24 2.5L10 3.89l-2 1.95.47 2.75L6 7.25 3.53 8.59 4 5.84 2 3.89l2.76-.39L6 1z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    {t('td.leave')}
-                  </button>
-                </div>
+                {showRateUs ? (
+                  <InlineRateForm onCancel={() => setShowRateUs(false)} onSave={saveRating} />
+                ) : (
+                  <div className="mt-3 flex items-center gap-3 flex-wrap">
+                    <Stars count={0} className="!text-[#2a2a2a]" />
+                    <button
+                      onClick={() => setShowRateUs(true)}
+                      className="btn-ember px-5 py-2.5 rounded-[2px] text-xs flex items-center gap-2"
+                    >
+                      <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                        <path
+                          d="M6 1l1.24 2.5L10 3.89l-2 1.95.47 2.75L6 7.25 3.53 8.59 4 5.84 2 3.89l2.76-.39L6 1z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      {t('td.leave')}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      {showRateUs && <RateUsModal onClose={() => setShowRateUs(false)} onSave={saveRating} />}
     </>
   );
 }

@@ -83,6 +83,10 @@ export interface Testimonial {
   project: string;
   year: string;
   visible: boolean;
+  /** ISO timestamp set on client-submitted reviews (via the public Rate Us form). */
+  createdAt?: string;
+  /** 'user' = submitted from the public "Rate Us" form (admin edits locked). */
+  source?: 'user' | 'admin';
 }
 
 export interface Rating {

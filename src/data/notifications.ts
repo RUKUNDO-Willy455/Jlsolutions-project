@@ -1,5 +1,5 @@
 import { STORAGE_KEYS } from './editor';
-import type { Booking, ProfileEditRequest, Technician } from './editor';
+import type { Booking, ProfileEditRequest, Technician, Testimonial, Rating } from './editor';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,12 +29,55 @@ function shortDay(iso: string): string {
 // ─── Derivation ───────────────────────────────────────────────────────────────
 
 /**
- * Builds the automatic update feed for the Admin Console: new/unconfirmed
- * bookings plus pending technician profile-edit requests.
+ * Builds the automatic update feed for the Admin Console: client-submitted
+ * reviews awaiting approval, fresh ratings, new/unconfirmed bookings, plus
+ * pending technician profile-edit requests.
  */
-export function deriveAdminNotifications(bookings: Booking[], requests: ProfileEditRequest[]): PortalNotification[] {
+export function deriveAdminNotifications(
+  bookings: Booking[],
+  requests: ProfileEditRequest[],
+  testimonials: Testimonial[] = [],
+  ratings: Rating[] = [],
+): PortalNotification[] {
   const list: PortalNotification[] = [];
   const stamp = nowLabel();
+
+  const truncate = (s: string, max: number) =>
+    s.length > max ? `${s.slice(0, max)}…` : s;
+
+  // Client-submitted reviews (unpublished) the admin must approve.
+  testimonials
+    .filter((t) => !t.visible)
+    .forEach((t) => {
+      list.push({
+        id: `test-pending-${t.id}`,
+        role: 'admin',
+        tab: 'Testimonials',
+        title: `New client review from ${t.name}`,
+        body: `${t.rating}-star · "${truncate(t.quote, 90)}"`,
+        createdAt: t.createdAt || stamp,
+        level: 'action',
+      });
+    });
+
+  // Ratings left without a written review — skip ones we already flagged as a
+  // pending review for the same person on the same day (no duplicates).
+  const pendingKeys = new Set(
+    testimonials.filter((t) => !t.visible).map((t) => `${t.name}|${(t.createdAt || '').slice(0, 10)}`),
+  );
+  ratings.forEach((r) => {
+    const key = `${r.name}|${(r.date || '').slice(0, 10)}`;
+    if (pendingKeys.has(key)) return;
+    list.push({
+      id: `rating-new-${r.id}`,
+      role: 'admin',
+      tab: 'Testimonials',
+      title: `New ${r.rating}-star rating`,
+      body: `${r.name || 'A client'} rated your service.`,
+      createdAt: stamp,
+      level: 'info',
+    });
+  });
 
   // Newest bookings first — flag ones the admin still has to act on.
   [...bookings]
