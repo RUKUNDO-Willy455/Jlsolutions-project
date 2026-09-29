@@ -1,67 +1,128 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Sparkles, Send, X, Phone } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { Sparkles, Send, X, Phone } from "lucide-react"
 import {
   answerFor,
   GREETING,
   QUICK_PROMPTS,
-  type AiReply,
   type Suggestion,
-} from '../data/assistant';
-import { SITE } from '../data/site';
-import './AiAssistant.css';
+} from "../data/assistant"
+import { SITE } from "../data/site"
+import "./AiAssistant.css"
 
 interface Msg {
-  id: number;
-  role: 'user' | 'ai';
-  text: string;
-  suggestions?: Suggestion[];
+  id: number
+  role: "user" | "ai"
+  text: string
+  suggestions?: Suggestion[]
   /** True while the "typing…" dots are shown for this message. */
-  pending?: boolean;
+  pending?: boolean
 }
 
-/** Minimal inline markdown: **bold**, *italic*, line breaks, bullet lines. */
-function renderText(text: string): ReactNode[] {
-  return text.split('\n').map((line, i) => {
-    const parts: ReactNode[] = [];
-    const re = /(\*\*[^*]+\*\*|\*[^*]+\*)/g;
-    let last = 0;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(line))) {
-      if (m.index > last) parts.push(line.slice(last, m.index));
-      const token = m[0];
-      if (token.startsWith('**')) {
-        parts.push(
-          <strong key={`${i}-${m.index}`} className="ai-chat__strong">
-            {token.slice(2, -2)}
-          </strong>,
-        );
-      } else {
-        parts.push(
-          <em key={`${i}-${m.index}`} className="ai-chat__em">
-            {token.slice(1, -1)}
-          </em>,
-        );
-      }
-      last = m.index + token.length;
-    }
-    if (last < line.length) parts.push(line.slice(last));
+const WEBSITE_HINT =
+  /\b(jean luc|service|offer|cctv|camera|electrical|solar|fire|tv|computer|sound|network|wifi|pcb|access control|maintenance|emergency|book|booking|price|pricing|cost|quote|payment|hours|coverage|guarantee|contact|whatsapp|technician|human)\b/i
 
-    const isBullet = /^[-•]\s/.test(line);
-    return (
-      <p key={i} className={isBullet ? 'ai-chat__bullet' : 'ai-chat__line'}>
-        {parts}
-      </p>
-    );
-  });
+function websiteSuggestions(text: string): Suggestion[] | undefined {
+  return WEBSITE_HINT.test(text) ? answerFor(text).suggestions : undefined
+}
+
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  const parts: ReactNode[] = []
+  const pattern =
+    /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\(https?:\/\/[^)\s]+\))/g
+  let last = 0
+  let match: RegExpExecArray | null
+  while ((match = pattern.exec(text))) {
+    if (match.index > last) parts.push(text.slice(last, match.index))
+    const token = match[0]
+    const key = `${keyPrefix}-${match.index}`
+    const link = token.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/)
+    if (link) {
+      parts.push(
+        <a key={key} href={link[2]} target="_blank" rel="noopener noreferrer">
+          {link[1]}
+        </a>,
+      )
+    } else if (token.startsWith("**")) {
+      parts.push(
+        <strong key={key} className="ai-chat__strong">
+          {token.slice(2, -2)}
+        </strong>,
+      )
+    } else if (token.startsWith("`")) {
+      parts.push(
+        <code key={key} className="ai-chat__inline-code">
+          {token.slice(1, -1)}
+        </code>,
+      )
+    } else {
+      parts.push(
+        <em key={key} className="ai-chat__em">
+          {token.slice(1, -1)}
+        </em>,
+      )
+    }
+    last = match.index + token.length
+  }
+  if (last < text.length) parts.push(text.slice(last))
+  return parts
+}
+
+function renderText(text: string): ReactNode[] {
+  const rendered: ReactNode[] = []
+  const lines = text.split("\n")
+  let codeLines: string[] | null = null
+
+  for (const [index, line] of lines.entries()) {
+    if (/^\s*```/.test(line)) {
+      if (codeLines) {
+        rendered.push(
+          <pre key={`code-${index}`} className="ai-chat__code">
+            <code>{codeLines.join("\n")}</code>
+          </pre>,
+        )
+        codeLines = null
+      } else {
+        codeLines = []
+      }
+      continue
+    }
+    if (codeLines) {
+      codeLines.push(line)
+      continue
+    }
+
+    const bullet = line.match(/^(?:[-*•]|\d+\.)\s+(.*)$/)
+    const heading = line.match(/^#{1,6}\s+(.*)$/)
+    const content = heading?.[1] ?? bullet?.[1] ?? line
+    const className = heading
+      ? "ai-chat__heading"
+      : bullet
+        ? "ai-chat__bullet"
+        : "ai-chat__line"
+    rendered.push(
+      <p key={index} className={className}>
+        {renderInline(content, String(index))}
+      </p>,
+    )
+  }
+
+  if (codeLines) {
+    rendered.push(
+      <pre className="ai-chat__code">
+        <code>{codeLines.join("\n")}</code>
+      </pre>,
+    )
+  }
+  return rendered
 }
 
 function handleSuggestion(s: Suggestion) {
   if (s.href) {
-    if (/^https?:/i.test(s.href)) window.open(s.href, '_blank', 'noopener');
-    else window.location.href = s.href;
-    return;
+    if (/^https?:/i.test(s.href)) window.open(s.href, "_blank", "noopener")
+    else window.location.href = s.href
+    return
   }
-  if (s.to) window.location.hash = s.to.replace(/^#/, '');
+  if (s.to) window.location.hash = s.to.replace(/^#/, "")
 }
 
 /**
@@ -70,79 +131,148 @@ function handleSuggestion(s: Suggestion) {
  * services, pricing, booking or how to reach a human.
  */
 export default function AiAssistant() {
-  const [open, setOpen] = useState(false);
-  const [started, setStarted] = useState(false);
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Msg[]>([]);
-  const nextId = useRef(1);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const timers = useRef<number[]>([]);
+  const [open, setOpen] = useState(false)
+  const [started, setStarted] = useState(false)
+  const [input, setInput] = useState("")
+  const [messages, setMessages] = useState<Msg[]>([])
+  const [busy, setBusy] = useState(false)
+  const nextId = useRef(1)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const busyRef = useRef(false)
+  const abortRef = useRef<AbortController | null>(null)
 
   // Seed the greeting the first time the panel is opened.
   useEffect(() => {
-    if (!open || started) return;
-    setStarted(true);
+    if (!open || started) return
+    setStarted(true)
     setMessages([
-      { id: nextId.current++, role: 'ai', text: GREETING.text, suggestions: GREETING.suggestions },
-    ]);
-  }, [open, started]);
+      {
+        id: nextId.current++,
+        role: "ai",
+        text: GREETING.text,
+        suggestions: GREETING.suggestions,
+      },
+    ])
+  }, [open, started])
 
   // Keep the transcript scrolled to the newest message.
   useEffect(() => {
-    const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, open]);
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [messages, open])
 
   useEffect(() => {
-    if (open) window.setTimeout(() => inputRef.current?.focus(), 220);
-  }, [open]);
+    if (open) window.setTimeout(() => inputRef.current?.focus(), 220)
+  }, [open])
 
-  // Clear pending timers on unmount.
-  useEffect(() => () => timers.current.forEach(t => window.clearTimeout(t)), []);
+  useEffect(() => () => abortRef.current?.abort(), [])
 
-  const reply = (text: string): AiReply => answerFor(text);
+  async function pushUser(text: string) {
+    const clean = text.trim()
+    if (!clean || busyRef.current) return
 
-  function pushUser(text: string) {
-    const clean = text.trim();
-    if (!clean) return;
-    setInput('');
-    const aiId = nextId.current++;
-    setMessages(prev => [
-      ...prev,
-      { id: nextId.current++, role: 'user', text: clean },
-      { id: aiId, role: 'ai', text: '', pending: true },
-    ]);
+    setInput("")
+    busyRef.current = true
+    setBusy(true)
+    const userId = nextId.current++
+    const aiId = nextId.current++
+    const history = messages
+      .filter((message) => !message.pending)
+      .slice(-12)
+      .map((message) => ({
+        role: message.role === "ai" ? "assistant" : "user",
+        content: message.text,
+      }))
 
-    const delay = Math.min(1400, 450 + clean.length * 12);
-    const t = window.setTimeout(() => {
-      const answer = reply(clean);
-      setMessages(prev =>
-        prev.map(m => (m.id === aiId ? { ...m, text: answer.text, suggestions: answer.suggestions, pending: false } : m)),
-      );
-    }, delay);
-    timers.current.push(t);
+    setMessages((previous) => [
+      ...previous,
+      { id: userId, role: "user", text: clean },
+      { id: aiId, role: "ai", text: "", pending: true },
+    ])
+
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    try {
+      const response = await fetch("/api/assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: clean, history }),
+        signal: controller.signal,
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(
+          typeof payload.error === "string"
+            ? payload.error
+            : "The AI service is temporarily unavailable. Please try again.",
+        )
+      }
+      if (typeof payload.text !== "string" || !payload.text.trim()) {
+        throw new Error("The AI returned an empty response. Please try again.")
+      }
+
+      const answer = payload.text.trim()
+      setMessages((previous) =>
+        previous.map((message) =>
+          message.id === aiId
+            ? {
+                ...message,
+                text: answer,
+                suggestions: websiteSuggestions(clean),
+                pending: false,
+              }
+            : message,
+        ),
+      )
+    } catch (error) {
+      if (controller.signal.aborted) return
+      const fallback =
+        "I could not reach the AI service. Please try again in a moment."
+      const message =
+        error instanceof Error &&
+        !/failed to fetch|load failed/i.test(error.message)
+          ? error.message
+          : fallback
+      setMessages((previous) =>
+        previous.map((item) =>
+          item.id === aiId
+            ? {
+                ...item,
+                text: message,
+                suggestions: websiteSuggestions(clean),
+                pending: false,
+              }
+            : item,
+        ),
+      )
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null
+      busyRef.current = false
+      setBusy(false)
+    }
   }
 
   const suggestions = useMemo(() => {
-    if (messages.length <= 1) return [];
-    const last = [...messages].reverse().find(m => m.role === 'ai');
-    return last?.pending ? [] : last?.suggestions ?? [];
-  }, [messages]);
+    if (messages.length <= 1) return []
+    const last = [...messages].reverse().find((m) => m.role === "ai")
+    return last?.pending ? [] : (last?.suggestions ?? [])
+  }, [messages])
 
   const lastAiId = useMemo(() => {
-    const last = [...messages].reverse().find(m => m.role === 'ai');
-    return last?.id;
-  }, [messages]);
+    const last = [...messages].reverse().find((m) => m.role === "ai")
+    return last?.id
+  }, [messages])
 
   return (
     <>
       {/* ── Floating toggle ─────────────────────────────────────────── */}
       <button
         type="button"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen((o) => !o)}
         className="ai-fab"
-        aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}
+        aria-label={open ? "Close AI assistant" : "Open AI assistant"}
         aria-expanded={open}
         title="Need help? Chat with the JL assistant"
       >
@@ -170,10 +300,11 @@ export default function AiAssistant() {
 
       {/* ── Chat panel ──────────────────────────────────────────────── */}
       <div
-        className={`ai-chat ${open ? 'ai-chat--open' : ''}`}
+        className={`ai-chat ${open ? "ai-chat--open" : ""}`}
         role="dialog"
         aria-label="Jean Luc Solutions AI assistant"
         aria-hidden={!open}
+        aria-busy={busy}
       >
         {/* Header */}
         <header className="ai-chat__header">
@@ -189,7 +320,8 @@ export default function AiAssistant() {
           <div className="ai-chat__title">
             <strong>JL Assistant</strong>
             <span>
-              <i className="ai-chat__dot" /> Online · replies instantly
+              <i className="ai-chat__dot" />{" "}
+              {busy ? "Thinking…" : "AI-powered support"}
             </span>
           </div>
           <a
@@ -214,9 +346,9 @@ export default function AiAssistant() {
         <div className="ai-chat__body" ref={scrollRef}>
           <div className="ai-chat__daymark">Today</div>
 
-          {messages.map(m => (
+          {messages.map((m) => (
             <div key={m.id} className={`ai-msg ai-msg--${m.role}`}>
-              {m.role === 'ai' && (
+              {m.role === "ai" && (
                 <span className="ai-msg__bubble-avatar" aria-hidden="true">
                   <img
                     src="/KEEP SYSTEMS RUNNING.jpeg"
@@ -238,27 +370,40 @@ export default function AiAssistant() {
                   renderText(m.text)
                 )}
 
-                {m.role === 'ai' && !m.pending && m.id === lastAiId && suggestions.length > 0 && (
-                  <div className="ai-chips">
-                    {suggestions.map((s, i) => (
-                      <button
-                        key={`${s.label}-${i}`}
-                        type="button"
-                        onClick={() => (s.href || s.to ? handleSuggestion(s) : pushUser(s.label))}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {m.role === "ai" &&
+                  !m.pending &&
+                  m.id === lastAiId &&
+                  suggestions.length > 0 && (
+                    <div className="ai-chips">
+                      {suggestions.map((s, i) => (
+                        <button
+                          key={`${s.label}-${i}`}
+                          type="button"
+                          disabled={busy}
+                          onClick={() =>
+                            s.href || s.to
+                              ? handleSuggestion(s)
+                              : pushUser(s.label)
+                          }
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
               </div>
             </div>
           ))}
 
           {messages.length <= 1 && (
             <div className="ai-quick">
-              {QUICK_PROMPTS.map(q => (
-                <button key={q.label} type="button" onClick={() => pushUser(q.label)}>
+              {QUICK_PROMPTS.map((q) => (
+                <button
+                  key={q.label}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => pushUser(q.label)}
+                >
                   {q.label}
                 </button>
               ))}
@@ -269,24 +414,25 @@ export default function AiAssistant() {
         {/* Composer */}
         <form
           className="ai-chat__composer"
-          onSubmit={e => {
-            e.preventDefault();
-            pushUser(input);
+          onSubmit={(e) => {
+            e.preventDefault()
+            pushUser(input)
           }}
         >
           <input
             ref={inputRef}
             className="ai-chat__input"
             value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Ask about services, pricing, booking…"
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask anything, or about our services…"
             aria-label="Message the AI assistant"
             autoComplete="off"
+            maxLength={4000}
           />
           <button
             type="submit"
             className="ai-chat__send"
-            disabled={!input.trim()}
+            disabled={!input.trim() || busy}
             aria-label="Send message"
           >
             <Send size={16} />
@@ -299,7 +445,13 @@ export default function AiAssistant() {
       </div>
 
       {/* Backdrop on small screens so the panel reads as a sheet */}
-      {open && <div className="ai-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />}
+      {open && (
+        <div
+          className="ai-backdrop"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </>
-  );
+  )
 }

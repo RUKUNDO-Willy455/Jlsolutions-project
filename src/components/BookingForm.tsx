@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef, Fragment, lazy, Suspense, Component } from 'react';
+import { useState, useRef, Fragment, lazy, Suspense, Component } from 'react';
 import type { ReactNode } from 'react';
-import { Check, MapPin } from 'lucide-react';
-import { useEditorStore, STORAGE_KEYS, seedTechnicians, seedBookings, seedNotifications } from '../data/editor';
-import type { AdminNotification, Booking } from '../data/editor';
-import { PHONE_LINKS, SITE } from '../data/site';
+import { Check, MapPin, ShieldCheck } from 'lucide-react';
+import { useEditorStore, STORAGE_KEYS, seedTechnicians, seedBookings } from '../data/editor';
+import type { Booking } from '../data/editor';
+import { SITE } from '../data/site';
 import type { LocationPick } from './LocationPicker';
 import { useI18n } from '../i18n';
 import { formatRwMobile, isValidRwMobile } from '../utils/phone';
-import { findFreeTechnician, isSlotTaken, isTechFree } from '../utils/availability';
+import { isSlotTaken } from '../utils/availability';
 
 const LocationPicker = lazy(() => import('./LocationPicker'));
 
@@ -81,7 +81,6 @@ const defaultForm = {
   location: '',
   date: '',
   time: '',
-  technician: '',
   service: '',
   notes: '',
   name: '',
@@ -196,8 +195,6 @@ async function searchRwanda(q: string): Promise<LocationSuggestion[]> {
   return merged;
 }
 
-const ANY_ID = 'any';
-
 const validateDetails = (f: typeof defaultForm, t: (k: string, v?: Record<string, string | number>) => string) => {
   const e: Record<string, string> = {};
   if (!f.service) e.service = t('book.errService');
@@ -221,7 +218,6 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
   const { t, locale } = useI18n();
   const [technicians] = useEditorStore(STORAGE_KEYS.technicians, seedTechnicians);
   const [bookings, setBookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
-  const [notifications, setNotifications] = useEditorStore(STORAGE_KEYS.notifications, seedNotifications);
   const [form, setForm] = useState({ ...defaultForm });
   const [submitted, setSubmitted] = useState(false);
   const [lastRef, setLastRef] = useState('');
@@ -335,12 +331,6 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
           next.time = '';
         }
       }
-      if ((name === 'date' || name === 'time') && next.technician !== ANY_ID) {
-        const sel = technicians.find((x) => x.id === next.technician);
-        if (sel && !isTechFree(sel, next.date, next.time, bookings)) {
-          next.technician = ANY_ID;
-        }
-      }
       return next;
     });
     setErrors((prev) => {
@@ -381,23 +371,18 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
     const nextErrors = validateContact(form, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-    const chosen = options.find((x) => x.id === form.technician);
-    const tech =
-      chosen && chosen.id !== ANY_ID
-        ? chosen
-        : (findFreeTechnician(technicians, form.date, form.time, bookings)
-          ?? technicians.find((x) => x.available)
-          ?? null);
     const raw = localStorage.getItem(STORAGE_KEYS.nextBookingRef);
     let n = raw ? parseInt(raw, 10) : 0;
     if (!n || Number.isNaN(n) || n < 1) {
+      // Prefix-agnostic so references minted under the old "BK" scheme still
+      // keep the sequence moving forward.
       const maxNum = bookings.reduce((m, b) => {
-        const g = /^BK(\d+)$/.exec(b.id);
+        const g = /^(?:BK|JL)(\d+)$/.exec(b.id);
         return g ? Math.max(m, parseInt(g[1], 10)) : m;
       }, 0);
       n = maxNum + 1;
     }
-    const ref = `BK${String(n).padStart(3, '0')}`;
+    const ref = `JL${String(n).padStart(3, '0')}`;
     setLastRef(ref);
     localStorage.setItem(STORAGE_KEYS.nextBookingRef, String(n + 1));
     const booking: Booking = {
@@ -408,8 +393,8 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
       location: form.location.trim(),
       date: form.date,
       time: form.time,
-      technician: tech ? tech.name : 'Not assigned',
-      technicianId: tech && tech.id !== ANY_ID ? tech.id : '',
+      technician: 'Not assigned',
+      technicianId: '',
       status: 'pending',
       createdAt: new Date().toISOString().split('T')[0],
       lat: form.lat,
@@ -423,23 +408,14 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
         },
       ],
     };
-    const notice: AdminNotification = {
-      id: `n${Date.now()}`,
-      kind: 'booking',
-      title: `New booking ${ref}`,
-      message: `${booking.name} requested ${booking.service} for ${booking.date} at ${booking.time}.`,
-      bookingRef: ref,
-      createdAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
-      read: false,
-    };
-    setNotifications((prev) => [notice, ...prev]);
     setBookings((prev) => [booking, ...prev]);
     setSubmitted(true);
   }
 
   const today = todayStr();
-  const options = [{ id: ANY_ID, name: t('book.bestAvailable'), role: t('book.autoAssign'), available: true, photoUrl: '' }, ...technicians];
-  const freeTech = findFreeTechnician(technicians, form.date, form.time, bookings);
+  const freeTechs = technicians.filter(
+    (tech) => tech.available && !isSlotTaken(tech.id, form.date, form.time, bookings),
+  );
 
   const waLink = submitted
     ? `https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(
@@ -524,10 +500,10 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
               {t('book.sub')}
             </p>
 
-            {/* Technician cards */}
+            {/* Field team (read-only — the admin assigns a technician) */}
             <div className="flex flex-col gap-2 reveal delay-300">
-              {options.map((tech) => {
-                const slotBusy = tech.id !== ANY_ID && isSlotTaken(tech.id, form.date, form.time, bookings);
+              {technicians.map((tech) => {
+                const slotBusy = isSlotTaken(tech.id, form.date, form.time, bookings);
                 const disabled = !tech.available || slotBusy;
                 const badge = !tech.available
                   ? t('book.offDuty')
@@ -535,40 +511,27 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     ? t('book.busy')
                     : t('book.available');
                 return (
-                <button
+                <div
                   key={tech.id}
-                  type="button"
-                  onClick={() => setForm((prev) => ({ ...prev, technician: tech.id }))}
-                  className={`group flex items-center gap-3 p-3 rounded-[2px] border text-left transition-all duration-200 ${
-                    form.technician === tech.id
-                      ? 'border-ember bg-[rgba(37,99,235,0.08)]'
-                      : 'border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.14)] bg-surface-2 hover:bg-surface-3'
-                  } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                  disabled={disabled}
+                  className={`flex items-center gap-3 p-3 rounded-[2px] border border-[rgba(255,255,255,0.06)] bg-surface-2 ${disabled ? 'opacity-40' : ''}`}
                 >
                   {/* Avatar */}
                   {tech.photoUrl ? (
                     <img
                       src={tech.photoUrl}
                       alt={tech.name}
-                      className={`w-9 h-9 rounded-[1px] object-cover shrink-0 border ${
-                        form.technician === tech.id ? 'border-ember' : 'border-[rgba(255,255,255,0.08)]'
-                      }`}
+                      className="w-9 h-9 rounded-[1px] object-cover shrink-0 border border-[rgba(255,255,255,0.08)]"
                     />
                   ) : (
                     <div
-                      className={`w-9 h-9 rounded-[1px] flex items-center justify-center shrink-0 text-sm font-semibold ${
-                        form.technician === tech.id
-                          ? 'bg-ember text-obsidian'
-                          : 'bg-surface-3 text-[#5a5a5a]'
-                      }`}
+                      className="w-9 h-9 rounded-[1px] flex items-center justify-center shrink-0 text-sm font-semibold bg-surface-3 text-[#5a5a5a]"
                       style={{ fontFamily: 'Fraunces, Georgia, serif' }}
                     >
                       {tech.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${form.technician === tech.id ? 'text-ash' : 'text-[#aaa]'}`}>
+                    <p className="text-sm font-semibold truncate text-[#aaa]">
                       {tech.name}
                     </p>
                     <p
@@ -579,7 +542,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     </p>
                   </div>
                   <span
-                    className={`text-[0.55rem] tracking-[0.14em] uppercase px-2 py-1 rounded-[1px] ${
+                    className={`text-[0.55rem] tracking-[0.14em] uppercase px-2 py-1 rounded-[1px] shrink-0 ${
                       !tech.available
                         ? 'text-[#4a4a4a] bg-surface-3'
                         : slotBusy
@@ -590,9 +553,13 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                   >
                     {badge}
                   </span>
-                </button>
+                </div>
                 );
               })}
+              <p className="text-[0.7rem] text-[#6a6a6a] leading-relaxed mt-1 flex items-start gap-2">
+                <ShieldCheck size={14} className="text-ember shrink-0 mt-0.5" />
+                {t('book.autoAssigned')}
+              </p>
             </div>
           </div>
 
@@ -917,10 +884,12 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         {availableTimeSlots(form.date).map((t2) => <option key={t2} value={t2}>{t2}</option>)}
                       </select>
                       {errors.time && <p className="text-[0.65rem] text-red-400 mt-1">{errors.time}</p>}
-                      {form.date && form.time && form.technician === ANY_ID && (
-                        <p className="text-[0.65rem] text-[#8a8a8a] leading-relaxed">
-                          {freeTech ? (
-                            <span className="text-emerald-400/90">✓ {t('book.autoAssignHint', { name: freeTech.name, role: freeTech.role })}</span>
+                      {form.date && form.time && (
+                        <p className="text-[0.65rem] leading-relaxed">
+                          {freeTechs.length > 0 ? (
+                            <span className="text-emerald-400/90">
+                              ✓ {t('book.techsAvailable', { count: freeTechs.length })}
+                            </span>
                           ) : (
                             <span className="text-yellow-400/90">⚠ {t('book.slotFull')}</span>
                           )}
@@ -1047,7 +1016,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         { label: t('book.sched'), value: form.date && form.time ? `${form.date} · ${form.time}` : '' },
                         { label: t('book.fullName'), value: form.name },
                         { label: t('book.phoneShort'), value: form.phone },
-                        { label: t('book.technician'), value: options.find(x => x.id === form.technician)?.name || t('book.notSelected') },
+                        { label: t('book.technician'), value: t('book.assignedLater') },
                       ].map((row) => row.value ? (
                         <div key={row.label} className="flex gap-4 items-baseline">
                           <dt

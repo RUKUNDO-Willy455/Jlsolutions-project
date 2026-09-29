@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   technician_id text NOT NULL DEFAULT '',
   status        text NOT NULL DEFAULT 'pending',
   created_at    text NOT NULL DEFAULT '',
+  assigned_at   text NOT NULL DEFAULT '',
   lat           real,
   lng           real,
   updates       text NOT NULL DEFAULT '[]'
@@ -102,6 +103,12 @@ CREATE TABLE IF NOT EXISTS ratings (
   date   text NOT NULL DEFAULT ''
 );
 `);
+
+// Additive migration: `bookings.assigned_at` was added when technician
+// assignment moved from the booking form to the admin console.
+if (!db.prepare('PRAGMA table_info(bookings)').all().some((c) => c.name === 'assigned_at')) {
+  db.exec("ALTER TABLE bookings ADD COLUMN assigned_at text NOT NULL DEFAULT ''");
+}
 
 // ---------------------------------------------------------------------------
 // Password hashing (scrypt + per-row salt)
@@ -156,6 +163,7 @@ function rowToBooking(r) {
     technicianId: r.technician_id,
     status: r.status,
     createdAt: r.created_at,
+    assignedAt: r.assigned_at || undefined,
   };
   if (r.lat != null) b.lat = Number(r.lat);
   if (r.lng != null) b.lng = Number(r.lng);
@@ -285,15 +293,15 @@ export const BookingStore = {
       const ins = db.prepare(`
         INSERT INTO bookings (
           id, name, phone, service, location, date, time, technician,
-          technician_id, status, created_at, lat, lng, updates
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          technician_id, status, created_at, assigned_at, lat, lng, updates
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       for (const b of list ?? []) {
         ins.run(
           String(b.id), String(b.name ?? ''), String(b.phone ?? ''),
           String(b.service ?? ''), String(b.location ?? ''), String(b.date ?? ''),
           String(b.time ?? ''), String(b.technician ?? ''), String(b.technicianId ?? ''),
-          String(b.status ?? 'pending'), String(b.createdAt ?? ''),
+          String(b.status ?? 'pending'), String(b.createdAt ?? ''), String(b.assignedAt ?? ''),
           b.lat != null ? Number(b.lat) : null,
           b.lng != null ? Number(b.lng) : null,
           JSON.stringify(b.updates ?? []),
@@ -401,11 +409,11 @@ function seedIfEmpty() {
       `).run(t.id, t.name, t.role, t.available ? 1 : 0, t.phone, t.email, t.username, hashPassword(t.password), t.photoUrl);
     }
     const insB = db.prepare(`
-      INSERT INTO bookings (id, name, phone, service, location, date, time, technician, technician_id, status, created_at, lat, lng, updates)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO bookings (id, name, phone, service, location, date, time, technician, technician_id, status, created_at, assigned_at, lat, lng, updates)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const b of seedBookings) {
-      insB.run(b.id, b.name, b.phone, b.service, b.location, b.date, b.time, b.technician, b.technicianId, b.status, b.createdAt, b.lat ?? null, b.lng ?? null, JSON.stringify(b.updates ?? []));
+      insB.run(b.id, b.name, b.phone, b.service, b.location, b.date, b.time, b.technician, b.technicianId, b.status, b.createdAt, b.assignedAt ?? '', b.lat ?? null, b.lng ?? null, JSON.stringify(b.updates ?? []));
     }
     const insT = db.prepare('INSERT INTO testimonials (id, name, title, company, quote, rating, project, year, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
     for (const t of seedTestimonials) {

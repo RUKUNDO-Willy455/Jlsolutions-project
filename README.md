@@ -9,9 +9,10 @@ electrical, solar, networking, access control, etc.).
   `/clients`, `/testimonials`, `/booking`, `/track`, `/contact`, `/privacy`, `/terms`)
 - **Console overlays:** `src/components/AdminPanel.tsx` (admin) and
   `src/components/TechnicianPanel.tsx` (technician), opened from the footer.
-- **Floating AI assistant:** `src/components/AiAssistant.tsx` (chat bubble on every page,
-  knowledge base in `src/data/assistant.ts`) plus WhatsApp / call buttons in
-  `src/components/FloatingActions.tsx`.
+- **Floating AI assistant:** `src/components/AiAssistant.tsx` (chat bubble on every page;
+  greeting + suggestion-chip copy in `src/data/assistant.ts`) plus WhatsApp / call buttons in
+  `src/components/FloatingActions.tsx`. The widget posts to `POST /api/assistant`, which the
+  server proxies to a real LLM — see [AI assistant setup](#ai-assistant-setup).
 
 ```bash
 pnpm install
@@ -22,6 +23,28 @@ pnpm build       # production build → dist/
 pnpm start       # serve dist/ + API from one process (node server/index.js)
 pnpm format      # oxfmt
 ```
+
+## AI assistant setup
+
+The chat is **not** answered in the browser: `AiAssistant` sends the visitor's message and a
+short slice of the conversation to `POST /api/assistant`, and `server/index.js` forwards it to
+an LLM with the JL business context prepended. The API key is read from `.env` (git-ignored) at
+server start, so **the chat is disabled until a key is configured** — the route answers
+`503 "The AI assistant is not configured"` and the widget shows that message.
+
+```bash
+cp .env.example .env    # then fill in one of the two keys below
+```
+
+| Variable | Purpose |
+| --- | --- |
+| `EJO_API_KEY` | EJO Labs (default `EJO_API_URL=https://api.ejolabs.com/api/v1/subiza`) |
+| `OPENAI_API_KEY` | Any OpenAI-compatible endpoint (used when `EJO_API_KEY` is unset) |
+| `OPENAI_BASE_URL` | Override for the OpenAI-compatible base (default `https://api.openai.com/v1`) |
+
+`EJO_API_KEY` wins when both are set. Everything else is handled server-side: the key is never
+exposed to the browser, requests are rate-limited to 20 per 10 minutes per IP, history is capped
+at 12 messages and 4000 characters each, and upstream calls time out after 45s.
 
 ## Database
 
@@ -113,14 +136,15 @@ technicians  1 ──── *  profile_requests  profile_requests.technicianId �
 **`technicians`** — `id` (PK, e.g. `jean`, `alice`), `name`, `role`,
 `available` (bool), `phone`, `email`, `username` (unique), `password`,
 `photoUrl`. Used both as login credentials for the Technician Console and as the
-assignable-staff list in the booking form (`available: false` ⇒ button disabled /
-"Booked").
+team roster shown read-only on the public booking form (`available: false` ⇒
+"Off Duty").
 
-**`bookings`** — `id` (PK, `BK001`, `BK002`, …), `name`, `phone`, `service`,
+**`bookings`** — `id` (PK, `JL001`, `JL002`, …), `name`, `phone`, `service`,
 `location`, `date` (`YYYY-MM-DD`), `time` (slot string, e.g. `10:00 – 12:00`),
 `technician` (denormalized display name), `technicianId` (FK → `technicians.id`,
-empty string = "Best Available" / unassigned), `status`
-(`pending | confirmed | completed | cancelled`), `createdAt`.
+empty string = unassigned — the admin assigns a technician in the console),
+`status` (`pending | confirmed | completed | cancelled`), `createdAt`,
+`assignedAt` (ISO timestamp of the latest admin assignment).
 
 **`profile_requests`** — `id` (PK), `technicianId` (FK), `technicianName`,
 `changes` (partial `Technician` patch: name/role/phone/email/photoUrl),
@@ -133,16 +157,18 @@ empty string = "Best Available" / unassigned), `status`
 ### 4. Write flows (invariants the database must preserve)
 
 1. **Public booking** (`BookingForm.tsx`)
-   Visitor fills 2 steps → a `Booking` is built with `status: 'pending'`,
-   `id = BK + (count + 1)`, prepended to `bookings`, and the success screen shows
-   the summary. Only *available* technicians can be picked; "Best Available" writes
-   `technicianId: ''` / `technician: 'Not assigned'` for later dispatch.
-   → In SQL this becomes `INSERT INTO bookings … RETURNING id`; the `BK###` id and
+   Visitor fills 3 steps → a `Booking` is built with `status: 'pending'`,
+   `id = JL + (count + 1)`, prepended to `bookings`, and the success screen shows
+   the summary. Visitors never pick a technician: the row is written with
+   `technicianId: ''` / `technician: 'Not assigned'`.
+   → In SQL this becomes `INSERT INTO bookings … RETURNING id`; the `JL###` id and
    the count-based generation must be replaced by a sequence/auto-increment to
    avoid collisions.
 
 2. **Admin dispatch** (`AdminPanel.tsx`)
-   Admin moves a booking through `pending → confirmed → completed / cancelled`,
+   Admin assigns a technician per booking from the Bookings table (setting
+   `technicianId`, `technician` and `assignedAt`, and logging a client-visible
+   update), moves a booking through `pending → confirmed → completed / cancelled`,
    adds/edits/deletes technicians (username + password required for new staff), and
    edits the founder profile — each setter writes straight back to storage.
 

@@ -18,6 +18,13 @@
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preload" as="image" href="/images/cctv.jpeg" fetchpriority="high" />
+    <!-- Paint the splash background before React boots, so there is no white
+         flash between the document load and the LoadingScreen taking over.
+         Must match the base tone of .splash in src/components/LoadingScreen.css. -->
+    <style>
+      html { background: #0a0f1a; color-scheme: dark; }
+      body { background: #0a0f1a; margin: 0; }
+    </style>
     <title>Jean Luc Solutions — Skills · Speed · Sustainability</title>
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
     <!-- figma:head-end -->

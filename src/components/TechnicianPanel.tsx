@@ -18,7 +18,29 @@ import PortalBrandBar from './PortalBrandBar';
 import PortalSidebar from './PortalSidebar';
 import { AvatarUpload } from './AvatarUpload';
 
-// â”€â”€â”€ Shared bits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Shared bits ──────────────────────────────────────────────────────────────
+
+/** Today as YYYY-MM-DD in the technician's own timezone (booking dates are ISO). */
+function todayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** "24 Sep 2026" — avoids the UTC shift you get from parsing a bare ISO date. */
+function prettyDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/** Client contact details stay locked until the day of the assignment. */
+const contactUnlocked = (date: string, today: string) => !date || date <= today;
+
+/** The number is still there, just not readable — revealed on the day. */
+function maskPhone(phone: string): string {
+  const cc = phone.replace(/\D/g, '').startsWith('250') ? '+250' : '';
+  return cc ? `${cc} ••• ••• •••` : '••• ••• •••';
+}
 
 function PanelBackground() {
   return (
@@ -34,7 +56,7 @@ function PanelBackground() {
         className="absolute bottom-6 right-8 text-[0.58rem] tracking-[0.22em] uppercase text-white/20 select-none"
         style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
       >
-        Skills Â· Speed Â· Sustainable
+        Skills · Speed · Sustainable
       </p>
     </div>
   );
@@ -62,7 +84,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
   );
 }
 
-// â”€â”€â”€ Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Login ────────────────────────────────────────────────────────────────────
 
 function TechLogin({
   technicians, onLogin, onExit,
@@ -127,7 +149,7 @@ function TechLogin({
                   Technician <span className="text-ember italic font-light">Portal</span>
                 </p>
                 <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3a3a3a] mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Jean Luc Solutions Â· Kigali
+                  Jean Luc Solutions · Kigali
                 </p>
               </div>
             </div>
@@ -198,7 +220,7 @@ function TechLogin({
   );
 }
 
-// â”€â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
 
 const TECH_TABS = ['Dashboard', 'Profile Settings', 'Requests'] as const;
 type TechTab = typeof TECH_TABS[number];
@@ -284,7 +306,7 @@ function ProfileSettingsTab({
           <div className="min-w-0 pt-1.5">
             <p className="text-white text-base font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{name || tech.name}</p>
             <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{role || tech.role}</p>
-            <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{phone || tech.phone} Â· {email || tech.email}</p>
+            <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{phone || tech.phone} · {email || tech.email}</p>
           </div>
         </div>
         <p className="text-[0.6rem] text-[#3a3a3a] mt-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
@@ -318,7 +340,7 @@ function ProfileSettingsTab({
         <div>
           <p className="text-xs font-semibold text-ember mb-1">Changes require approval</p>
           <p className="text-xs text-[#5a5a5a] leading-relaxed">
-            Your profile edits are saved only after the admin reviews and approves them in the Admin Console â†’ Requests.
+            Your profile edits are saved only after the admin reviews and approves them in the Admin Console → Requests.
           </p>
         </div>
       </div>
@@ -337,10 +359,29 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
   }
 
   const myBookings = bookings
-    .filter(b => b.technicianId && b.technicianId === tech.id && b.status !== 'pending')
-    .sort((a, b) => a.date.localeCompare(b.date));
+    .filter(b => b.technicianId && b.technicianId === tech.id && b.status !== 'cancelled')
+    .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
   const confirmedBookings = myBookings.filter(b => b.status === 'confirmed').length;
+  const awaitingBookings = myBookings.filter(b => b.status === 'pending').length;
   const activeBookings = myBookings.filter(b => b.status === 'confirmed' || b.status === 'completed').length;
+
+  // Re-checked every minute so a tab left open overnight unlocks on the day.
+  const [today, setToday] = useState(todayISO);
+  useEffect(() => {
+    const id = window.setInterval(() => setToday(todayISO()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const assignmentMap = (b: Booking) =>
+    b.lat != null && b.lng != null
+      ? `https://www.google.com/maps?q=${b.lat.toFixed(6)},${b.lng.toFixed(6)}`
+      : b.location.trim()
+        ? `https://www.google.com/maps/search/${encodeURIComponent(`${b.location}, Rwanda`)}`
+        : '';
+  const waFor = (phone: string) => {
+    const d = phone.replace(/\D/g, '');
+    return d.startsWith('250') ? d : d.length === 9 ? `250${d}` : d;
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -355,7 +396,7 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
         <div className="min-w-0 flex-1">
           <p className="text-white text-lg font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{tech.name}</p>
           <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{tech.role}</p>
-          <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{tech.phone} Â· {tech.email}</p>
+          <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{tech.phone} · {tech.email}</p>
         </div>
         <span className={`ml-auto text-[0.58rem] tracking-wide uppercase px-3 py-1.5 border rounded-[1px] shrink-0 ${tech.available ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
           {tech.available ? 'Available' : 'Off Duty'}
@@ -365,36 +406,95 @@ function TechDashboard({ tech, requests, setRequests, bookings }: { tech: Techni
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="My Bookings" value={activeBookings} sub="assigned & confirmed" />
         <StatCard label="Confirmed" value={confirmedBookings} sub="on your schedule" />
-        <StatCard label="Approved" value={approved} sub="profile edits" />
-        <StatCard label="Rejected" value={rejected} sub="profile edits" />
+        <StatCard label="Awaiting" value={awaitingBookings} sub="assigned, not confirmed" />
+        <StatCard label="Profile Edits" value={approved + rejected} sub={`${approved} approved · ${rejected} rejected`} />
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-[#aaa] mb-4" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Confirmed Assignments</h3>
+        <h3 className="text-sm font-semibold text-[#aaa] mb-1" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>My Assignments</h3>
+        <p className="text-[0.62rem] text-[#4a4a4a] mb-4" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+          <i className="bx bx-lock text-[0.75rem] align-middle" /> Client phone numbers and messaging unlock on the day of the assignment.
+        </p>
         <div className="flex flex-col gap-3">
           {myBookings.length === 0 && (
-            <p className="text-sm text-[#3a3a3a] text-center py-8">No confirmed bookings yet. You'll be notified here as soon as the admin confirms your next assignment.</p>
+            <p className="text-sm text-[#3a3a3a] text-center py-8">Nothing assigned to you yet. Jobs appear here the moment the admin assigns them to you.</p>
           )}
-          {myBookings.map(b => (
-            <div key={b.id} className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.06)] rounded-[2px] p-5">
+          {myBookings.map(b => {
+            const canContact = contactUnlocked(b.date, today);
+            return (
+            <div
+              key={b.id}
+              className={`bg-[#0f0f0f] border rounded-[2px] p-5 ${
+                b.status === 'pending'
+                  ? 'border-yellow-400/30 bg-yellow-400/[0.03]'
+                  : 'border-[rgba(255,255,255,0.06)]'
+              }`}
+            >
               <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                 <div className="min-w-0">
                   <p className="text-white text-sm font-semibold">{b.name}</p>
-                  
-                  <p className="text-[0.62rem] text-[#4a4a4a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{b.phone} Â· {b.id}</p>
+
+                  <p className="text-[0.62rem] text-[#4a4a4a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{canContact ? b.phone : maskPhone(b.phone)} · {b.id}</p>
                 </div>
-                <span className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1 border rounded-[1px] shrink-0 ${b.status === 'confirmed' ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : b.status === 'pending' ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' : b.status === 'completed' ? 'text-blue-400 bg-blue-400/10 border-blue-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                  {!canContact && (
+                    <span
+                      className="text-[0.55rem] tracking-wide uppercase px-2 py-1 border rounded-[1px] text-[#5a5a5a] bg-[#161616] border-[rgba(255,255,255,0.08)]"
+                      style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                    >
+                      <i className="bx bx-lock text-[0.7rem] align-middle" /> Unlocks {prettyDate(b.date)}
+                    </span>
+                  )}
+                  {b.status === 'pending' && (
+                    <span className="text-[0.55rem] tracking-wide uppercase px-2 py-1 border rounded-[1px] text-yellow-400 bg-yellow-400/10 border-yellow-400/30" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      New — awaiting confirmation
+                    </span>
+                  )}
+                <span className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1 border rounded-[1px] ${b.status === 'confirmed' ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : b.status === 'pending' ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' : b.status === 'completed' ? 'text-blue-400 bg-blue-400/10 border-blue-400/20' : 'text-red-400 bg-red-400/10 border-red-400/20'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                   {b.status}
                 </span>
+                </div>
               </div>
+
               <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-xs">
                 <span className="text-[#5a5a5a]"><span className="text-[#4a4a4a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>SERVICE</span> {b.service}</span>
                 <span className="text-[#5a5a5a]"><span className="text-[#4a4a4a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>DATE</span> {b.date}</span>
                 <span className="text-[#5a5a5a]"><span className="text-[#4a4a4a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>TIME</span> {b.time}</span>
               </div>
               <p className="text-xs text-[#4a4a4a] mt-2 flex items-center gap-1.5"><i className="bx bx-map-pin text-[#3a3a3a]" /> {b.location}</p>
+              <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-[rgba(255,255,255,0.05)]">
+                <a
+                  href={assignmentMap(b)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[0.6rem] tracking-wide uppercase text-ember/80 hover:text-ember transition-colors duration-150"
+                  style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                >
+                  <i className="bx bx-map-pin text-[0.8rem]" /> View on map
+                </a>
+                {canContact ? (
+                  <a
+                    href={`https://wa.me/${waFor(b.phone)}?text=${encodeURIComponent(`Hello ${b.name}, this is Jean Luc Solutions about your booking ${b.id} on ${b.date} at ${b.time}.`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[0.6rem] tracking-wide uppercase text-emerald-300/80 hover:text-emerald-300 transition-colors duration-150"
+                    style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                  >
+                    <i className="bx bxl-whatsapp text-sm" /> Message client
+                  </a>
+                ) : (
+                  <span
+                    title={`Client contact unlocks on ${prettyDate(b.date)}`}
+                    className="inline-flex items-center gap-1.5 text-[0.6rem] tracking-wide uppercase text-[#3a3a3a] cursor-not-allowed select-none"
+                    style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                  >
+                    <i className="bx bx-lock text-[0.8rem]" /> Contact locked until {prettyDate(b.date)}
+                  </span>
+                )}
+              </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -473,7 +573,7 @@ function TechRequestsTab({ tech, requests, setRequests }: { tech: Technician; re
   );
 }
 
-// â”€â”€â”€ Main export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main export ──────────────────────────────────────────────────────────────
 
 export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
   const [technicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians);
@@ -515,7 +615,7 @@ const [signedIn, setSignedIn] = useState<Technician | null>(null);
   if (!tech) return <TechLogin technicians={technicians} onLogin={t => { setSignedIn(t); setTechId(t.id); setStarted(false); }} onExit={onExit} />;
 
   if (!started) {
-    const myBookings = bookings.filter(b => b.technicianId === tech.id && b.status !== 'pending');
+    const myBookings = bookings.filter(b => b.technicianId === tech.id && b.status !== 'cancelled');
     const pendingRequests = profileRequests.filter(r => r.technicianId === tech.id && r.status === 'pending').length;
     const approvedRequests = profileRequests.filter(r => r.technicianId === tech.id && r.status === 'approved').length;
     return (
@@ -525,18 +625,18 @@ const [signedIn, setSignedIn] = useState<Technician | null>(null);
         userTitle={tech.role}
         portalLabel="Technician Portal"
         avatarUrl={tech.photoUrl}
-        tagline="Good to see you back on the tools. You'll only hear about an assignment once the admin confirms it — and you can track the profile changes you've requested."
+        tagline="Good to see you back on the tools. You are notified here the moment the admin assigns you a job — plus a one-click resume to where you left off."
         lastTab={TECH_TABS.includes(tab) ? tab : 'Dashboard'}
         lastSeenLabel={relativeTimeLabel(loadStored<string | null>(STORAGE_KEYS.techLastAt, null))}
         notifications={notifications}
         stats={[
           { label: 'My bookings', value: myBookings.filter(b => b.status === 'confirmed' || b.status === 'completed').length },
           { label: 'Confirmed', value: myBookings.filter(b => b.status === 'confirmed').length },
-          { label: 'Pending requests', value: pendingRequests },
+          { label: 'New assignments', value: myBookings.filter(b => b.status === 'pending').length },
           { label: 'Approved changes', value: approvedRequests },
         ]}
         quickLinks={[
-          { label: 'My schedule', description: 'Bookings assigned to you', tab: 'Dashboard', icon: 'bx-tachometer' },
+          { label: 'My schedule', description: 'Jobs the admin has assigned to you', tab: 'Dashboard', icon: 'bx-tachometer' },
           { label: 'Update profile', description: 'Submit changes for admin approval', tab: 'Profile Settings', icon: 'bx-user-circle' },
           { label: 'My requests', description: 'Status of your profile change requests', tab: 'Requests', icon: 'bx-envelope-open' },
         ]}
@@ -589,8 +689,8 @@ const [signedIn, setSignedIn] = useState<Technician | null>(null);
             <div className="mb-8">
               <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{tab}</h1>
               <p className="text-xs text-[#4a4a4a] mt-1">
-                {tab === 'Dashboard'        && 'Your assignments, availability, and request overview'}
-                {tab === 'Profile Settings' && 'Update your details â€” changes are approved by the admin'}
+                {tab === 'Dashboard'        && 'Jobs the admin has assigned to you, plus your request overview'}
+                {tab === 'Profile Settings' && 'Update your details — changes are approved by the admin'}
                 {tab === 'Requests'         && 'Track the status of your profile change requests'}
               </p>
             </div>

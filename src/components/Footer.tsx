@@ -124,6 +124,9 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
               </a>
             </li>
             <li>
+              {/* Routed in-app, not a bare mailto: a visitor with no mail client
+                  configured (or a blocked mailto) would otherwise get a dead click.
+                  The contact page offers call, WhatsApp and a form as fallbacks. */}
               <a href="#/contact">
                 <CircleHelp size={15} /> {t('footer.emailQuestion')}
               </a>

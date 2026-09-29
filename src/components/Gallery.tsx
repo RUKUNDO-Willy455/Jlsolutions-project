@@ -98,6 +98,8 @@ export default function Gallery() {
         {sel && (
           <div
             id="gallery-viewer"
+            role="region"
+            aria-label={t('gal.lightbox')}
             className="max-w-4xl mx-auto mb-14 bg-[#0b0b0b] border border-[rgba(255,255,255,0.1)] rounded-[2px] p-4 sm:p-6"
           >
             <div className="flex items-center justify-between gap-4 mb-4">
@@ -142,7 +144,7 @@ export default function Gallery() {
                   <img
                     src={currentSrc}
                     alt={labelFor(currentSrc)}
-                    className="w-full h-auto max-h-[600px] object-contain bg-black rounded-[2px]"
+                    className="w-full h-auto max-h-[78vh] object-contain bg-black rounded-[2px]"
                   />
                 )}
               </div>

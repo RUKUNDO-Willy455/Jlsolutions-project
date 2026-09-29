@@ -48,6 +48,7 @@ export default function PrivacyPage() {
 
           <Section title={t('priv.2t')}>
             <p>{t('priv.2b')}</p>
+            <p>{t('priv.2c')}</p>
           </Section>
 
           <Section title={t('priv.3t')}>

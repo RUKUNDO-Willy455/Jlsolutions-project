@@ -33,18 +33,18 @@ function AdminBackground() {
       />
       {/* Dark overlay left-heavy so sidebar + content stay readable */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
-      {/* Tagline â€” bottom right */}
+      {/* Tagline — bottom right */}
       <p
         className="absolute bottom-6 right-8 text-[0.58rem] tracking-[0.22em] uppercase text-white/20 select-none"
         style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
       >
-        Skills Â· Speed Â· Sustainable
+        Skills · Speed · Sustainable
       </p>
     </div>
   );
 }
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Service { id: string; title: string; description: string; active: boolean; }
 interface SiteSettings {
@@ -52,7 +52,7 @@ interface SiteSettings {
   phone: string; emergencyPhone: string; email: string; founded: string;
 }
 
-// â”€â”€â”€ Seed data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Seed data ─────────────────────────────────────────────────────────────────
 
 const seedServices: Service[] = [
   { id: 's1', title: 'CCTV & Surveillance', description: 'End-to-end IP and analogue camera systems for residential, commercial, and industrial sites.', active: true },
@@ -63,12 +63,12 @@ const seedServices: Service[] = [
   { id: 's6', title: 'Emergency Response', description: 'Rapid-deployment field technicians available around the clock.', active: true },
 ];
 const seedSettings: SiteSettings = {
-  companyName: 'Jean Luc Solutions', tagline: 'Skills Â· Speed Â· Sustainable',
+  companyName: 'Jean Luc Solutions', tagline: 'Skills · Speed · Sustainable',
   address: 'KG 11 Ave, Gasabo, Kigali, Rwanda', phone: '+250 788 123 456',
   emergencyPhone: '+250 788 999 000', email: 'info@jeanlucsolutions.rw', founded: '2008',
 };
 
-// â”€â”€â”€ Small shared components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Small shared components ──────────────────────────────────────────────────
 
 const TABS = ['Dashboard', 'Bookings', 'Technicians', 'Requests', 'Founder', 'Services', 'Testimonials', 'Settings'] as const;
 type Tab = typeof TABS[number];
@@ -98,7 +98,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
   );
 }
 
-// â”€â”€â”€ Login Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Login Screen ─────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => void }) {
   const [user, setUser] = useState('');
@@ -127,7 +127,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
   return (
     <div className="min-h-dvh flex bg-[#080808]">
 
-      {/* Home button â€” top-left corner */}
+      {/* Home button — top-left corner */}
       <button
         onClick={onExit}
         title="Back to main site"
@@ -136,25 +136,25 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
         <i className="bx bx-home text-xl text-[#4a4a4a] group-hover:text-ember transition-colors duration-200" />
       </button>
 
-      {/* â”€â”€ Right panel â€” CCTV photo (rendered first, sits behind) â”€â”€ */}
+      {/* ── Right panel — CCTV photo (rendered first, sits behind) ── */}
       <div className="hidden lg:block absolute inset-0">
         <img src={adminBg1} alt="" className="w-full h-full object-cover" style={{ opacity: 0.9 }} />
         {/* Dark fade on the left so the card area stays readable */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/55 to-transparent" />
         <div className="absolute bottom-8 right-8">
           <p className="text-[0.58rem] tracking-[0.22em] uppercase text-white/25" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-            Skills Â· Speed Â· Sustainable
+            Skills · Speed · Sustainable
           </p>
         </div>
       </div>
 
-      {/* â”€â”€ Left panel â€” dark wash behind the card â”€â”€ */}
+      {/* ── Left panel — dark wash behind the card ── */}
       <div className="relative z-10 flex items-center justify-end w-full lg:w-[54%] shrink-0 px-5 py-10 sm:px-10 sm:py-16">
 
-        {/* â”€â”€ Card with L-bracket corners + dotted right edge â”€â”€ */}
+        {/* ── Card with L-bracket corners + dotted right edge ── */}
         <div className="relative w-full max-w-[400px]">
 
-          {/* Corner brackets â€” each is a small L-shape with rounded ends */}
+          {/* Corner brackets — each is a small L-shape with rounded ends */}
           {/* Top-left */}
           <span className="absolute top-0 left-0 w-7 h-7 pointer-events-none"
             style={{ borderTop: '2px solid rgba(37,99,235,0.7)', borderLeft: '2px solid rgba(37,99,235,0.7)', borderRadius: '6px 0 0 0' }} />
@@ -175,7 +175,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
           {/* Card body */}
           <div className="px-6 py-8 sm:px-8 flex flex-col gap-0" style={{ background: 'rgba(8,8,8,0.38)', backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)' }}>
 
-            {/* Logo + title â€” centered */}
+            {/* Logo + title — centered */}
             <div className="flex flex-col items-center gap-4 mb-8">
               <img src={jeanlucLogo} alt="Jean Luc Solutions" className="h-20 w-auto object-contain sm:h-24"
                 style={{ animation: 'loadPulse 3s ease-in-out infinite' }} />
@@ -184,7 +184,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
                   Admin <span className="text-ember italic font-light">Console</span>
                 </p>
                 <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3a3a3a] mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Jean Luc Solutions Â· Kigali
+                  Jean Luc Solutions · Kigali
                 </p>
               </div>
             </div>
@@ -247,7 +247,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
               </button>
 
               <p className="text-center text-[0.6rem] text-[#2a2a2a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                Secured Â· Jean Luc Solutions Admin
+                Secured · Jean Luc Solutions Admin
               </p>
             </form>
           </div>
@@ -264,7 +264,7 @@ function LoginScreen({ onLogin, onExit }: { onLogin: () => void; onExit: () => v
   );
 }
 
-// â”€â”€â”€ Tab panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab panels ────────────────────────────────────────────────────────────────
 
 function Dashboard({ bookings, technicians }: { bookings: Booking[]; technicians: Technician[] }) {
   const counts = { pending: 0, confirmed: 0, completed: 0, cancelled: 0 };
@@ -287,6 +287,13 @@ function Dashboard({ bookings, technicians }: { bookings: Booking[]; technicians
               <span className="text-sm text-white flex-1 truncate">{b.name}</span>
               <span className="text-xs text-[#5a5a5a] hidden md:block flex-1 truncate">{b.service}</span>
               <span className="text-xs text-[#5a5a5a] hidden lg:block">{b.date}</span>
+              {b.technicianId ? (
+                <span className="text-[0.6rem] text-[#7a7a7a] hidden sm:block w-32 truncate">{b.technician}</span>
+              ) : b.status !== 'cancelled' ? (
+                <span className="text-[0.58rem] tracking-wide uppercase px-2 py-0.5 border rounded-[1px] text-yellow-400 bg-yellow-400/10 border-yellow-400/20 hidden sm:block" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                  Unassigned
+                </span>
+              ) : null}
               <span className={`text-[0.6rem] tracking-wide uppercase px-2 py-0.5 border rounded-[1px] ${statusColor[b.status]}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{b.status}</span>
             </div>
           ))}
@@ -296,11 +303,26 @@ function Dashboard({ bookings, technicians }: { bookings: Booking[]; technicians
   );
 }
 
-function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookings: React.Dispatch<React.SetStateAction<Booking[]>> }) {
+function BookingsTab({ bookings, setBookings, technicians }: { bookings: Booking[]; setBookings: React.Dispatch<React.SetStateAction<Booking[]>>; technicians: Technician[] }) {
   const [openMsg, setOpenMsg] = useState<string | null>(null);
   const [msgDraft, setMsgDraft] = useState('');
   const [msgError, setMsgError] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+
+  const stamp = () => new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  const unassigned = bookings.filter((b) => !b.technicianId && b.status !== 'cancelled').length;
+
+  /** True when this technician already holds another active job on the same slot. */
+  const conflicts = (b: Booking, techId: string) =>
+    bookings.some(
+      (x) =>
+        x.id !== b.id &&
+        x.technicianId === techId &&
+        x.date === b.date &&
+        x.time === b.time &&
+        x.status !== 'cancelled',
+    );
 
   function resetBookings() {
     if (!confirmReset) {
@@ -314,6 +336,36 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
     setOpenMsg(null);
     setMsgDraft('');
     setMsgError('');
+  }
+
+  /**
+   * Admin-only technician assignment. Technicians are notified the moment
+   * `technicianId` is set, so this also logs an update the client can read on
+   * the tracking page.
+   */
+  function assignTechnician(id: string, techId: string) {
+    const target = bookings.find((b) => b.id === id);
+    if (!target || (target.technicianId ?? '') === techId) return;
+    const tech = technicians.find((t) => t.id === techId) ?? null;
+    const previous = target.technicianId ? target.technician : '';
+    const text = tech
+      ? previous && previous !== tech.name
+        ? `Technician reassigned: ${previous} → ${tech.name}.`
+        : `Assigned to ${tech.name}, who will contact you before arrival.`
+      : 'Technician unassigned — the coordinator is still looking for someone available.';
+    setBookings(prev =>
+      prev.map((b) =>
+        b.id !== id
+          ? b
+          : {
+              ...b,
+              technicianId: techId,
+              technician: tech ? tech.name : 'Not assigned',
+              assignedAt: techId ? new Date().toISOString() : undefined,
+              updates: [...(b.updates ?? []), { id: `u${Date.now()}`, text, from: 'admin' as const, createdAt: stamp() }],
+            },
+      ),
+    );
   }
 
   function setStatus(id: string, status: Booking['status']) {
@@ -376,7 +428,14 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <p className="text-xs text-[#5a5a5a]">{bookings.length} bookings total</p>
+        <p className="text-xs text-[#5a5a5a]">
+          {bookings.length} bookings total
+          {unassigned > 0 && (
+            <span className="ml-2 text-[0.58rem] tracking-wide uppercase px-2 py-1 border rounded-[1px] text-yellow-400 bg-yellow-400/10 border-yellow-400/20" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              {unassigned} awaiting a technician
+            </span>
+          )}
+        </p>
         <div className="flex items-center gap-2">
           <button
             onClick={exportCsv}
@@ -424,7 +483,7 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                   <td className="px-4 py-3 whitespace-nowrap"><p className="text-white text-xs font-medium">{b.name}</p><p className="text-[#4a4a4a] text-[0.62rem]">{b.phone}</p></td>
                   <td className="px-4 py-3 text-xs text-[#7a7a7a] max-w-[160px] truncate">{b.service}</td>
                   <td className="px-4 py-3 max-w-[210px]">
-                    <p className="text-xs text-[#7a7a7a] truncate">{b.location || 'â€”'}</p>
+                    <p className="text-xs text-[#7a7a7a] truncate">{b.location || '—'}</p>
                     {mapLink(b) && (
                       <a href={mapLink(b)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[0.6rem] text-ember/80 hover:text-ember transition-colors duration-150">
                         <i className="bx bx-map-pin text-[0.8rem]" /> View on map
@@ -433,7 +492,44 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                     
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap"><p className="text-xs text-[#7a7a7a]">{b.date}</p><p className="text-[0.62rem] text-[#4a4a4a]">{b.time}</p></td>
-                  <td className="px-4 py-3 text-xs text-[#7a7a7a] whitespace-nowrap">{b.technician}</td>
+                  <td className="px-4 py-3">
+                    <div className="relative w-[200px]">
+                      <select
+                        value={b.technicianId ?? ''}
+                        onChange={(e) => assignTechnician(b.id, e.target.value)}
+                        aria-label={`Assign a technician to ${b.id}`}
+                        className={`field !py-1.5 !pr-7 !text-[0.7rem] ${
+                          b.technicianId ? '!border-emerald-400/30 text-[#d0d0d0]' : '!border-yellow-400/40 text-yellow-300'
+                        }`}
+                        style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
+                      >
+                        <option value="">— Pick a technician —</option>
+                        {technicians.map((t) => {
+                          const clash = conflicts(b, t.id);
+                          return (
+                            <option key={t.id} value={t.id}>
+                              {t.name}
+                              {t.available ? '' : ' (off duty)'}
+                              {clash ? ' · double-booked' : ''}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <i className="bx bx-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-[0.7rem] text-[#5a5a5a] pointer-events-none" />
+                    </div>
+                    {b.technicianId && !technicians.some((t) => t.id === b.technicianId) && (
+                      <p className="text-[0.55rem] text-red-400 mt-1">No longer on the roster</p>
+                    )}
+                    {!b.technicianId && b.status !== 'cancelled' && (
+                      <p className="text-[0.55rem] text-yellow-400/80 mt-1">Awaiting assignment</p>
+                    )}
+                    {b.assignedAt && (
+                      <p className="text-[0.55rem] text-[#3a3a3a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                        assigned {relativeTimeLabel(b.assignedAt)}
+                      </p>
+                    )}
+                  </td>
+
                   <td className="px-4 py-3 whitespace-nowrap"><span className={`text-[0.58rem] tracking-wide uppercase px-2 py-0.5 border rounded-[1px] ${statusColor[b.status]}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{b.status}</span></td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex gap-1 items-center">
@@ -459,10 +555,10 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                            Client updates Â· {b.name}
+                            Client updates · {b.name}
                           </p>
                           <a
-                            href={`https://wa.me/${waFor(b.phone)}?text=${encodeURIComponent(`Hello ${b.name}, regarding your booking ${b.id} with Jean Luc Solutions:\nService: ${b.service}\nScheduled: ${b.date} ${b.time}\nStatus: ${b.status}`)}`}
+                            href={`https://wa.me/${waFor(b.phone)}?text=${encodeURIComponent(`Hello ${b.name}, regarding your booking ${b.id} with Jean Luc Solutions:\nService: ${b.service}\nScheduled: ${b.date} ${b.time}${b.technicianId ? `\nTechnician: ${b.technician}` : ''}\nStatus: ${b.status}`)}`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-[0.6rem] tracking-wide uppercase text-emerald-300 hover:text-emerald-200 transition-colors duration-150 flex items-center gap-1"
@@ -473,12 +569,12 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                         </div>
                         <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1">
                           {(b.updates ?? []).length === 0 && (
-                            <p className="text-xs text-[#5a5a5a] py-2">No updates yet â€” send the client their first message.</p>
+                            <p className="text-xs text-[#5a5a5a] py-2">No updates yet — send the client their first message.</p>
                           )}
                           {(b.updates ?? []).map(u => (
                             <div key={u.id} className={`flex flex-col gap-0.5 max-w-[85%] rounded-[2px] px-3 py-2 text-xs ${u.from === 'admin' ? 'bg-[rgba(37,99,235,0.12)] border border-[rgba(37,99,235,0.22)] self-end' : 'bg-[#181818] border border-[rgba(255,255,255,0.06)] self-start'}`}>
                               <span className="text-[0.55rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                                {u.from === 'admin' ? 'Jean Luc Solutions' : b.name} Â· {u.createdAt}
+                                {u.from === 'admin' ? 'Jean Luc Solutions' : b.name} · {u.createdAt}
                               </span>
                               <span className="text-white/90 leading-relaxed">{u.text}</span>
                             </div>
@@ -489,7 +585,7 @@ function BookingsTab({ bookings, setBookings }: { bookings: Booking[]; setBookin
                             value={msgDraft}
                             onChange={(e) => { setMsgDraft(e.target.value); if (msgError) setMsgError(''); }}
                             onKeyDown={(e) => { if (e.key === 'Enter') sendUpdate(b.id); }}
-                            placeholder={msgError ? msgError : 'Type an update for the clientâ€¦'}
+                            placeholder={msgError ? msgError : 'Type an update for the client…'}
                             className={`field !py-2.5 text-sm ${msgError ? '!border-red-500/60' : ''}`}
                           />
                           <button onClick={() => sendUpdate(b.id)} className="btn-ember px-4 py-2.5 rounded-[2px] text-xs shrink-0">Send</button>
@@ -603,7 +699,7 @@ function TechniciansTab({ technicians, setTechnicians }: { technicians: Technici
                 className={`text-[0.62rem] tracking-wide uppercase px-3 py-2 border rounded-[1px] transition-colors duration-150 ${newTech.available ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`}
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                {newTech.available ? 'â— Available' : 'â—‹ Off Duty'}
+                {newTech.available ? '● Available' : '○ Off Duty'}
               </button>
               <span className="text-xs text-[#4a4a4a]">Set initial availability</span>
             </div>
@@ -654,17 +750,17 @@ function TechniciansTab({ technicians, setTechnicians }: { technicians: Technici
                 <div className="min-w-0">
                   <p className="text-white text-sm font-semibold">{t.name}</p>
                   <p className="text-[0.68rem] text-[#5a5a5a] mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.role}</p>
-                  <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{t.phone}{t.email ? ` Â· ${t.email}` : ''}</p>
+                  <p className="text-[0.65rem] text-[#4a4a4a] mt-1 break-words">{t.phone}{t.email ? ` · ${t.email}` : ''}</p>
                   <p className="text-[0.62rem] text-[#4a4a4a] mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                    Login: <span className="text-ember">{t.username || 'â€”'}</span>
+                    Login: <span className="text-ember">{t.username || '—'}</span>
                     {t.password ? (
-                      <> Â· Pw: <span className="text-ember">{showPass ? t.password : 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢'}</span>
+                      <> · Pw: <span className="text-ember">{showPass ? t.password : '••••••••'}</span>
                         <button onClick={() => setShowPass(s => !s)} className="ml-2 text-[#3a3a3a] hover:text-white transition-colors duration-150">
                           {showPass ? 'hide' : 'show'}
                         </button>
                       </>
                     ) : (
-                      <> Â· <span className="text-[#2a2a2a]">password protected</span></>
+                      <> · <span className="text-[#2a2a2a]">password protected</span></>
                     )}
                   </p>
                 </div>
@@ -747,7 +843,7 @@ function RequestsTab({
                       return (
                         <div key={key} className="flex flex-wrap items-center gap-2 text-xs">
                           <span className="text-[0.6rem] tracking-wide uppercase text-[#4a4a4a] w-16 shrink-0" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>photo</span>
-                          <span className="text-ember">â†’</span>
+                          <span className="text-ember">→</span>
                           {val ? <img src={val} alt="New photo" className="w-10 h-10 rounded-full object-cover border border-[rgba(37,99,235,0.3)]" /> : <span className="text-[#4a4a4a]">Remove photo</span>}
                         </div>
                       );
@@ -755,8 +851,8 @@ function RequestsTab({
                     return (
                       <div key={key} className="flex flex-wrap items-baseline gap-2 text-xs">
                         <span className="text-[0.6rem] tracking-wide uppercase text-[#4a4a4a] w-16 shrink-0" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{key}</span>
-                        <span className="text-[#5a5a5a] line-through">{String(current ?? 'â€”')}</span>
-                        <span className="text-ember">â†’</span>
+                        <span className="text-[#5a5a5a] line-through">{String(current ?? '—')}</span>
+                        <span className="text-ember">→</span>
                         <span className="text-white">{val}</span>
                       </div>
                     );
@@ -923,13 +1019,13 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
             <div><Label>Client Name *</Label><input type="text" value={newT.name} onChange={e => setNewT(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Claude Rugema" className="field text-sm" /></div>
             <div><Label>Title</Label><input type="text" value={newT.title} onChange={e => setNewT(p => ({ ...p, title: e.target.value }))} placeholder="e.g. IT Manager" className="field text-sm" /></div>
             <div><Label>Company</Label><input type="text" value={newT.company} onChange={e => setNewT(p => ({ ...p, company: e.target.value }))} placeholder="e.g. Bank of Kigali" className="field text-sm" /></div>
-            <div><Label>Project / Service</Label><input type="text" value={newT.project} onChange={e => setNewT(p => ({ ...p, project: e.target.value }))} placeholder="e.g. IP CCTV â€” 24 Cameras" className="field text-sm" /></div>
+            <div><Label>Project / Service</Label><input type="text" value={newT.project} onChange={e => setNewT(p => ({ ...p, project: e.target.value }))} placeholder="e.g. IP CCTV — 24 Cameras" className="field text-sm" /></div>
             <div><Label>Year</Label><input type="text" value={newT.year} onChange={e => setNewT(p => ({ ...p, year: e.target.value }))} placeholder="e.g. 2025" className="field text-sm" /></div>
             <div>
               <Label>Rating</Label>
               <StarPicker value={newT.rating} onChange={v => setNewT(p => ({ ...p, rating: v }))} />
             </div>
-            <div className="sm:col-span-2"><Label>Quote *</Label><textarea rows={3} value={newT.quote} onChange={e => setNewT(p => ({ ...p, quote: e.target.value }))} placeholder="What did this client say about youâ€¦" className="field text-sm resize-none" /></div>
+            <div className="sm:col-span-2"><Label>Quote *</Label><textarea rows={3} value={newT.quote} onChange={e => setNewT(p => ({ ...p, quote: e.target.value }))} placeholder="What did this client say about you…" className="field text-sm resize-none" /></div>
             <div className="sm:col-span-2 flex items-center gap-3">
               <button
                 type="button"
@@ -937,7 +1033,7 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
                 className={`text-[0.62rem] tracking-wide uppercase px-3 py-2 border rounded-[1px] transition-colors duration-150 ${newT.visible ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25' : 'text-[#4a4a4a] bg-[#161616] border-[rgba(255,255,255,0.08)]'}`}
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
-                {newT.visible ? 'â— Visible' : 'â—‹ Hidden'}
+                {newT.visible ? '● Visible' : '○ Hidden'}
               </button>
               <span className="text-xs text-[#4a4a4a]">Show on the public site</span>
             </div>
@@ -989,7 +1085,7 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
                   )}
                 </div>
                 <p className="text-xs text-[#5a5a5a] leading-relaxed italic">"{t.quote}"</p>
-                <p className="text-[0.6rem] text-[#3a3a3a] mt-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.project} Â· {t.year} Â· {t.rating}/5 stars</p>
+                <p className="text-[0.6rem] text-[#3a3a3a] mt-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.project} · {t.year} · {t.rating}/5 stars</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => toggleVisible(t.id)} className={`text-[0.58rem] tracking-wide uppercase px-2.5 py-1.5 border rounded-[1px] transition-colors duration-150 ${t.visible ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/25 hover:bg-yellow-400/20'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t.visible ? 'Visible' : 'Publish'}</button>
@@ -1023,13 +1119,13 @@ function SettingsTab({ settings, setSettings }: { settings: SiteSettings; setSet
         <div className="sm:col-span-2"><Label>Email</Label><Field value={settings.email} onChange={v => set('email', v)} /></div>
       </div>
       <button onClick={handleSave} className={`btn-ember px-8 py-3 rounded-[2px] self-start transition-all duration-300 ${saved ? '!bg-emerald-600' : ''}`}>
-        {saved ? 'âœ“ Saved' : 'Save Settings'}
+        {saved ? '✓ Saved' : 'Save Settings'}
       </button>
     </div>
   );
 }
 
-// â”€â”€â”€ Founder Profile Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Founder Profile Tab ──────────────────────────────────────────────────────
 
 function FounderProfileTab({
   profile, setProfile,
@@ -1088,9 +1184,9 @@ function FounderProfileTab({
 
       {/* Photo URL */}
       <div>
-        <Label>â€¦or paste a Photo URL</Label>
+        <Label>…or paste a Photo URL</Label>
         <input type="url" value={profile.photoUrl} onChange={e => set('photoUrl', e.target.value)}
-          placeholder="https://â€¦ (leave blank to use default)" className="field text-sm" />
+          placeholder="https://… (leave blank to use default)" className="field text-sm" />
       </div>
 
       {/* Identity */}
@@ -1183,7 +1279,7 @@ function FounderProfileTab({
             value={newDegree.title}
             onChange={e => setNewDegree(p => ({ ...p, title: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && addDegree()}
-            placeholder="Add a degreeâ€¦"
+            placeholder="Add a degree…"
             className="field text-sm"
           />
           <input
@@ -1226,7 +1322,7 @@ function FounderProfileTab({
             value={newAch}
             onChange={e => setNewAch(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && addAchievement()}
-            placeholder="Add a new achievementâ€¦"
+            placeholder="Add a new achievement…"
             className="field text-sm flex-1"
           />
           <button onClick={addAchievement} className="btn-ember px-4 py-2 rounded-[2px] text-xs shrink-0">Add</button>
@@ -1257,7 +1353,7 @@ function FounderProfileTab({
       <div className="bg-[rgba(37,99,235,0.06)] border border-[rgba(37,99,235,0.18)] rounded-[2px] p-5 flex items-start gap-3">
         <i className="bx bx-info-circle text-ember text-lg shrink-0 mt-0.5" />
         <div>
-          <p className="text-xs font-semibold text-ember mb-1">Meet the Founder â€” Public Page</p>
+          <p className="text-xs font-semibold text-ember mb-1">Meet the Founder — Public Page</p>
           <p className="text-xs text-[#5a5a5a] leading-relaxed">
             All information saved here will appear on the public-facing "Meet the Founder" section of the Jean Luc Solutions website. Keep the bio professional and the photo high-resolution.
           </p>
@@ -1275,7 +1371,7 @@ function FounderProfileTab({
   );
 }
 
-// â”€â”€â”€ Main export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main export ───────────────────────────────────────────────────────────────
 
 export default function AdminPanel({ onExit }: { onExit: () => void }) {
   const [authed, setAuthed] = useState(false);
@@ -1425,7 +1521,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
               </p>
             </div>
             {tab === 'Dashboard'    && <Dashboard bookings={bookings} technicians={technicians} />}
-            {tab === 'Bookings'     && <BookingsTab bookings={bookings} setBookings={setBookings} />}
+            {tab === 'Bookings'     && <BookingsTab bookings={bookings} setBookings={setBookings} technicians={technicians} />}
             {tab === 'Technicians'  && <TechniciansTab technicians={technicians} setTechnicians={setTechnicians} />}
             {tab === 'Requests'     && (
               <RequestsTab

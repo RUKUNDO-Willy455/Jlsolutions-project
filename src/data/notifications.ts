@@ -26,6 +26,15 @@ function shortDay(iso: string): string {
   return iso.slice(8, 10) + ' ' + iso.slice(5, 7) + ' ' + iso.slice(0, 4);
 }
 
+/** Renders a stored ISO timestamp like the rest of the feed; falls back as-is. */
+function stampFrom(iso: string | null | undefined, fallback: string): string {
+  if (!iso) return fallback;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
 // ─── Derivation ───────────────────────────────────────────────────────────────
 
 /**
@@ -85,15 +94,25 @@ export function deriveAdminNotifications(
     .forEach((b) => {
       const when = `${shortDay(b.date)} · ${b.time}`;
       if (b.status === 'pending') {
-        list.push({
-          id: `bk-pending-${b.id}`,
-          role: 'admin',
-          tab: 'Bookings',
-          title: `${b.id} awaits confirmation`,
-          body: `${b.name} · ${b.service} · ${when}`,
-          createdAt: b.createdAt || stamp,
-          level: 'action',
-        });
+        list.push(b.technicianId
+          ? {
+              id: `bk-pending-${b.id}`,
+              role: 'admin',
+              tab: 'Bookings',
+              title: `${b.id} — ${b.technician} assigned, awaiting confirmation`,
+              body: `${b.name} · ${b.service} · ${when}`,
+              createdAt: b.createdAt || stamp,
+              level: 'action',
+            }
+          : {
+              id: `bk-unassigned-${b.id}`,
+              role: 'admin',
+              tab: 'Bookings',
+              title: `${b.id} needs a technician`,
+              body: `${b.name} · ${b.service} · ${when}`,
+              createdAt: b.createdAt || stamp,
+              level: 'action',
+            });
       } else if (b.status === 'confirmed') {
         list.push({
           id: `bk-confirmed-${b.id}`,
@@ -151,12 +170,22 @@ export function deriveTechNotifications(
   const myRequests = requests.filter((r) => r.technicianId === tech.id);
 
   [...myBookings]
-    .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+    .sort((a, b) => (b.assignedAt || b.createdAt || '').localeCompare(a.assignedAt || a.createdAt || ''))
     .forEach((b) => {
-      // Technicians only hear about a booking once the admin confirms it.
-      if (b.status === 'pending') return;
       const when = `${shortDay(b.date)} · ${b.time}`;
-      if (b.status === 'confirmed') {
+      if (b.status === 'pending') {
+        // The admin assigned this job but has not confirmed it yet — the
+        // technician hears about it the moment `technicianId` is set.
+        list.push({
+          id: `assigned-new-${b.id}`,
+          role: 'tech',
+          tab: 'Dashboard',
+          title: `New assignment — ${b.id}`,
+          body: `${b.name} · ${b.service} · ${when}`,
+          createdAt: stampFrom(b.assignedAt || b.createdAt, stamp),
+          level: 'action',
+        });
+      } else if (b.status === 'confirmed') {
         list.push({
           id: `assigned-confirmed-${b.id}`,
           role: 'tech',

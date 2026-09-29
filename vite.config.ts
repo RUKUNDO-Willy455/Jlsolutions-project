@@ -48,6 +48,9 @@ react(),
       watch: {
         ignored: [
           '**/.figma/**',
+          // The SQLite WAL is written on every request; watching it would
+          // trigger a full reload loop while the API server is running.
+          '**/server/data/**',
         ],
       },
     },

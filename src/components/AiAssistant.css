@@ -302,6 +302,11 @@
 
 .ai-chat__line { margin: 0; }
 .ai-chat__line + .ai-chat__line { margin-top: 0.35rem; }
+.ai-chat__heading {
+  margin: 0.45rem 0 0.1rem;
+  color: #f2ede6;
+  font-weight: 600;
+}
 .ai-chat__bullet {
   margin: 0;
   padding-left: 0.9rem;
@@ -318,6 +323,29 @@
 .ai-msg--user .ai-chat__strong { color: #ffffff; }
 .ai-chat__em { font-style: italic; color: #93b8f7; }
 .ai-msg--user .ai-chat__em { color: #dbeafe; }
+/* The bubbles render as .ai-msg__bubble, so this is the selector that matches. */
+.ai-msg__bubble a { color: #93b8f7; text-decoration: underline; text-underline-offset: 2px; }
+.ai-chat__inline-code,
+.ai-chat__code code {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 0.78em;
+}
+.ai-chat__inline-code {
+  padding: 0.08rem 0.28rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.28);
+}
+.ai-chat__code {
+  max-width: 100%;
+  margin: 0.55rem 0;
+  padding: 0.7rem;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: #090909;
+  white-space: pre;
+}
 
 /* Typing dots */
 .ai-typing {
@@ -369,6 +397,12 @@
   border-color: #3b82f6;
   color: #ffffff;
   transform: translateY(-1px);
+}
+.ai-chips button:disabled,
+.ai-quick button:disabled {
+  opacity: 0.45;
+  cursor: wait;
+  transform: none;
 }
 
 /* ── Composer ────────────────────────────────────────────────── */

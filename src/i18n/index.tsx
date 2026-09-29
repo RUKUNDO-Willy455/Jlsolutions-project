@@ -77,7 +77,7 @@ const en: Record<string, string> = {
   'nav.pricing': 'Pricing',
   'nav.clients': 'Clients',
   'nav.testimonials': 'Testimonials',
-  'nav.book': 'Book a Technician',
+  'nav.book': 'Book a Visit',
   'nav.track': 'Track Booking',
   'nav.contact': 'Contact',
   'nav.contactUs': 'Contact Us',
@@ -171,9 +171,7 @@ const en: Record<string, string> = {
   'book.title': 'Schedule your',
   'book.titleEm': 'expert today.',
   'book.sub':
-    'Pick your preferred technician, service type, and time window. We confirm within 30 minutes.',
-  'book.bestAvailable': 'Best Available',
-  'book.autoAssign': 'Auto-assign technician',
+    'Tell us the service and the window that suits you. Our coordinator assigns the best available technician and confirms within 30 minutes.',
   'book.available': 'Available',
   'book.booked': 'Booked',
   'book.busy': 'Busy · slot taken',
@@ -219,7 +217,7 @@ const en: Record<string, string> = {
   'book.review': 'Review Booking →',
   'book.summary': 'Booking Summary',
   'book.technician': 'Technician',
-  'book.notSelected': 'Not selected',
+  'book.assignedLater': 'Assigned by our team after confirmation',
   'book.confirm': 'Confirm Booking',
   'book.confirmNote':
     'We confirm within 30 minutes. You can also share this booking via WhatsApp after confirming.',
@@ -245,7 +243,9 @@ const en: Record<string, string> = {
   'book.mapLoading': 'Loading Rwanda map…',
 
   // Booking — availability, summary & print
-  'book.autoAssignHint': '{name} — {role} will be auto-assigned for this slot.',
+  'book.autoAssigned':
+    'No need to choose: our coordinator assigns the technician who is free for your slot and confirms the visit with you before it is locked in.',
+  'book.techsAvailable': '{count} technician(s) free for this slot.',
   'book.slotFull': 'This slot is fully booked — please pick another time.',
   'book.srv': 'Service',
   'book.loc': 'Location',
@@ -288,7 +288,7 @@ const en: Record<string, string> = {
   'track.fieldDesc': 'Booking reference & phone',
   'track.findTitle': 'Find your booking',
   'track.refLabel': 'Booking reference',
-  'track.refPlaceholder': 'e.g. BK003',
+  'track.refPlaceholder': 'e.g. JL003',
   'track.phoneLabel': 'Phone number',
   'track.phonePlaceholder': 'e.g. 0788 123 456',
   'track.submit': 'Track my booking',
@@ -742,9 +742,11 @@ const en: Record<string, string> = {
   'priv.2t': '2. Information we collect',
   'priv.2b':
     'We collect only what you choose to give us: your name, phone number, email, service location and appointment details when you book a service or send a message. We do not collect payment card numbers on this website.',
+  'priv.2c':
+    'When you use the AI assistant, your message and a short portion of the current chat are sent to our AI service provider to generate a response. Do not include passwords, card details, government identifiers, or other sensitive information in chat.',
   'priv.3t': '3. How we use it',
   'priv.3b':
-    'Your information is used to schedule and deliver your service, confirm appointments, respond to enquiries, and improve our service quality. We never sell your personal data to third parties.',
+    'Your information is used to schedule and deliver your service, confirm appointments, respond to enquiries, answer AI chat requests, and improve our service quality. We never sell your personal data to third parties.',
   'priv.4t': '4. Local storage',
   'priv.4b':
     "We use your browser's local storage to remember your in-progress booking and saved preferences on this device. You can clear this at any time through your browser settings.",
@@ -763,7 +765,7 @@ const fr: typeof en = {
   'nav.pricing': 'Tarifs',
   'nav.clients': 'Clients',
   'nav.testimonials': 'Témoignages',
-  'nav.book': 'Réserver un technicien',
+  'nav.book': 'Réserver une visite',
   'nav.track': 'Suivre ma réservation',
   'nav.contact': 'Contact',
   'nav.contactUs': 'Contactez-nous',
@@ -853,9 +855,7 @@ const fr: typeof en = {
   'book.title': 'Planifiez votre',
   'book.titleEm': 'expert aujourd\'hui.',
   'book.sub':
-    'Choisissez votre technicien préféré, le type de service et la plage horaire. Nous confirmons sous 30 minutes.',
-  'book.bestAvailable': 'Meilleur disponible',
-  'book.autoAssign': 'Attribution automatique',
+    'Indiquez-nous le service et la plage horaire qui vous convient. Notre coordinateur affecte le meilleur technicien disponible et confirme sous 30 minutes.',
   'book.available': 'Disponible',
   'book.booked': 'Occupé',
   'book.busy': 'Pris · créneau occupé',
@@ -901,7 +901,7 @@ const fr: typeof en = {
   'book.review': 'Vérifier la réservation →',
   'book.summary': 'Résumé de la réservation',
   'book.technician': 'Technicien',
-  'book.notSelected': 'Non sélectionné',
+  'book.assignedLater': 'Affecté par notre équipe après confirmation',
   'book.confirm': 'Confirmer la réservation',
   'book.confirmNote':
     'Nous confirmons sous 30 minutes. Vous pouvez aussi partager cette réservation via WhatsApp après confirmation.',
@@ -924,7 +924,9 @@ const fr: typeof en = {
   'book.mapRetry': 'Réessayer',
   'book.mapLoading': 'Chargement de la carte du Rwanda…',
 
-  'book.autoAssignHint': '{name} — {role} sera attribué automatiquement pour ce créneau.',
+  'book.autoAssigned':
+    'Rien à choisir : notre coordinateur affecte le technicien libre sur votre créneau et vous confirme la visite avant qu\'elle ne soit verrouillée.',
+  'book.techsAvailable': '{count} technicien(s) disponible(s) sur ce créneau.',
   'book.slotFull': 'Ce créneau est complet — veuillez en choisir un autre.',
   'book.srv': 'Service',
   'book.loc': 'Lieu',
@@ -960,7 +962,7 @@ const fr: typeof en = {
   'track.fieldDesc': 'Référence & téléphone',
   'track.findTitle': 'Retrouver votre réservation',
   'track.refLabel': 'Référence de réservation',
-  'track.refPlaceholder': 'ex. BK003',
+  'track.refPlaceholder': 'ex. JL003',
   'track.phoneLabel': 'Numéro de téléphone',
   'track.phonePlaceholder': 'ex. 0788 123 456',
   'track.submit': 'Suivre ma réservation',
@@ -1392,9 +1394,11 @@ const fr: typeof en = {
   'priv.2t': '2. Informations que nous collectons',
   'priv.2b':
     'Nous ne collectons que ce que vous choisissez de nous donner : votre nom, numéro de téléphone, e-mail, lieu de service et détails du rendez-vous lorsque vous réservez un service ou envoyez un message. Nous ne collectons pas les numéros de cartes de paiement sur ce site.',
+  'priv.2c':
+    "Lorsque vous utilisez l'assistant IA, votre message et une courte partie de la conversation en cours sont transmis à notre fournisseur de service IA afin de générer une réponse. N'indiquez pas de mots de passe, de données de carte, de documents d'identité officiels ou toute autre information sensible dans le chat.",
   'priv.3t': '3. Comment nous les utilisons',
   'priv.3b':
-    'Vos informations servent à planifier et fournir votre service, confirmer les rendez-vous, répondre aux demandes et améliorer la qualité de notre service. Nous ne vendons jamais vos données personnelles à des tiers.',
+    'Vos informations servent à planifier et fournir votre service, confirmer les rendez-vous, répondre aux demandes, traiter les demandes de chat IA et améliorer la qualité de notre service. Nous ne vendons jamais vos données personnelles à des tiers.',
   'priv.4t': '4. Stockage local',
   'priv.4b':
     'Nous utilisons le stockage local de votre navigateur pour mémoriser votre réservation en cours et vos préférences sur cet appareil. Vous pouvez tout effacer à tout moment via les paramètres de votre navigateur.',
@@ -1503,9 +1507,7 @@ const rw: typeof en = {
   'book.title': 'Teganya umwarimu',
   'book.titleEm': 'wawe nonaha.',
   'book.sub':
-    'Hitamo umwarimu ushaka, ubwoko bwa serivisi n\'igihe. Dukuhamya iminota 30.',
-  'book.bestAvailable': 'Ubuhari bwiza',
-  'book.autoAssign': 'Kwihitirawa ubwako',
+    'Tumira ubwoko bwa serivisi n\'igihe gishimira. Umuhoro wacu ahitamo umwarimu uburira kandi akabahamya mu minota 30.',
   'book.available': 'Arahari',
   'book.booked': 'Afite gahunda',
   'book.busy': 'Yakoreshejwe · igihe kigiye',
@@ -1551,7 +1553,7 @@ const rw: typeof en = {
   'book.review': 'Suzuma gahunda →',
   'book.summary': 'Incamake yigahunda',
   'book.technician': 'Umwarimu',
-  'book.notSelected': 'Ntabwo wahisemo',
+  'book.assignedLater': 'Abahitwa n\'ikigo cyacu nyuma yo kuyemeza',
   'book.confirm': 'Emeza gahunda',
   'book.confirmNote':
     'Dukuhamya iminota 30. Ushobora no guhana iyi gahunda kuri WhatsApp nyuma yo kuyemeza.',
@@ -1574,7 +1576,9 @@ const rw: typeof en = {
   'book.mapRetry': 'Ongera ugerageze',
   'book.mapLoading': 'Biracyiboneza ikarita ya Rwanda…',
 
-  'book.autoAssignHint': '{name} — {role} azateganyirizwa muri iki gihe.',
+  'book.autoAssigned':
+    'Ntakwiye guhitamo: umuhoro wacu ahitamo umwarimu uburira kuri iki gihe, akabahamya mbere yo kugenda ngo igahunda cyemejwe.',
+  'book.techsAvailable': 'Abashakashatsi {count} bari kuri iki gihe.',
   'book.slotFull': 'Iki gihe cyuzuye — hitamo ikindi.',
   'book.srv': 'Serivisi',
   'book.loc': 'Aho biri',
@@ -1610,7 +1614,7 @@ const rw: typeof en = {
   'track.fieldDesc': 'Nomero ya gahunda & telefone',
   'track.findTitle': 'Shakisha gahunda yawe',
   'track.refLabel': 'Nomero ya gahunda',
-  'track.refPlaceholder': 'urug. BK003',
+  'track.refPlaceholder': 'urug. JL003',
   'track.phoneLabel': 'Nomero ya telefone',
   'track.phonePlaceholder': 'urug. 0788 123 456',
   'track.submit': 'Kurikirana gahunda yanjye',
@@ -2042,9 +2046,11 @@ const rw: typeof en = {
   'priv.2t': '2. Amakuru twega',
   'priv.2b':
     'Twega gusa icyo wihitiye kuduha: izina, nomero ya telefone, imeyili, aho serivisi izakorwa n\'ibisobanuro by\'igikorwa iyo usaba serivisi cyangwa wohereza ubutumwa. Ntabwo twega nomero z\'amakarita yo kwishyura kuri uru rubuga.',
+  'priv.2c':
+    "Iyo ukoresha mugufu wa AI, ubutumwa bwawe n'ice cyuzuye cyo iganiro kiratangira ribohereza kuri serivisi yacu ya AI kugira ngo isubize. Ntukunze ubika ibinyabiziga (password), amakarita, impapuro za leta cyangwa makuru y'umutekano mu kiganiro.",
   'priv.3t': '3. Uko tuyakoresha',
   'priv.3b':
-    'Amakuru yawe akoreshwa kugira ngo gahunda itangirwe, kwemeza ibikorwa, gusubiza ibibazo no kunoza ubwiza bw\'imurimo wacu. Ntabwo twuba amakuru yawe umutwe wa gatatu.',
+    'Amakuru yawe akoreshwa kugira ngo gahunda itangirwe, kwemeza ibikorwa, gusubiza ibibazo, gusubiza ibibazo by\'ikiganiro cya AI no kunoza ubwiza bw\'imurimo wacu. Ntabwo twuba amakuru yawe umutwe wa gatatu.',
   'priv.4t': '4. Kubika mu kinyabubasha (local storage)',
   'priv.4b':
     'Dukoresha local storage ya browser yawe kugira ngo twibuke gahunda yawe ikirimo kugenda n\'ibyo wahisemo kuri iyi mashini. Ushobora kubikuraho icyo gihe binyuze mu mirongo ya browser yawe.',

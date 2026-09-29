@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Page from '../components/Page';
 import { Phone, Mail, MessageCircle, MapPin, Clock3, ArrowRight } from 'lucide-react';
-import { PHONE_LINKS, SITE } from '../data/site';
+import { PHONE_LINKS, SITE, SUPPORT_MAIL_LINK } from '../data/site';
 import { useI18n } from '../i18n';
 
 export default function ContactPage() {
@@ -74,7 +74,9 @@ export default function ContactPage() {
                 label: t('contact.email'),
                 value: SITE.email,
                 sub: t('contact.emailSub'),
-                href: PHONE_LINKS.mail,
+                // Pre-filled "describe the issue" template, so the visitor does
+                // not have to write the report from scratch.
+                href: SUPPORT_MAIL_LINK,
                 external: false,
               },
               {
