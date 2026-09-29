@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useEditorStore, STORAGE_KEYS, seedTestimonials, seedRatings, seedNotifications } from '../data/editor';
 import type { Testimonial, Rating, AdminNotification } from '../data/editor';
+import { apiJson } from '../data/api';
 import { useI18n } from '../i18n';
 
 function Stars({ count, className }: { count: number; className?: string }) {
@@ -23,7 +24,8 @@ function InlineRateForm({
   onSave,
 }: {
   onCancel: () => void;
-  onSave: (rating: number, name: string, details: { title: string; company: string; quote: string; project: string }) => void;
+  /** Resolves true once the server has stored the review, false on failure. */
+  onSave: (rating: number, name: string, details: { title: string; company: string; quote: string; project: string }) => Promise<boolean>;
 }) {
   const { t } = useI18n();
   const [stars, setStars] = useState(0);
@@ -34,10 +36,21 @@ function InlineRateForm({
   const [quote, setQuote] = useState('');
   const [project, setProject] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function submit() {
-    if (stars < 1 || !name.trim()) return;
-    onSave(stars, name.trim(), { title: title.trim(), company: company.trim(), quote: quote.trim(), project: project.trim() });
+  async function submit() {
+    if (stars < 1 || !name.trim() || saving) return;
+    setSaving(true);
+    setError(null);
+    // The parent only resolves once the server has stored the review, so the
+    // thank-you message can never claim success for a submission that failed.
+    const ok = await onSave(stars, name.trim(), { title: title.trim(), company: company.trim(), quote: quote.trim(), project: project.trim() });
+    setSaving(false);
+    if (!ok) {
+      setError(t('api.reviewFailed'));
+      return;
+    }
     setSubmitted(true);
   }
 
@@ -160,13 +173,19 @@ function InlineRateForm({
         </div>
       )}
 
+      {error && (
+        <p className="text-xs text-red-400 leading-relaxed" role="alert">
+          {error}
+        </p>
+      )}
+
       <div className="flex gap-3">
         <button
           onClick={submit}
-          disabled={stars < 1 || !name.trim()}
+          disabled={stars < 1 || !name.trim() || saving}
           className="btn-ember px-6 py-2.5 rounded-[2px] text-xs disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {t('td.mSubmit')}
+          {saving ? t('book.sending') : t('td.mSubmit')}
         </button>
         <button onClick={onCancel} className="btn-ghost px-6 py-2.5 rounded-[2px] text-xs">{t('td.mCancel')}</button>
       </div>
@@ -202,7 +221,39 @@ export default function TestimonialsDetail() {
     { value: `${recommend}%`, label: t('td.stat3') },
   ];
 
-  function saveRating(rating: number, name: string, details: { title: string; company: string; quote: string; project: string }) {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  /**
+   * Submits a review through the server.
+   *
+   * This used to append to local state, which meant every review left by a
+   * visitor sat in that one browser until an admin happened to open the console
+   * on the same device — the shared-review feature silently did not work. The
+   * server stores it as unpublished and the admin approves it in the console.
+   */
+  async function saveRating(
+    rating: number,
+    name: string,
+    details: { title: string; company: string; quote: string; project: string },
+  ): Promise<boolean> {
+    setSubmitError(null);
+    try {
+      await apiJson('/api/reviews', {
+        method: 'POST',
+        body: {
+          name,
+          rating,
+          title: details.title,
+          company: details.company,
+          quote: details.quote,
+          project: details.project,
+        },
+      });
+    } catch (err) {
+      setSubmitError((err as Error).message);
+      return false;
+    }
+    // Optimistic local echo so the stars update immediately for this visitor.
     const now = new Date().toISOString();
     const r: Rating = { id: `r-${Date.now()}`, name, rating, date: now.split('T')[0] };
     setRatings(prev => [...prev, r]);
@@ -233,6 +284,7 @@ export default function TestimonialsDetail() {
       };
       setNotifications(prev => [notice, ...prev]);
     }
+    return true;
   }
 
   return (

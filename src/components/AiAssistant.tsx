@@ -7,6 +7,7 @@ import {
   type Suggestion,
 } from "../data/assistant"
 import { SITE } from "../data/site"
+import { apiUrl } from "../data/api"
 import "./AiAssistant.css"
 
 interface Msg {
@@ -195,7 +196,7 @@ export default function AiAssistant() {
     abortRef.current = controller
 
     try {
-      const response = await fetch("/api/assistant", {
+      const response = await fetch(apiUrl("/api/assistant"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: clean, history }),

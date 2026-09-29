@@ -275,10 +275,71 @@ COMMIT;
 
 ### 7. Security notes
 
-- Technician passwords are now stored as **scrypt hashes** in the DB and never
-  returned by the API. The admin UI shows "password protected" instead of plaintext.
-- The admin credential lives **server-side** (`ADMIN_USER` / `ADMIN_PASSWORD`
-  env, dev defaults `admin` / `jeanluc@2024`). The client falls back to a local
-  check only when the API is unreachable.
-- Collection writes are still open to any visitor (no table-level auth yet);
-  components could be hardened with admin/technician tokens before going live.
+Technician passwords are stored as **scrypt hashes** in the DB and are never
+returned by the API. The admin UI shows "password protected" instead of
+plaintext. Everything below is enforced by `server/index.js`.
+
+**Authentication.** Admin and technician logins are verified server-side and
+exchange the password for a short-lived session token (HMAC-SHA256, 12 h). The
+browser stores the token and sends it as `Authorization: Bearer …`; the password
+is never sent again. There is deliberately no shared secret in the bundle — any
+secret in client code is public, so it cannot be a security boundary.
+
+**Authorization.** Which reads are public, and why:
+
+| Endpoint | Access | Reason |
+| --- | --- | --- |
+| `GET /api/health` | public | liveness probe |
+| `GET /api/founder`, `GET /api/testimonials`, `GET /api/ratings` | public | marketing content the site renders |
+| `GET /api/technicians` (no token) | public, **reduced** | `id`, `name`, `role`, `available`, `photoUrl` only — no usernames, phones or emails |
+| `GET /api/availability` | public | `{technicianId, date, time, status}` only — the booking form needs the schedule, not the customers |
+| `GET /api/bookings` | **admin or technician** | holds names, phone numbers, addresses and map pins |
+| `GET /api/ratings` writes, all other writes | **admin or technician** | |
+| `POST /api/bookings` | public, rate limited | booking form |
+| `POST /api/reviews` | public, rate limited | always stored `visible: false` for admin approval |
+| `GET /api/bookings/track?ref=&phone=` | public, rate limited | returns only the matching booking, and only when reference **and** phone both check out |
+
+**No destructive collection writes.** `PUT /api/<collection>` merges by `id`
+rather than replacing the table. Previously any browser that PUT a stale or
+empty array — a second device, a first-time visitor, a tab that had loaded
+before an edit — silently deleted every row it did not know about. Deletes are
+now explicit: `DELETE /api/<collection>/:id`.
+
+**References are minted server-side.** The booking form used to derive `JLxxx`
+from its own `localStorage` counter, so two people booking at the same moment
+were handed the same reference and one of them could never be tracked. The
+server allocates it inside the insert.
+
+**Production refuses to start insecurely.** With `NODE_ENV=production` the API
+exits if `ADMIN_PASSWORD` is still the documented default or `SESSION_SECRET` is
+unset. The password is not logged in production.
+
+**Rate limits.** Admin login 8 / 15 min, technician login 10 / 15 min, booking
+create 10 / 10 min, review submit 5 / 10 min, track lookup 20 / 10 min, keyed by
+`X-Forwarded-For` where a proxy provides it.
+
+### 8. Deploying so changes are actually shared
+
+The site is a static front end; the API is the only writer. If they are not both
+running, the app still works but **each browser keeps its own copy** — which is
+what makes an admin change appear on one PC and nowhere else. `ApiStatusBanner`
+warns the user whenever the API is unreachable so this is never silent.
+
+1. **Deploy the API** with a persistent disk (the database must survive deploys):
+   - Render: `render.yaml` is a ready Blueprint. Use a **paid** plan — free
+     instances have no persistent disk. Set `ADMIN_PASSWORD` (and let
+     `SESSION_SECRET` be generated) in the dashboard.
+   - Railway: `railway.json` sets the start command and health check. Attach a
+     volume and set `JLS_DB` to a path inside it, then set `ADMIN_PASSWORD` and
+     `SESSION_SECRET`.
+   - Fly: same requirements — a volume mounted at `/var/data`, `JLS_DB=/var/data/jls.db`.
+2. **Point the front end at it** by setting `VITE_API_URL` to the API's public
+   origin in the Netlify build environment, e.g.
+   `https://jls-api.onrender.com`. Leave it unset locally — Vite proxies `/api`
+   to the local server.
+3. **Verify** `https://<api-host>/api/health` returns `{"ok":true}`, then book a
+   test job on the live site and confirm it appears in the admin console from a
+   different device.
+
+Without step 1's persistent disk, the database resets on every deploy and the
+console will look like it lost everyone's data.

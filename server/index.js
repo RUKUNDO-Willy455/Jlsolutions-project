@@ -1,5 +1,6 @@
 import http from "node:http"
 import https from "node:https"
+import crypto from "node:crypto"
 import path from "node:path"
 import fs from "node:fs"
 import { fileURLToPath } from "node:url"
@@ -21,9 +22,29 @@ const DIST_DIR = path.join(__dirname, "..", "dist")
 
 if (fs.existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE)
 
-const PORT = parseInt(process.env.JLS_API_PORT || "3001", 10)
+const PORT = parseInt(process.env.PORT || process.env.JLS_API_PORT || "3001", 10)
+const NODE_ENV = process.env.NODE_ENV || "development"
+const IS_PROD = NODE_ENV === "production"
+const KNOWN_DEFAULT_ADMIN_PASSWORD = "jeanluc@2024"
 const ADMIN_USER = process.env.ADMIN_USER || "admin"
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "jeanluc@2024"
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || KNOWN_DEFAULT_ADMIN_PASSWORD
+const SESSION_SECRET = process.env.SESSION_SECRET || "jls-insecure-dev-secret"
+const SESSION_TTL_MS = 12 * 60 * 60 * 1000
+
+// A publicly reachable API must never boot with the documented defaults: that
+// password is in the git history, so anyone could wipe every booking.
+if (IS_PROD) {
+  const problems = []
+  if (ADMIN_PASSWORD === KNOWN_DEFAULT_ADMIN_PASSWORD)
+    problems.push("ADMIN_PASSWORD is still the default (jeanluc@2024) - set your own")
+  if (!process.env.SESSION_SECRET)
+    problems.push("SESSION_SECRET is not set - generate one with: openssl rand -hex 32")
+  if (problems.length) {
+    console.error("[api] Refusing to start with NODE_ENV=production:\n  - " + problems.join("\n  - "))
+    process.exit(1)
+  }
+}
+
 const EJO_API_KEY = process.env.EJO_API_KEY || ""
 const EJO_API_URL =
   process.env.EJO_API_URL || "https://api.ejolabs.com/api/v1/subiza"
@@ -35,6 +56,7 @@ const AI_CHAT_URL = EJO_API_KEY
   ? EJO_API_URL
   : `${OPENAI_BASE_URL}/chat/completions`
 const ASSISTANT_RATE_LIMITS = new Map()
+const RATE_LIMITS = new Map()
 const ASSISTANT_WINDOW_MS = 10 * 60 * 1000
 const ASSISTANT_MAX_REQUESTS = 20
 const ASSISTANT_MAX_MESSAGE_LENGTH = 4000
@@ -46,7 +68,7 @@ Your main job is to answer questions about this website's services, starting pri
 Use these website facts as the source of truth for company-specific claims:
 - Company: Jean Luc Solutions. Motto: Skills • Speed • Sustainability. Primary phone: 0789682414. Backup phone: 0724238710. Email: niwemimi99@gmail.com. WhatsApp uses the primary phone.
 - Coverage: primarily Kigali, with scheduled visits to Musanze, Huye, and Rubavu.
-- Working hours: Sunday–Thursday 07:00–19:00; Friday 08:00–13:00; public holidays are emergency call-outs only. The team aims to respond to enquiries within 30 minutes during working hours.
+- Working hours: Sunday–Thursday 07:00–19:00; Friday 08:00–13:00; public holidays are emergency call-outs only. The team aims to respond to enquiries within 30 minutes during working hours.
 - Public services and starting prices: Smart Electrical Installation from $60 / 75,000 RWF; CCTV Camera Installation from $35 / 45,000 RWF; Solar System Installation from $120 / 155,000 RWF; Fire Detector Systems from $50 / 65,000 RWF; TV Mounting from $25 / 32,000 RWF; Computer Maintenance & Lab Installation from $30 / 40,000 RWF; Sound System Installation from $40 / 50,000 RWF; Network / Smart Technology from $45 / 58,000 RWF.
 - The booking form also accepts CCTV & Surveillance Installation, PCB Repair & Diagnostics, Network Infrastructure Setup, Access Control Systems, Preventive Maintenance, Emergency Response Call-Out, and System Audit & Consultation.
 - Process: site survey, system design, installation, then commissioning and handover with testing, training, and documentation.
@@ -98,14 +120,20 @@ function readBody(req, maxBytes = 64 * 1024 * 1024) {
   })
 }
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  // Authorization is required: writes are authenticated with a bearer token.
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Max-Age": "600",
+}
+
 function send(res, code, payload) {
   const body = JSON.stringify(payload)
   res.writeHead(code, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    ...CORS_HEADERS,
   })
   res.end(body)
 }
@@ -113,6 +141,82 @@ function send(res, code, payload) {
 function badRequest(res, message) {
   send(res, 400, { error: message })
 }
+
+// ---------------------------------------------------------------------------
+// Sessions
+//
+// The admin/technician password is verified server-side and exchanged for a
+// short-lived signed token. The password itself never reaches the browser, so
+// (unlike a shared secret compiled into the bundle) this is a real boundary:
+// to write anything you must actually authenticate.
+// ---------------------------------------------------------------------------
+
+const b64url = (buf) => Buffer.from(buf).toString("base64url")
+
+function signSession(payload) {
+  const body = b64url(JSON.stringify(payload))
+  const sig = crypto.createHmac("sha256", SESSION_SECRET).update(body).digest("base64url")
+  return `${body}.${sig}`
+}
+
+function verifySession(token) {
+  if (typeof token !== "string" || !token.includes(".")) return null
+  const [body, sig] = token.split(".")
+  const expected = crypto.createHmac("sha256", SESSION_SECRET).update(body).digest("base64url")
+  const a = Buffer.from(sig)
+  const b = Buffer.from(expected)
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null
+  try {
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"))
+    if (!payload?.exp || Date.now() > payload.exp) return null
+    return payload
+  } catch {
+    return null
+  }
+}
+
+function readToken(req) {
+  const header = req.headers["authorization"]
+  if (typeof header === "string" && header.toLowerCase().startsWith("bearer ")) {
+    return header.slice(7).trim()
+  }
+  return ""
+}
+
+/** Returns the verified session, or null (and answers 401 when not authenticated). */
+function requireAuth(req, res) {
+  const session = verifySession(readToken(req))
+  if (!session) {
+    send(res, 401, { error: "Sign in to continue." })
+    return null
+  }
+  return session
+}
+
+// ---------------------------------------------------------------------------
+// Rate limiting (shared by the assistant, the auth endpoints and lookups)
+// ---------------------------------------------------------------------------
+
+function allowRequest(req, res, limit, windowMs, bucket = "generic") {
+  const now = Date.now()
+  const key = `${bucket}:${assistantClientKey(req)}`
+  const store = RATE_LIMITS.get(key)
+  const entry = store && now - store.startedAt < windowMs ? store : { startedAt: now, count: 0 }
+  entry.count += 1
+  RATE_LIMITS.set(key, entry)
+  if (RATE_LIMITS.size > 5000) {
+    for (const [k, v] of RATE_LIMITS) if (now - v.startedAt >= windowMs) RATE_LIMITS.delete(k)
+  }
+  const allowed = entry.count <= limit
+  if (!allowed) res.setHeader("Retry-After", String(Math.ceil((entry.startedAt + windowMs - now) / 1000)))
+  return allowed
+}
+
+function tooManyRequests(res) {
+  send(res, 429, { error: "Too many attempts. Please wait a moment and try again." })
+  return true
+}
+
 
 function collectionGet(storeRes, res) {
   send(res, 200, storeRes.all())
@@ -129,6 +233,69 @@ function collectionPut(store, list, res, { sanitize } = {}) {
   }
   const out = sanitize ? sanitize(store.all()) : store.all()
   return send(res, 200, out)
+}
+
+// Collection-level UPSERT (merge) for the same client shape.
+//
+// The panels hold a whole collection in React state and PUT it back. With a
+// plain replace, any client whose copy is stale (another device, another admin,
+// a first-time visitor with empty storage) silently deletes every row it does
+// not know about. So: rows absent from the payload are preserved, rows present
+// are updated, new ids are inserted. Deleting is always explicit, via
+// DELETE /api/<collection>/:id.
+function collectionMerge(store, incoming, res, { sanitize } = {}) {
+  if (!Array.isArray(incoming)) return badRequest(res, "Expected an array.")
+  try {
+    const current = store.all() ?? []
+    const currentById = new Map(current.map((row) => [String(row.id), row]))
+    const incomingById = new Map()
+    for (const item of incoming) {
+      const id = String(item?.id ?? "").trim()
+      if (!id) return badRequest(res, "Every item needs an id.")
+      incomingById.set(id, { ...(currentById.get(id) ?? {}), ...item, id })
+    }
+    const merged = [
+      ...current.map((row) => incomingById.get(String(row.id)) ?? row),
+      ...[...incomingById.values()].filter((item) => !currentById.has(String(item.id))),
+    ]
+    store.replace(merged)
+  } catch (err) {
+    return send(res, 500, { error: `Database error: ${err.message}` })
+  }
+  const out = sanitize ? sanitize(store.all()) : store.all()
+  return send(res, 200, out)
+}
+
+function collectionDelete(store, id, res, { sanitize } = {}) {
+  try {
+    const current = store.all() ?? []
+    const next = current.filter((row) => String(row.id) !== String(id))
+    if (next.length === current.length) return send(res, 404, { error: "Not found" })
+    store.replace(next)
+  } catch (err) {
+    return send(res, 500, { error: `Database error: ${err.message}` })
+  }
+  const out = sanitize ? sanitize(store.all()) : store.all()
+  return send(res, 200, out)
+}
+
+/** Mints the next reference, accepting the legacy "BK" and current "JL" forms. */
+function nextBookingRef() {
+  const rows = db.prepare("SELECT id FROM bookings").all()
+  let max = 0
+  for (const row of rows) {
+    const match = /^(?:BK|JL)(\d+)$/.exec(String(row.id ?? ""))
+    if (match) max = Math.max(max, parseInt(match[1], 10))
+  }
+  return `JL${String(max + 1).padStart(3, "0")}`
+}
+
+/** Compares phone numbers by their last 9 digits, tolerant of spacing/prefix. */
+function samePhone(a, b) {
+  const digits = (v) => String(v ?? "").replace(/\D/g, "")
+  const x = digits(a).slice(-9)
+  const y = digits(b).slice(-9)
+  return x.length >= 4 && y.length >= 4 && x === y
 }
 
 function assistantClientKey(req) {
@@ -394,6 +561,138 @@ async function handleApi(req, res, url) {
       return true
     }
 
+    // Public client-review submission from the "Rate us" form. The review is
+    // always stored with visible:false, so nothing a stranger writes is ever
+    // published without the admin approving it in the console. Appending here
+    // (rather than letting the browser PUT the collection) is what stops a
+    // visitor from rewriting or deleting existing reviews.
+    if (seg.length === 2 && seg[1] === "reviews" && req.method === "POST") {
+      if (!allowRequest(req, 5, 10 * 60 * 1000, "review")) return tooManyRequests(res)
+      const body = await readBody(req)
+      const name = String(body?.name ?? "").trim()
+      const rating = Math.round(Number(body?.rating))
+      if (!name) return badRequest(res, "Please tell us your name.")
+      if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
+        return badRequest(res, "Please choose a rating between 1 and 5.")
+      }
+      const now = new Date()
+      const stamp = now.toISOString()
+      const ratingRow = {
+        id: `r-${now.getTime()}`,
+        name,
+        rating,
+        date: stamp.slice(0, 10),
+      }
+      const quote = String(body?.quote ?? "").trim()
+      const pending = quote
+        ? {
+            id: `rv-${now.getTime()}`,
+            name,
+            title: String(body?.title ?? "").trim(),
+            company: String(body?.company ?? "").trim(),
+            quote,
+            rating,
+            project: String(body?.project ?? "").trim() || "Client Review",
+            year: stamp.slice(0, 4),
+            // Forced off regardless of what the client asked for.
+            visible: false,
+            createdAt: stamp,
+            source: "user",
+          }
+        : null
+      try {
+        RatingStore.replace([...RatingStore.all(), ratingRow])
+        if (pending) TestimonialStore.replace([...TestimonialStore.all(), pending])
+      } catch (err) {
+        return send(res, 500, { error: `Database error: ${err.message}` })
+      }
+      send(res, 201, { ok: true, rating: ratingRow, pending: Boolean(pending) })
+      return true
+    }
+
+    // Public booking creation. The reference is minted server-side so two
+    // visitors booking at the same moment can never be handed the same one,
+    // and so the client never has to read the whole collection to find a free
+    // number. This is the only unauthenticated write.
+    if (seg.length === 2 && seg[1] === "bookings" && req.method === "POST") {
+      if (!allowRequest(req, res, 10, 10 * 60 * 1000, "booking")) return tooManyRequests(res)
+      const body = await readBody(req)
+      const name = String(body?.name ?? "").trim()
+      const phone = String(body?.phone ?? "").trim()
+      if (!name || !phone) return badRequest(res, "Name and phone are required.")
+      const id = nextBookingRef()
+      const booking = {
+        id,
+        name,
+        phone,
+        service: String(body?.service ?? ""),
+        location: String(body?.location ?? ""),
+        date: String(body?.date ?? ""),
+        time: String(body?.time ?? ""),
+        technician: "Not assigned",
+        technicianId: "",
+        status: "pending",
+        createdAt: new Date().toISOString().slice(0, 10),
+        lat: body?.lat ?? null,
+        lng: body?.lng ?? null,
+        updates: [
+          {
+            id: `u${Date.now()}`,
+            text: "Booking received — awaiting confirmation. Our coordinator will call you shortly.",
+            from: "admin",
+            createdAt: new Date().toLocaleString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+        ],
+      }
+      try {
+        const merged = [booking, ...BookingStore.all()]
+        BookingStore.replace(merged)
+      } catch (err) {
+        return send(res, 500, { error: `Database error: ${err.message}` })
+      }
+      send(res, 201, booking)
+      return true
+    }
+
+    // Public, single-booking lookup. Deliberately does NOT expose the whole
+    // collection: every booking holds a name, phone number, address and map
+    // pin, and the tracking page is reachable by anyone.
+    if (seg.length === 3 && seg[1] === "bookings" && seg[2] === "track") {
+      if (req.method !== "GET") {
+        send(res, 405, { error: "Method not allowed" })
+        return true
+      }
+      if (!allowRequest(req, res, 20, 10 * 60 * 1000, "track")) return tooManyRequests(res)
+      const ref = String(url.searchParams.get("ref") ?? "").trim().toUpperCase()
+      const phone = String(url.searchParams.get("phone") ?? "").trim()
+      if (!ref || !phone) return badRequest(res, "A reference and phone number are required.")
+      const matches = BookingStore.all().filter(
+        (b) => String(b.id).toUpperCase() === ref && samePhone(b.phone, phone),
+      )
+      send(res, 200, matches)
+      return true
+    }
+
+    // Public, PII-free availability feed so the booking form can show how many
+    // technicians are free without downloading customer data.
+    if (seg.length === 2 && seg[1] === "availability" && req.method === "GET") {
+      const rows = BookingStore.all()
+        .filter((b) => ["pending", "confirmed", "completed"].includes(b.status))
+        .map((b) => ({
+          technicianId: b.technicianId,
+          date: b.date,
+          time: b.time,
+          status: b.status,
+        }))
+      send(res, 200, rows)
+      return true
+    }
+
     // Public read/write collections
     if (seg.length === 2) {
       const route = seg[1]
@@ -407,6 +706,17 @@ async function handleApi(req, res, url) {
         testimonials: [TestimonialStore],
         ratings: [RatingStore],
       }
+      // Marketing content is public to read (the site renders it). The team
+      // list is public too, but only as the reduced projection below. Every
+      // other read, and every write, needs a session.
+      const isWrite = req.method !== "GET" && req.method !== "HEAD"
+      const authed = !!verifySession(readToken(req))
+      const publicRead =
+        route === "founder" || route === "testimonials" || route === "technicians" || route === "ratings"
+      if (isWrite || !(authed || publicRead)) {
+        if (!requireAuth(req, res)) return true
+      }
+
       if (route === "founder") {
         if (req.method === "GET") {
           send(res, 200, FounderStore.get())
@@ -426,6 +736,23 @@ async function handleApi(req, res, url) {
         send(res, 405, { error: "Method not allowed" })
         return true
       }
+
+      // Public, PII-free team list for the booking form.
+      if (route === "technicians" && req.method === "GET" && !authed) {
+        send(
+          res,
+          200,
+          TechnicianStore.all().map((t) => ({
+            id: t.id,
+            name: t.name,
+            role: t.role,
+            available: t.available,
+            photoUrl: t.photoUrl,
+          })),
+        )
+        return true
+      }
+
       const entry = map[route]
       if (entry) {
         const [store, opts] = entry
@@ -435,10 +762,29 @@ async function handleApi(req, res, url) {
         }
         if (req.method === "PUT") {
           const body = await readBody(req)
-          collectionPut(store, body, res, opts ?? {})
+          collectionMerge(store, body, res, opts ?? {})
           return true
         }
         send(res, 405, { error: "Method not allowed" })
+        return true
+      }
+    }
+
+    // DELETE /api/<collection>/:id — the only way to remove a row.
+    if (seg.length === 3) {
+      const route = seg[1]
+      const map = {
+        technicians: [TechnicianStore, { sanitize: () => TechnicianStore.all() }],
+        bookings: [BookingStore],
+        "profile-requests": [RequestStore],
+        testimonials: [TestimonialStore],
+        ratings: [RatingStore],
+      }
+      const entry = map[route]
+      if (entry && req.method === "DELETE") {
+        if (!requireAuth(req, res)) return true
+        const [store, opts] = entry
+        collectionDelete(store, decodeURIComponent(seg[2]), res, opts ?? {})
         return true
       }
     }
@@ -450,6 +796,8 @@ async function handleApi(req, res, url) {
       seg[2] === "admin" &&
       req.method === "POST"
     ) {
+      // Throttled so the admin password cannot be brute-forced from the internet.
+      if (!allowRequest(req, res, 8, 15 * 60 * 1000, "auth-admin")) return tooManyRequests(res)
       const body = await readBody(req)
       const okUser = body.username === ADMIN_USER
       const okPass = body.password === ADMIN_PASSWORD
@@ -457,7 +805,12 @@ async function handleApi(req, res, url) {
         send(res, 401, { ok: false, error: "Invalid credentials" })
         return true
       }
-      send(res, 200, { ok: true, role: "admin" })
+      const token = signSession({
+        role: "admin",
+        sub: String(ADMIN_USER),
+        exp: Date.now() + SESSION_TTL_MS,
+      })
+      send(res, 200, { ok: true, role: "admin", token, expiresIn: SESSION_TTL_MS })
       return true
     }
 
@@ -468,6 +821,7 @@ async function handleApi(req, res, url) {
       seg[2] === "technician" &&
       req.method === "POST"
     ) {
+      if (!allowRequest(req, res, 10, 15 * 60 * 1000, "auth-tech")) return tooManyRequests(res)
       const body = await readBody(req)
       const username = String(body.username ?? "")
         .trim()
@@ -492,7 +846,12 @@ async function handleApi(req, res, url) {
         username: row.username,
         photoUrl: row.photo_url,
       }
-      send(res, 200, { ok: true, technician: t })
+      const token = signSession({
+        role: "tech",
+        sub: String(row.id),
+        exp: Date.now() + SESSION_TTL_MS,
+      })
+      send(res, 200, { ok: true, technician: t, token, expiresIn: SESSION_TTL_MS })
       return true
     }
 
@@ -549,11 +908,7 @@ export function createServer() {
     const url = new URL(req.url, `http://${req.headers.host ?? "localhost"}`)
     try {
       if (req.method === "OPTIONS") {
-        res.writeHead(204, {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        })
+        res.writeHead(204, CORS_HEADERS)
         return res.end()
       }
       const handled = await handleApi(req, res, url)
@@ -569,14 +924,12 @@ export function createServer() {
 export function start() {
   const server = createServer()
   server.listen(PORT, () => {
-    console.log(
-      `[api] Jean Luc Solutions API running  →  http://localhost:${PORT}`,
-    )
-    console.log(
-      `[api] Admin login (dev defaults): ${ADMIN_USER} / ${ADMIN_PASSWORD}`,
-    )
-    if (fs.existsSync(DIST_DIR))
-      console.log("[api] Serving production build from dist/")
+    console.log(`[api] Jean Luc Solutions API running  →  port ${PORT}`)
+    // Never print the password on a public deployment.
+    if (IS_PROD) console.log(`[api] Admin user: ${ADMIN_USER} (password from ADMIN_PASSWORD)`)
+    else console.log(`[api] Admin login (dev defaults): ${ADMIN_USER} / ${ADMIN_PASSWORD}`)
+    if (process.env.JLS_DB) console.log(`[api] Database: ${process.env.JLS_DB}`)
+    if (fs.existsSync(DIST_DIR)) console.log("[api] Serving production build from dist/")
   })
   return server
 }

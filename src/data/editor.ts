@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
+import { apiJson, writeToken, type SessionRole } from './api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -222,30 +223,18 @@ function persistLocal(key: string, value: unknown) {
   }
 }
 
-async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
-  });
-  const data = (await res.json()) as T & { error?: string };
-  if (!res.ok) {
-    const err = new Error(data?.error ?? `Request to ${url} failed (${res.status})`) as Error & { status?: number };
-    err.status = res.status;
-    throw err;
-  }
-  return data;
-}
-
-async function fetchCollection<T>(key: string): Promise<T | null> {
+async function fetchCollection<T>(key: string, role: SessionRole): Promise<T | null> {
   const endpoint = API_ENDPOINT[key];
   if (!endpoint) return null;
-  return apiJson<T>(endpoint);
+  return apiJson<T>(endpoint, { role });
 }
 
-async function pushCollection<T>(key: string, value: T): Promise<void> {
+/** Upserts the collection. The server merges by id, so a stale browser copy can
+ *  no longer delete rows another device added. */
+async function pushCollection<T>(key: string, value: T, role: SessionRole): Promise<void> {
   const endpoint = API_ENDPOINT[key];
   if (!endpoint) return;
-  await apiJson(endpoint, { method: 'PUT', body: JSON.stringify(value) });
+  await apiJson(endpoint, { method: 'PUT', body: value, role });
 }
 
 /** Authenticates the admin against the backend. Falls back to the legacy
@@ -253,14 +242,19 @@ async function pushCollection<T>(key: string, value: T): Promise<void> {
  *  never on an HTTP 401 (invalid credentials). */
 export async function authAdmin(username: string, password: string): Promise<boolean> {
   try {
-    const r = await apiJson<{ ok: boolean }>('/api/auth/admin', {
+    const r = await apiJson<{ ok: boolean; token?: string }>('/api/auth/admin', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: { username, password },
     });
-    return r.ok;
+    if (!r.ok) return false;
+    // Keep the signed session so later writes are authenticated. Without this
+    // the browser would have to resend the password on every save.
+    if (r.token) writeToken('admin', r.token);
+    return true;
   } catch (err) {
-    if ((err as Error & { status?: number }).status !== undefined) return false;
-    return username === 'admin' && password === 'jeanluc@2024';
+    const status = (err as { status?: number }).status;
+    if (status !== undefined && status !== 0) return false;
+    return false;
   }
 }
 
@@ -272,18 +266,44 @@ export async function authTechnician(
   fallbackTechs: Technician[],
 ): Promise<Technician | null> {
   try {
-    const r = await apiJson<{ ok: boolean; technician?: Technician }>('/api/auth/technician', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    });
-    return r.ok ? (r.technician ?? null) : null;
-  } catch (err) {
-    if ((err as Error & { status?: number }).status !== undefined) return null;
-    return (
-      fallbackTechs.find(
-        t => t.username.trim().toLowerCase() === username.trim().toLowerCase() && t.password === password,
-      ) ?? null
+    const r = await apiJson<{ ok: boolean; technician?: Technician; token?: string }>(
+      '/api/auth/technician',
+      { method: 'POST', body: { username, password } },
     );
+    if (!r.ok) return null;
+    if (r.token) writeToken('tech', r.token);
+    return r.technician ?? null;
+  } catch (err) {
+    // A 401/429 is a real answer from the server. Only a genuine network
+    // failure falls back, and even then the local check no longer grants a
+    // session — a technician working offline gets no write access, which is the
+    // honest outcome rather than silent divergence.
+    const status = (err as { status?: number }).status;
+    if (status !== undefined && status !== 0) return null;
+    void fallbackTechs;
+    return null;
+  }
+}
+
+/**
+ * Deletes one row.
+ *
+ * Collection writes are merges now, so a row is only ever removed when the
+ * admin asks for it explicitly. Routing removals through the server keeps the
+ * delete in the shared database instead of only in this browser's cache.
+ */
+export async function deleteRecord(
+  key: string,
+  id: string,
+  role: SessionRole = 'admin',
+): Promise<boolean> {
+  const endpoint = API_ENDPOINT[key];
+  if (!endpoint) return false;
+  try {
+    await apiJson(`${endpoint}/${encodeURIComponent(id)}`, { method: 'DELETE', role });
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -316,13 +336,17 @@ export function readEditorStore<T>(key: string, fallback: T): T {
  *   the backend (debounced PUT) — components keep using the same setter API as
  *   before, so the booking form, admin console and tech portal need no changes.
  */
-export function useEditorStore<T>(key: string, seed: T): [T, Dispatch<SetStateAction<T>>] {
+export function useEditorStore<T>(
+  key: string,
+  seed: T,
+  role: SessionRole = 'admin',
+): [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => load(key, seed));
   const initializedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-    fetchCollection<T>(key)
+    fetchCollection<T>(key, role)
       .then(data => {
         if (cancelled || data == null) return;
         initializedRef.current = true;
@@ -330,24 +354,26 @@ export function useEditorStore<T>(key: string, seed: T): [T, Dispatch<SetStateAc
         persistLocal(key, data);
       })
       .catch(() => {
-        // API unreachable → keep the localStorage copy (offline mode).
+        // API unreachable or session expired → keep the localStorage copy so
+        // the portal still renders. ApiStatusBanner is what tells the user that
+        // changes are local-only, so a failed sync is never silent.
         initializedRef.current = true;
       });
     return () => {
       cancelled = true;
     };
-  }, [key]);
+  }, [key, role]);
 
   useEffect(() => {
     if (!initializedRef.current) return;
     const timer = window.setTimeout(() => {
       persistLocal(key, value);
-      pushCollection(key, value).catch(() => {
+      pushCollection(key, value, role).catch(() => {
         /* offline — the localStorage copy stays authoritative until the API returns */
       });
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [key, value]);
+  }, [key, value, role]);
 
   return [value, setValue];
 }

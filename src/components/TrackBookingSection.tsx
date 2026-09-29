@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { readEditorStore, STORAGE_KEYS, seedBookings } from '../data/editor';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { apiJson } from '../data/api';
 import type { Booking } from '../data/editor';
 import { MapPin, CheckCircle2, XCircle, Clock3, Phone, ArrowRight, ChevronRight } from 'lucide-react';
 import { PHONE_LINKS, SITE } from '../data/site';
@@ -44,9 +44,6 @@ function Field({ label, type, value, onChange, placeholder, autoComplete }: {
 
 export default function TrackBookingSection() {
   const { t } = useI18n();
-  const [bookings, setBookings] = useState<Booking[]>(() =>
-    readEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings),
-  );
   const [ref, setRef] = useState('');
   const [phone, setPhone] = useState('');
   const [matches, setMatches] = useState<Booking[]>([]);
@@ -54,18 +51,53 @@ export default function TrackBookingSection() {
   const [lookedUp, setLookedUp] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const prevCount = useRef(0);
   const pollTimer = useRef<number | null>(null);
 
+  /**
+   * Looks up one booking through the server. This used to read the entire
+   * bookings collection out of localStorage and filter it in the browser, which
+   * meant every visitor's browser held every customer's name, phone number,
+   * address and map pin. The scoped endpoint returns only the match, and only
+   * after the reference and phone number both check out.
+   */
+  const lookup = useCallback(async (reference: string, phoneNumber: string) => {
+    const params = new URLSearchParams({ ref: reference, phone: phoneNumber });
+    return apiJson<Booking[]>(`/api/bookings/track?${params.toString()}`);
+  }, []);
+
+  const selectedRef = selected?.id ?? null;
+  const selectedPhone = selected?.phone ?? null;
+
+  // Poll only the booking already shown, so status and timeline updates appear
+  // without re-downloading anything the visitor is not entitled to see.
   useEffect(() => {
-    pollTimer.current = window.setInterval(() => {
-      setBookings(readEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings));
-      setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    }, 30000);
+    if (!selectedRef || !selectedPhone) return;
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const fresh = await lookup(selectedRef, selectedPhone);
+        const updated = fresh[0];
+        setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        if (cancelled || !updated) return;
+        const count = (updated.updates ?? []).length;
+        if (prevCount.current > 0 && count > prevCount.current) setFlash(true);
+        prevCount.current = count;
+        setSelected(updated);
+        setMatches(prev => prev.map((m) => (m.id === updated.id ? updated : m)));
+      } catch {
+        /* keep showing the last known state if the network blips */
+      }
+    };
+    void refresh();
+    pollTimer.current = window.setInterval(refresh, 30000);
     return () => {
+      cancelled = true;
       if (pollTimer.current) window.clearInterval(pollTimer.current);
     };
-  }, []);
+  }, [lookup, selectedRef, selectedPhone]);
 
   useEffect(() => {
     if (flash) {
@@ -74,44 +106,42 @@ export default function TrackBookingSection() {
     }
   }, [flash]);
 
-  // Keep the selected booking (and match list) in sync as polling picks up edits
-  // made in the admin console — e.g. new status, new timeline updates.
-  useEffect(() => {
-    if (!selected) return;
-    const fresh = bookings.find((b) => b.id === selected.id);
-    if (!fresh) return;
-    const count = (fresh.updates ?? []).length;
-    if (prevCount.current > 0 && count > prevCount.current) setFlash(true);
-    prevCount.current = count;
-    setSelected(fresh);
-    if (matches.length) {
-      setMatches((prev) => prev.map((m) => (m.id === fresh.id ? fresh : m)));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookings]);
-
   const selectBooking = (b: Booking) => {
     prevCount.current = (b.updates ?? []).length;
     setSelected(b);
   };
 
-  const search = (e: React.FormEvent) => {
+  const search = async (e: React.FormEvent) => {
     e.preventDefault();
-    const refNorm = ref.trim().toUpperCase();
-    const wantPhone = digitsOnly(phone);
-    const found = bookings.filter((b) => {
-      const refOk = !refNorm || b.id.toUpperCase() === refNorm;
-      const phoneNorm = digitsOnly(b.phone);
-      const phoneOk = !wantPhone || phoneNorm.endsWith(wantPhone) || phoneNorm.includes(wantPhone);
-      return refOk && phoneOk;
-    });
-    setMatches(found);
-    setSelected(found[0] ?? null);
-    if (found[0]) {
-      prevCount.current = (found[0].updates ?? []).length;
-      setFlash(false);
+    const reference = ref.trim().toUpperCase();
+    const phoneNumber = digitsOnly(phone);
+    if (!reference || !phoneNumber) {
+      setSearchError(t('track.needBoth'));
+      setMatches([]);
+      setSelected(null);
+      setLookedUp(true);
+      return;
     }
-    setLookedUp(true);
+    setSearching(true);
+    setSearchError(null);
+    try {
+      const found = await lookup(reference, phoneNumber);
+      setMatches(found);
+      setSelected(found[0] ?? null);
+      if (found[0]) {
+        prevCount.current = (found[0].updates ?? []).length;
+        setFlash(false);
+        setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      }
+      setLookedUp(true);
+    } catch (err) {
+      setMatches([]);
+      setSelected(null);
+      setLookedUp(true);
+      setSearchError((err as Error).message);
+    } finally {
+      setSearching(false);
+    }
   };
 
   const result = selected;
@@ -145,8 +175,12 @@ export default function TrackBookingSection() {
               placeholder={t('track.phonePlaceholder')}
               autoComplete="tel"
             />
-            <button type="submit" className="btn-ember py-4 px-6 rounded-[2px] flex items-center justify-center gap-2">
-              {t('track.submit')}
+            <button
+              type="submit"
+              disabled={searching}
+              className="btn-ember py-4 px-6 rounded-[2px] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait"
+            >
+              {searching ? t('track.searching') : t('track.submit')}
               <ArrowRight size={16} />
             </button>
           </form>
@@ -155,7 +189,13 @@ export default function TrackBookingSection() {
             {t('track.phoneOnlyHint')}
           </p>
 
-          {lookedUp && matches.length === 0 && (
+          {searchError && (
+            <p className="mt-4 text-xs text-red-400 leading-relaxed" role="alert">
+              {searchError}
+            </p>
+          )}
+
+          {lookedUp && !searchError && matches.length === 0 && (
             <p className="mt-5 text-xs text-[#6a6a6a] leading-relaxed">
               {t('track.help')} <a href={PHONE_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="text-ember hover:text-ember">{t('track.helpWhatsApp')}</a>{' '}
               {t('track.helpEnd')}

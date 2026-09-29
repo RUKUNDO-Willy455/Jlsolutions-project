@@ -17,6 +17,7 @@ import WelcomeScreen from './WelcomeScreen';
 import PortalBrandBar from './PortalBrandBar';
 import PortalSidebar from './PortalSidebar';
 import { AvatarUpload } from './AvatarUpload';
+import ApiStatusBanner from './ApiStatusBanner';
 
 // ─── Shared bits ──────────────────────────────────────────────────────────────
 
@@ -576,9 +577,15 @@ function TechRequestsTab({ tech, requests, setRequests }: { tech: Technician; re
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
-  const [technicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians);
-  const [bookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
-  const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
+  // The tech portal authenticates as a technician, so its requests must carry
+  // the technician session rather than an admin one.
+  const [technicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians, 'tech');
+  const [bookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings, 'tech');
+  const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(
+    STORAGE_KEYS.profileRequests,
+    seedProfileRequests,
+    'tech',
+  );
   const [techId, setTechId] = useState<string | null>(null);
 const [signedIn, setSignedIn] = useState<Technician | null>(null);
   const [started, setStarted] = useState(false);
@@ -659,6 +666,7 @@ const [signedIn, setSignedIn] = useState<Technician | null>(null);
 
   return (
     <div className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+      <ApiStatusBanner />
       <PanelBackground />
 
       <div className="relative z-10 flex flex-1 overflow-hidden">

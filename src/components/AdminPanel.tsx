@@ -14,6 +14,8 @@ import {
   seedRatings,
   loadStored,
   saveStored,
+  deleteRecord,
+  readEditorStore,
 } from '../data/editor';
 import type { FounderProfile, Technician, Degree, ProfileEditRequest, Booking, Testimonial, Rating } from '../data/editor';
 import { deriveAdminNotifications, markNotificationsSeen, relativeTimeLabel } from '../data/notifications';
@@ -21,6 +23,7 @@ import WelcomeScreen from './WelcomeScreen';
 import PortalSidebar from './PortalSidebar';
 import PortalBrandBar from './PortalBrandBar';
 import { AvatarUpload } from './AvatarUpload';
+import ApiStatusBanner from './ApiStatusBanner';
 
 function AdminBackground() {
   return (
@@ -330,12 +333,20 @@ function BookingsTab({ bookings, setBookings, technicians }: { bookings: Booking
       window.setTimeout(() => setConfirmReset(false), 4000);
       return;
     }
+    // Delete each booking through the server. Clearing the local array alone no
+    // longer touches the shared database (collection writes merge by id), so
+    // without these calls "Reset" would appear to work and leave every real
+    // booking intact for the next device to see.
+    const ids = bookings.map(b => b.id);
     setBookings([]);
-    localStorage.setItem(STORAGE_KEYS.nextBookingRef, '1');
     setConfirmReset(false);
     setOpenMsg(null);
     setMsgDraft('');
     setMsgError('');
+    void Promise.all(ids.map(id => deleteRecord(STORAGE_KEYS.bookings, id))).then(results => {
+      if (results.every(Boolean)) return;
+      setBookings(readEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings));
+    });
   }
 
   /**
@@ -375,8 +386,12 @@ function BookingsTab({ bookings, setBookings, technicians }: { bookings: Booking
       updates: [...(b.updates ?? []), { id: `u${Date.now()}`, text: `Booking status updated to ${status} by the admin.`, from: 'admin' as const, createdAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) }],
     } : b));
   }
-  function removeBooking(id: string) {
+  async function removeBooking(id: string) {
+    const target = bookings.find(b => b.id === id);
+    if (!target) return;
     setBookings(prev => prev.filter(b => b.id !== id));
+    const ok = await deleteRecord(STORAGE_KEYS.bookings, id);
+    if (!ok) setBookings(prev => (prev.some(b => b.id === id) ? prev : [...prev, target]));
   }
   function sendUpdate(id: string) {
     const text = msgDraft.trim();
@@ -626,8 +641,15 @@ function TechniciansTab({ technicians, setTechnicians }: { technicians: Technici
   function toggleAvail(id: string) {
     setTechnicians(prev => prev.map(t => t.id === id ? { ...t, available: !t.available } : t));
   }
-  function remove(id: string) {
+  async function remove(id: string) {
+    // Capture the row first: the collection write is a merge, so if the delete
+    // is refused the row has to be restored by putting it back, otherwise the
+    // next merge would leave it missing from the local view only.
+    const target = technicians.find(t => t.id === id);
+    if (!target) return;
     setTechnicians(prev => prev.filter(t => t.id !== id));
+    const ok = await deleteRecord(STORAGE_KEYS.technicians, id);
+    if (!ok) setTechnicians(prev => (prev.some(t => t.id === id) ? prev : [...prev, target]));
   }
   function submitAdd() {
     if (!newTech.name.trim() || !newTech.role.trim()) { setAddError('Name and role are required.'); return; }
@@ -800,8 +822,10 @@ function RequestsTab({
     }
   }
 
-  function removeRequest(req: ProfileEditRequest) {
+  async function removeRequest(req: ProfileEditRequest) {
     setRequests(prev => prev.filter(r => r.id !== req.id));
+    const ok = await deleteRecord(STORAGE_KEYS.profileRequests, req.id);
+    if (!ok) setRequests(prev => (prev.some(r => r.id === req.id) ? prev : [...prev, req]));
   }
 
   const pending = requests.filter(r => r.status === 'pending');
@@ -987,7 +1011,13 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
     setTestimonials(prev => prev.map(t => t.id === draft.id ? draft : t));
     setEditing(null); setDraft(null);
   }
-  function remove(id: string) { setTestimonials(prev => prev.filter(t => t.id !== id)); }
+  async function remove(id: string) {
+    const target = testimonials.find(t => t.id === id);
+    if (!target) return;
+    setTestimonials(prev => prev.filter(t => t.id !== id));
+    const ok = await deleteRecord(STORAGE_KEYS.testimonials, id);
+    if (!ok) setTestimonials(prev => (prev.some(t => t.id === id) ? prev : [...prev, target]));
+  }
   function toggleVisible(id: string) { setTestimonials(prev => prev.map(t => t.id === id ? { ...t, visible: !t.visible } : t)); }
   function submitAdd() {
     if (!newT.name.trim() || !newT.quote.trim()) { setAddError('Client name and quote are required.'); return; }
@@ -1463,6 +1493,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
 
   return (
     <div className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+      <ApiStatusBanner />
       {/* Subtle service background behind entire console */}
       <AdminBackground />
 

@@ -10,12 +10,26 @@ import type { Booking, Technician } from '../data/editor';
 
 const ACTIVE_STATUSES: Booking['status'][] = ['pending', 'confirmed', 'completed'];
 
+/**
+ * The minimum a caller needs to know about a booking to judge a slot.
+ *
+ * The portals hold full `Booking` objects, but the public booking form must not:
+ * it only needs the schedule, so it reads the PII-free `/api/availability` feed
+ * instead. Typing against this shape lets both callers share the same logic.
+ */
+export interface ScheduleRow {
+  technicianId: string;
+  date: string;
+  time: string;
+  status: Booking['status'];
+}
+
 /** True when the technician already has work booked on this date+time slot. */
 export function isSlotTaken(
   techId: string,
   date: string | null | undefined,
   time: string | null | undefined,
-  bookings: Booking[],
+  bookings: readonly ScheduleRow[],
 ): boolean {
   if (!techId || !date || !time) return false;
   return bookings.some(
@@ -32,7 +46,7 @@ export function isTechFree(
   tech: Technician,
   date: string | null | undefined,
   time: string | null | undefined,
-  bookings: Booking[],
+  bookings: readonly ScheduleRow[],
 ): boolean {
   if (!tech.available) return false;
   return !isSlotTaken(tech.id, date, time, bookings);
@@ -43,7 +57,7 @@ export function findFreeTechnician(
   techs: Technician[],
   date: string | null | undefined,
   time: string | null | undefined,
-  bookings: Booking[],
+  bookings: readonly ScheduleRow[],
 ): Technician | null {
   return techs.find((t) => isTechFree(t, date, time, bookings)) ?? null;
 }

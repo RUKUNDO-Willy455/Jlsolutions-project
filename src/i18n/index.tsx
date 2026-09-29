@@ -219,6 +219,14 @@ const en: Record<string, string> = {
   'book.technician': 'Technician',
   'book.assignedLater': 'Assigned by our team after confirmation',
   'book.confirm': 'Confirm Booking',
+  'book.sending': 'Sending…',
+  'api.offlinePortal':
+    'The server is unreachable. Changes you make now are saved on this device only and will not reach the other devices until the connection is restored. Do not sign out or clear this browser\u2019s data.',
+  'api.offlineGlobal':
+    'Booking requests and live updates need our server, which is unreachable right now. The rest of the site still works.',
+  'api.retry': 'Retry',
+  'api.dismiss': 'Dismiss',
+  'api.reviewFailed': 'Your review could not be sent. Please check your connection and try again.',
   'book.confirmNote':
     'We confirm within 30 minutes. You can also share this booking via WhatsApp after confirming.',
 
@@ -292,8 +300,10 @@ const en: Record<string, string> = {
   'track.phoneLabel': 'Phone number',
   'track.phonePlaceholder': 'e.g. 0788 123 456',
   'track.submit': 'Track my booking',
+  'track.searching': 'Searching…',
+  'track.needBoth': 'Enter both your reference and phone number to look up a booking.',
   'track.phoneOnlyHint':
-    'No reference handy? We can also look up bookings by phone number alone.',
+    'We check your reference together with your phone number so nobody else can see your booking.',
   'track.help': "Can't find it? Check the reference and phone number you used, or",
   'track.helpEnd': "and we'll look it up.",
   'track.helpWhatsApp': 'WhatsApp us',
@@ -903,6 +913,14 @@ const fr: typeof en = {
   'book.technician': 'Technicien',
   'book.assignedLater': 'Affecté par notre équipe après confirmation',
   'book.confirm': 'Confirmer la réservation',
+  'book.sending': 'Envoi…',
+  'api.offlinePortal':
+    'Le serveur est injoignable. Les modifications enregistrées maintenant restent sur cet appareil uniquement et ne parviendront pas aux autres appareils avant le retour de la connexion. Ne fermez pas cette session.',
+  'api.offlineGlobal':
+    'Les demandes de réservation et les mises à jour nécessitent notre serveur, actuellement injoignable. Le reste du site fonctionne toujours.',
+  'api.retry': 'Réessayer',
+  'api.dismiss': 'Fermer',
+  'api.reviewFailed': 'Votre avis n\u2019a pas pu être envoyé. Vérifiez votre connexion et réessayez.',
   'book.confirmNote':
     'Nous confirmons sous 30 minutes. Vous pouvez aussi partager cette réservation via WhatsApp après confirmation.',
 
@@ -966,7 +984,9 @@ const fr: typeof en = {
   'track.phoneLabel': 'Numéro de téléphone',
   'track.phonePlaceholder': 'ex. 0788 123 456',
   'track.submit': 'Suivre ma réservation',
-  'track.phoneOnlyHint': 'Pas de référence sous la main ? Nous pouvons aussi rechercher par numéro de téléphone.',
+  'track.searching': 'Recherche…',
+  'track.needBoth': 'Saisissez votre référence et votre numéro de téléphone pour retrouver votre réservation.',
+  'track.phoneOnlyHint': 'Nous vérifions votre référence avec votre numéro de téléphone afin que personne d\'autre ne puisse voir votre réservation.',
   'track.help': 'Introuvable ? Vérifiez la référence et le numéro utilisés, ou',
   'track.helpEnd': 'et nous chercherons.',
   'track.helpWhatsApp': 'Écrivez-nous sur WhatsApp',
@@ -1414,9 +1434,9 @@ const rw: typeof en = {
   'nav.services': 'Serivisi',
   'nav.process': 'Inzira',
   'nav.founder': 'Uwashinze',
-  'nav.pricing': 'Amatarifa',
+  'nav.pricing': 'Ibiciro',
   'nav.clients': 'Abakiriya',
-  'nav.testimonials': 'Ibyivugo',
+  'nav.testimonials': 'Ubuhamya',
   'nav.book': 'Saba serivisi',
   'nav.track': 'Kurikirana gahunda',
   'nav.contact': 'Twandikire',
@@ -1492,8 +1512,8 @@ const rw: typeof en = {
     'Ibafata imyororokere (biometrics), amarembo ya smart card, n\'igenzura rya kure ry\'imarembo — binyuze muri CCTV yawe.',
   'hero.s4.tag': '05 — Kubungabunga gahunda',
   'hero.s4.h0': 'Nta',
-  'hero.s4.h1': 'koza',
-  'hero.s4.h2': 'ritunguruka.',
+  'hero.s4.h1': 'gihe',
+  'hero.s4.h2': 'kigendera ubusa.',
   'hero.s4.body':
     'Ubugenzuzi bwateganyijwe, updates za firmware, gukoresha thermal imaging n\'ibiganiro bya SLA bigumana sisitemu zawe zikora neza.',
   'hero.s5.tag': '06 — Gukiza ubutunguruka',
@@ -1555,6 +1575,14 @@ const rw: typeof en = {
   'book.technician': 'Umwarimu',
   'book.assignedLater': 'Abahitwa n\'ikigo cyacu nyuma yo kuyemeza',
   'book.confirm': 'Emeza gahunda',
+  'book.sending': 'Kohereza…',
+  'api.offlinePortal':
+    'Serivisi ntiboneka. Ibintu wahinduye ubikora kuri kuru gusa, ntibuzabikira abandi bakesi kugeza igihe serivisi ugarukira. Ntifunge usura cyangwa ubyibonye mu browser.',
+  'api.offlineGlobal':
+    'Guhitamo gahunda no kugaragara ibinti bisaba serivisi yacu, ifariwe nacyo. Ibindi byose bya site bikora gukora.',
+  'api.retry': 'Ongera ugerageze',
+  'api.dismiss': 'Funga',
+  'api.reviewFailed': 'Iyihevizi yawe ntishobora kohereza. Reba connetion yawe maze ugerageze.',
   'book.confirmNote':
     'Dukuhamya iminota 30. Ushobora no guhana iyi gahunda kuri WhatsApp nyuma yo kuyemeza.',
 
@@ -1618,7 +1646,9 @@ const rw: typeof en = {
   'track.phoneLabel': 'Nomero ya telefone',
   'track.phonePlaceholder': 'urug. 0788 123 456',
   'track.submit': 'Kurikirana gahunda yanjye',
-  'track.phoneOnlyHint': 'Nomero ifite? Dushobora no gushakisha ukoresheje telefone gusa.',
+  'track.searching': 'Gushakisha…',
+  'track.needBoth': 'Injiza nimero ya gahunda na nomero ya telefone byombi kugira ngo ubone gahunda yawe.',
+  'track.phoneOnlyHint': 'Tugenzura nimero ya gahunda hamwe na nomero ya telefone yawe kugira ngo n uwundi umuntu ashobora kubona gahunda yawe.',
   'track.help': 'Ntibonetse? Ongera ugosora nomero n\'ikiganiro, cyangwa',
   'track.helpEnd': 'tuzabishakisha.',
   'track.helpWhatsApp': 'twandikire kuri WhatsApp',

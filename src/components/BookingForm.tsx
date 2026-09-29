@@ -1,13 +1,14 @@
-import { useState, useRef, Fragment, lazy, Suspense, Component } from 'react';
+import { useState, useEffect, useRef, Fragment, lazy, Suspense, Component } from 'react';
 import type { ReactNode } from 'react';
 import { Check, MapPin, ShieldCheck } from 'lucide-react';
-import { useEditorStore, STORAGE_KEYS, seedTechnicians, seedBookings } from '../data/editor';
-import type { Booking } from '../data/editor';
+import { seedTechnicians } from '../data/editor';
+import type { Booking, Technician } from '../data/editor';
+import { apiJson } from '../data/api';
 import { SITE } from '../data/site';
 import type { LocationPick } from './LocationPicker';
 import { useI18n } from '../i18n';
 import { formatRwMobile, isValidRwMobile } from '../utils/phone';
-import { isSlotTaken } from '../utils/availability';
+import { isSlotTaken, type ScheduleRow } from '../utils/availability';
 
 const LocationPicker = lazy(() => import('./LocationPicker'));
 
@@ -216,11 +217,36 @@ const validateContact = (f: typeof defaultForm, t: (k: string, v?: Record<string
 
 export default function BookingForm({ onTrack, nested }: { onTrack?: () => void; nested?: boolean }) {
   const { t, locale } = useI18n();
-  const [technicians] = useEditorStore(STORAGE_KEYS.technicians, seedTechnicians);
-  const [bookings, setBookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);
+  // The booking form is public, so it cannot read the bookings collection any
+  // more: that would hand every visitor the full customer list. It reads the
+  // reduced team projection and the PII-free schedule feed instead, which carry
+  // exactly what slot availability needs and nothing else.
+  const [technicians, setTechnicians] = useState<Technician[]>(seedTechnicians);
+  const [schedule, setSchedule] = useState<ScheduleRow[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      apiJson<Technician[]>('/api/technicians'),
+      apiJson<ScheduleRow[]>('/api/availability'),
+    ])
+      .then(([team, rows]) => {
+        if (cancelled) return;
+        if (team.length) setTechnicians(team);
+        setSchedule(rows);
+      })
+      .catch(() => {
+        /* keep the seed team so the form still renders if the API is down */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [form, setForm] = useState({ ...defaultForm });
   const [submitted, setSubmitted] = useState(false);
   const [lastRef, setLastRef] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -366,55 +392,43 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
     if (Object.keys(nextErrors).length === 0) setStep(3);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const nextErrors = validateContact(form, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-    const raw = localStorage.getItem(STORAGE_KEYS.nextBookingRef);
-    let n = raw ? parseInt(raw, 10) : 0;
-    if (!n || Number.isNaN(n) || n < 1) {
-      // Prefix-agnostic so references minted under the old "BK" scheme still
-      // keep the sequence moving forward.
-      const maxNum = bookings.reduce((m, b) => {
-        const g = /^(?:BK|JL)(\d+)$/.exec(b.id);
-        return g ? Math.max(m, parseInt(g[1], 10)) : m;
-      }, 0);
-      n = maxNum + 1;
-    }
-    const ref = `JL${String(n).padStart(3, '0')}`;
-    setLastRef(ref);
-    localStorage.setItem(STORAGE_KEYS.nextBookingRef, String(n + 1));
-    const booking: Booking = {
-      id: ref,
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      service: form.service,
-      location: form.location.trim(),
-      date: form.date,
-      time: form.time,
-      technician: 'Not assigned',
-      technicianId: '',
-      status: 'pending',
-      createdAt: new Date().toISOString().split('T')[0],
-      lat: form.lat,
-      lng: form.lng,
-      updates: [
-        {
-          id: `u${Date.now()}`,
-          text: 'Booking received — awaiting confirmation. Our coordinator will call you shortly.',
-          from: 'admin',
-          createdAt: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      // The reference is minted by the server. Doing it in the browser was
+      // wrong twice over: every visitor started from their own empty local
+      // copy, so two people booking at the same moment were handed the same
+      // JL001 and one of them could never be tracked down.
+      const created = await apiJson<Booking>('/api/bookings', {
+        method: 'POST',
+        body: {
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          service: form.service,
+          location: form.location.trim(),
+          date: form.date,
+          time: form.time,
+          lat: form.lat,
+          lng: form.lng,
         },
-      ],
-    };
-    setBookings((prev) => [booking, ...prev]);
-    setSubmitted(true);
+      });
+      setLastRef(created.id);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError((err as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const today = todayStr();
   const freeTechs = technicians.filter(
-    (tech) => tech.available && !isSlotTaken(tech.id, form.date, form.time, bookings),
+    (tech) => tech.available && !isSlotTaken(tech.id, form.date, form.time, schedule),
   );
 
   const waLink = submitted
@@ -503,7 +517,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
             {/* Field team (read-only — the admin assigns a technician) */}
             <div className="flex flex-col gap-2 reveal delay-300">
               {technicians.map((tech) => {
-                const slotBusy = isSlotTaken(tech.id, form.date, form.time, bookings);
+                const slotBusy = isSlotTaken(tech.id, form.date, form.time, schedule);
                 const disabled = !tech.available || slotBusy;
                 const badge = !tech.available
                   ? t('book.offDuty')
@@ -1044,11 +1058,18 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                       </button>
                       <button
                         type="submit"
-                        className="btn-ember flex-[2] py-4 rounded-[2px]"
+                        disabled={submitting}
+                        className="btn-ember flex-[2] py-4 rounded-[2px] disabled:opacity-60 disabled:cursor-wait"
                       >
-                        {t('book.confirm')}
+                        {submitting ? t('book.sending') : t('book.confirm')}
                       </button>
                     </div>
+
+                    {submitError && (
+                      <p className="text-xs text-red-400 leading-relaxed" role="alert">
+                        {submitError}
+                      </p>
+                    )}
                   </>
                 )}
               </form>

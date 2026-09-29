@@ -1,0 +1,33 @@
+# Render Blueprint — Jean Luc Solutions API
+#
+# The front end is a static Netlify bundle; this service is the only thing that
+# writes to the database, so it is the single place shared data can diverge
+# from. A persistent disk is mandatory: without one, every deploy and every
+# container restart would reset bookings, technicians and reviews to the seed
+# values and the admin console would appear to "lose" its data.
+services:
+  - type: web
+    name: jls-api
+    runtime: node
+    plan: starter # must be a paid plan: free instances have no persistent disk
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JLS_DB
+        value: /var/data/jls.db
+      # Generate a real value: openssl rand -hex 32
+      - key: SESSION_SECRET
+        generateValue: true
+      # The API refuses to start in production while this is still the default.
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_USER
+        value: admin
+    disk:
+      name: jls-data
+      mountPath: /var/data
+      sizeGB: 1
