@@ -1470,10 +1470,10 @@ const rw: typeof en = {
   'cta.hEm': 'amaboko meza.',
   'cta.body':
     'Yaba kamera imwe cyangwa urusoboro rwuzuye rwo kugenzura mumujyi wa Kigali, Musanze cyangwa Rubavu — duzana byiza, impamyabumenyi imwe nigitizive kimwe.',
-  'cta.feat1': 'Amanzura yubusa ku masoko arengeye 500,000 RWF',
+  'cta.feat1': "Gupima ubuso k'ubuntu ku masoko arengeje 500,000 RWF",
   'cta.feat2': 'Imirimo yose yemejwe ku mezi 24',
-  'cta.feat3': 'Guhuzagurika mumasaha 90 muri Kigali (Greater Kigali)',
-  'cta.feat4': 'Abashakashatsi bafite impamyabumenyi kandi bahujwe na RURA',
+  'cta.feat3': 'Guhabwa ubufasha bwihutirwa mu minota 90 mu Mujyi wa Kigali n’inkengero zawo',
+  'cta.feat4': 'Abashakashatsi bafite impamyabumenyi kandi bemejwe na RURA',
   'cta.book': 'Saba serivisi',
   'cta.call': 'Twahambe nonaha',
   'cta.whatsapp': 'Twoherereze WhatsApp',
@@ -1927,7 +1927,7 @@ const rw: typeof en = {
   'ps.3d':
     'Impapuro z\'isuzuma zikurikirana buri dosiye y\'umushinga. Abakiriya basinyira gusa nyuma yo gusuzuma buri kanoma, ugezweho n\'umuriro.',
 
-  'cl.kicker': 'Babigiranye ikizere',
+  'cl.kicker': 'Abatugiriye ikizere',
   'cl.sec0': 'Serivisi z\'Imari',
   'cl.sec1': 'Itumanaho (Telecom)',
   'cl.sec2': 'Urwego rwa Leta',
@@ -2033,14 +2033,14 @@ const rw: typeof en = {
   'gal.prev': 'Ikibanza kiki cyabanjirije',
   'gal.next': 'Ikibanza gikurikira',
 
-  'fa.call': 'Twahamagare nonaha',
+  'fa.call': 'Duhamagare nonaha',
   'fa.callAria': 'Hamagara {name}',
   'fa.chat': 'Twandikire kuri WhatsApp',
   'fa.chatAria': 'Twandikire kuri WhatsApp',
 
   'pg.services': 'Serivisi — Jean Luc Solutions',
   'pg.process': 'Inzira yacu — Jean Luc Solutions',
-  'pg.pricing': 'Amatarifa — Jean Luc Solutions',
+  'pg.pricing': 'Ibiciro — Jean Luc Solutions',
   'pg.clients': 'Abakiriya bacu — Jean Luc Solutions',
   'pg.founder': 'Uwashinze — Jean Luc Solutions',
   'pg.testimonials': 'Ibyivugo — Jean Luc Solutions',
