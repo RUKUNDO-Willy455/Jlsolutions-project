@@ -8,7 +8,6 @@ import './Founder.css';
 export default function Founder() {
   const { t } = useI18n();
   const [profile] = useEditorStore<typeof seedFounder>(STORAGE_KEYS.founder, seedFounder);
-  const portrait = profile.photoUrl || IMAGES.technicians[0];
 
   const VALUES = [
     {
@@ -100,27 +99,49 @@ export default function Founder() {
 
             {/* Media */}
             <div className="reveal delay-200 lg:sticky lg:top-28">
-              <div className="founder__card relative rounded-[2px] overflow-hidden bg-[#111] border border-[rgba(255,255,255,0.08)]">
-                <img
-                  src={portrait}
-                  alt={`${profile.name} — ${profile.title} of Jean Luc Solutions`}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full object-cover"
-                  style={{ aspectRatio: '4/5', objectPosition: 'top center', opacity: 0.9 }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#090909]/85 via-transparent to-transparent" />
-                <div className="absolute bottom-5 left-6 right-6">
-                  <p className="text-xl font-semibold text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                    {profile.name}
-                  </p>
-                  <p className="text-[0.65rem] tracking-[0.18em] uppercase text-ember mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                    {profile.title}
-                  </p>
+              <div className="founder__card relative bg-[#111]">
+                <div className="relative rounded-[2px] overflow-hidden border border-[rgba(255,255,255,0.08)]">
+                  <img
+                    src={IMAGES.founderProfile}
+                    alt={`${profile.name} — ${profile.title} of Jean Luc Solutions`}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full object-cover"
+                    style={{ aspectRatio: '4/5', objectPosition: 'top center', opacity: 0.9 }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#090909]/85 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-5 left-6 right-6 pointer-events-none">
+                    <p className="text-xl font-semibold text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+                      {profile.name}
+                    </p>
+                    <p className="text-[0.65rem] tracking-[0.18em] uppercase text-ember mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      {profile.title}
+                    </p>
+                  </div>
+                  <span className="absolute top-4 right-5 text-[3rem] font-semibold text-white/5 select-none pointer-events-none" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+                    {profile.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
+                  </span>
                 </div>
-                <span className="absolute top-4 right-5 text-[3rem] font-semibold text-white/5 select-none" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                  {profile.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
-                </span>
+
+                {/* Corner accent cards */}
+                <div className="founder__corner-card founder__corner-card--top absolute -top-6 left-6 w-32 h-40 sm:w-40 sm:h-48 lg:w-44 lg:h-52 overflow-hidden z-10 shadow-xl shadow-black/50">
+                  <img
+                    src={IMAGES.founderProfile2}
+                    alt="Founder at work"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="founder__corner-card founder__corner-card--bottom absolute -bottom-6 right-6 w-32 h-40 sm:w-40 sm:h-48 lg:w-44 lg:h-52 overflow-hidden z-10 shadow-xl shadow-black/50">
+                  <img
+                    src={IMAGES.founderProfile2}
+                    alt="Founder on site"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 mt-5">

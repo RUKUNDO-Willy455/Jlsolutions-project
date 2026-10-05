@@ -41,3 +41,21 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+
+/* Corner accent cards */
+.founder__corner-card {
+  transition: transform 0.3s ease;
+}
+
+.founder__corner-card--top {
+  border-radius: 0 0 20px 0;
+}
+
+.founder__corner-card--bottom {
+  border-radius: 20px 0 0 0;
+}
+
+.founder__corner-card:hover {
+  transform: scale(1.05);
+  z-index: 20;
+}

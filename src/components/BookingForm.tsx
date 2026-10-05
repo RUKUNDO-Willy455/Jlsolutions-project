@@ -380,16 +380,27 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
     });
   }
 
+  function scrollToTop() {
+    const el = document.getElementById('booking');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   function handleContinue() {
     const nextErrors = validateDetails(form, t);
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) setStep(2);
+    if (Object.keys(nextErrors).length === 0) {
+      setStep(2);
+      scrollToTop();
+    }
   }
 
   function handleContinueContact() {
     const nextErrors = validateContact(form, t);
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) setStep(3);
+    if (Object.keys(nextErrors).length === 0) {
+      setStep(3);
+      scrollToTop();
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -661,7 +672,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                   {t('book.trackLink', { ref: lastRef })} →
                 </a>
                 <button
-                  onClick={() => { setSubmitted(false); setForm(defaultForm); setStep(1); setErrors({}); }}
+                  onClick={() => { setSubmitted(false); setForm(defaultForm); setStep(1); setErrors({}); scrollToTop(); }}
                   className="btn-ghost px-6 py-3 rounded-[2px]"
                 >
                   {t('book.bookAnother')}
@@ -683,7 +694,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         )}
                         <button
                           type="button"
-                          onClick={() => step > i + 1 && setStep(i + 1)}
+                          onClick={() => { if (step > i + 1) { setStep(i + 1); scrollToTop(); } }}
                           aria-current={step === i + 1 ? 'step' : undefined}
                           className={`flex flex-col items-center gap-1.5 ${
                             step > i + 1 ? 'cursor-pointer group' : 'cursor-default'
@@ -991,7 +1002,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     <div className="flex gap-3 mt-2">
                       <button
                         type="button"
-                        onClick={() => { setStep(1); setErrors({}); }}
+                        onClick={() => { setStep(1); setErrors({}); scrollToTop(); }}
                         className="btn-ghost flex-1 py-4 rounded-[2px]"
                       >
                         {t('book.back')}
@@ -1051,7 +1062,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     <div className="flex gap-3 mt-2">
                       <button
                         type="button"
-                        onClick={() => { setStep(2); setErrors({}); }}
+                        onClick={() => { setStep(2); setErrors({}); scrollToTop(); }}
                         className="btn-ghost flex-1 py-4 rounded-[2px]"
                       >
                         {t('book.back')}

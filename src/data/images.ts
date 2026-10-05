@@ -80,4 +80,8 @@ export const IMAGES = {
 
   /** Square crop — likely the logo capture. */
   logoCandidate: img('profile.jpeg'),
+
+  /** Founder profile photos for the carousel. */
+  founderProfile: img('Founder/Founder-profile.jpg'),
+  founderProfile2: img('Founder/Founder-profile2.jpg'),
 };
