@@ -55,14 +55,14 @@
   white-space: nowrap;
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
-  background: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #f2ede6;
+  background: var(--jl-surface-2);
+  border: 1px solid var(--jl-line);
+  color: var(--jl-ash);
   font-family: 'DM Mono', 'Courier New', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   opacity: 0;
   transform: translateX(6px);
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -72,7 +72,7 @@
   opacity: 1;
   transform: translateX(0);
 }
-.ai-fab__label svg { color: #60a5fa; }
+.ai-fab__label svg { color: var(--jl-accent); }
 
 .ai-fab__badge {
   position: absolute;
@@ -85,8 +85,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #090909;
-  color: #60a5fa;
+  background: var(--jl-solid);
+  color: var(--jl-accent);
   border: 1px solid rgba(96, 165, 250, 0.5);
   font-family: 'DM Mono', 'Courier New', monospace;
   font-size: 0.5rem;
@@ -116,11 +116,11 @@
   height: min(34rem, calc(100dvh - 9rem));
   display: flex;
   flex-direction: column;
-  background: #0d0d0d;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--jl-surface-1);
+  border: 1px solid var(--jl-line-strong);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(37, 99, 235, 0.12);
   opacity: 0;
   visibility: hidden;
   transform: translateY(18px) scale(0.97);
@@ -151,8 +151,8 @@
   align-items: center;
   gap: 0.7rem;
   padding: 0.8rem 0.9rem;
-  background: linear-gradient(135deg, #101a2e 0%, #0d0d0d 70%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(135deg, var(--jl-surface-2) 0%, var(--jl-surface-1) 70%);
+  border-bottom: 1px solid var(--jl-line);
   flex-shrink: 0;
 }
 .ai-chat__avatar {
@@ -184,7 +184,7 @@
   font-family: 'Fraunces', Georgia, serif;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #f2ede6;
+  color: var(--jl-ash);
 }
 .ai-chat__title span {
   display: inline-flex;
@@ -194,7 +194,7 @@
   font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6a6a6a;
+  color: var(--jl-ink-3);
 }
 .ai-chat__dot {
   width: 6px;
@@ -214,14 +214,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.03);
-  color: #8a8a8a;
+  border: 1px solid var(--jl-line);
+  background: var(--jl-line-soft);
+  color: var(--jl-ink-2);
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
-.ai-chat__call:hover { color: #60a5fa; border-color: rgba(96, 165, 250, 0.4); }
-.ai-chat__close:hover { color: #f2ede6; border-color: rgba(255, 255, 255, 0.3); }
+.ai-chat__call:hover { color: var(--jl-accent); border-color: rgba(96, 165, 250, 0.4); }
+.ai-chat__close:hover { color: var(--jl-ash); border-color: var(--jl-line-strong); }
 
 /* ── Transcript ──────────────────────────────────────────────── */
 .ai-chat__body {
@@ -232,10 +232,25 @@
   flex-direction: column;
   gap: 0.75rem;
   scrollbar-width: thin;
-  scrollbar-color: #2a2a2a transparent;
+  scrollbar-color: var(--jl-line-strong) transparent;
+  position: relative;
 }
 .ai-chat__body::-webkit-scrollbar { width: 4px; }
-.ai-chat__body::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+.ai-chat__body::-webkit-scrollbar-thumb { background: var(--jl-line-strong); border-radius: 4px; }
+
+/* JL logo watermark behind the transcript */
+.ai-chat__watermark {
+  position: absolute;
+  top: 6.5rem;
+  left: 50%;
+  width: 8rem;
+  height: 8rem;
+  transform: translateX(-50%);
+  background: url('/images/jeanluc-logo.png') no-repeat center / contain;
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: 0;
+}
 
 .ai-chat__daymark {
   align-self: center;
@@ -243,7 +258,7 @@
   font-size: 0.55rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #3f3f3f;
+  color: var(--jl-ink-4);
 }
 
 .ai-msg {
@@ -269,7 +284,7 @@
   border-radius: 999px;
   background: rgba(37, 99, 235, 0.15);
   border: 1px solid rgba(37, 99, 235, 0.35);
-  color: #60a5fa;
+  color: var(--jl-accent);
   overflow: hidden;
 }
 .ai-msg__bubble-avatar-img {
@@ -286,11 +301,11 @@
   border-radius: 8px;
   font-size: 0.85rem;
   line-height: 1.55;
-  color: #cfcfcf;
+  color: var(--jl-ink-1);
 }
 .ai-msg--ai .ai-msg__bubble {
-  background: #151515;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--jl-surface-2);
+  border: 1px solid var(--jl-line);
   border-bottom-left-radius: 2px;
 }
 .ai-msg--user .ai-msg__bubble {
@@ -304,7 +319,7 @@
 .ai-chat__line + .ai-chat__line { margin-top: 0.35rem; }
 .ai-chat__heading {
   margin: 0.45rem 0 0.1rem;
-  color: #f2ede6;
+  color: var(--jl-ash);
   font-weight: 600;
 }
 .ai-chat__bullet {
@@ -319,12 +334,12 @@
   left: 0;
   color: #2563eb;
 }
-.ai-chat__strong { color: #f2ede6; font-weight: 600; }
+.ai-chat__strong { color: var(--jl-ash); font-weight: 600; }
 .ai-msg--user .ai-chat__strong { color: #ffffff; }
-.ai-chat__em { font-style: italic; color: #93b8f7; }
+.ai-chat__em { font-style: italic; color: var(--jl-accent); }
 .ai-msg--user .ai-chat__em { color: #dbeafe; }
 /* The bubbles render as .ai-msg__bubble, so this is the selector that matches. */
-.ai-msg__bubble a { color: #93b8f7; text-decoration: underline; text-underline-offset: 2px; }
+.ai-msg__bubble a { color: var(--jl-accent); text-decoration: underline; text-underline-offset: 2px; }
 .ai-chat__inline-code,
 .ai-chat__code code {
   font-family: 'DM Mono', 'Courier New', monospace;
@@ -332,18 +347,18 @@
 }
 .ai-chat__inline-code {
   padding: 0.08rem 0.28rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--jl-line);
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--jl-surface-2);
 }
 .ai-chat__code {
   max-width: 100%;
   margin: 0.55rem 0;
   padding: 0.7rem;
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--jl-line);
   border-radius: 4px;
-  background: #090909;
+  background: var(--jl-surface-3);
   white-space: pre;
 }
 
@@ -358,14 +373,14 @@
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #4a4a4a;
+  background: var(--jl-ink-3);
   animation: ai-dot 1.1s ease-in-out infinite;
 }
 .ai-typing i:nth-child(2) { animation-delay: 0.15s; }
 .ai-typing i:nth-child(3) { animation-delay: 0.3s; }
 @keyframes ai-dot {
-  0%, 60%, 100% { transform: translateY(0); background: #3a3a3a; }
-  30% { transform: translateY(-4px); background: #60a5fa; }
+  0%, 60%, 100% { transform: translateY(0); background: var(--jl-ink-4); }
+  30% { transform: translateY(-4px); background: var(--jl-accent); }
 }
 
 /* Suggestion / quick chips */
@@ -387,7 +402,7 @@
   border-radius: 999px;
   background: rgba(37, 99, 235, 0.1);
   border: 1px solid rgba(37, 99, 235, 0.35);
-  color: #93b8f7;
+  color: var(--jl-accent);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
@@ -411,17 +426,17 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 0.8rem 0.35rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  background: #0f0f0f;
+  border-top: 1px solid var(--jl-line);
+  background: var(--jl-surface-2);
   flex-shrink: 0;
 }
 .ai-chat__input {
   flex: 1;
-  background: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--jl-surface-1);
+  border: 1px solid var(--jl-line-strong);
   border-radius: 999px;
   padding: 0.65rem 1rem;
-  color: #f2ede6;
+  color: var(--jl-ash);
   font-family: 'Outfit', sans-serif;
   font-size: 0.85rem;
   outline: none;
@@ -432,7 +447,7 @@
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
-.ai-chat__input::placeholder { color: #4a4a4a; }
+.ai-chat__input::placeholder { color: var(--jl-ink-3); }
 
 .ai-chat__send {
   width: 2.4rem;
@@ -458,8 +473,8 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-align: center;
-  color: #3a3a3a;
-  background: #0f0f0f;
+  color: var(--jl-ink-4);
+  background: var(--jl-surface-2);
   flex-shrink: 0;
 }
 

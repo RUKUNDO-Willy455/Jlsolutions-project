@@ -1,6 +1,7 @@
 import { useEditorStore, STORAGE_KEYS, seedTestimonials } from '../data/editor';
 import type { Testimonial } from '../data/editor';
 import { useI18n } from '../i18n';
+import adminBg1 from '../assets/admin-bg-1.jpg';
 
 function Stars({ count }: { count: number }) {
   const { t } = useI18n();
@@ -11,7 +12,7 @@ function Stars({ count }: { count: number }) {
         const isEmpty = pct === 0;
         return (
           <span key={i} className="relative inline-flex w-3 h-3">
-            <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 text-[#2a2a2a] absolute inset-0">
+            <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 text-ink-4 absolute inset-0">
               <path
                 d="M6 1l1.24 2.5L10 3.89l-2 1.95.47 2.75L6 7.25 3.53 8.59 4 5.84 2 3.89l2.76-.39L6 1z"
                 fill="currentColor"
@@ -46,15 +47,17 @@ export default function Testimonials() {
     : '0.0';
 
   return (
-    <section id="testimonials" className="bg-obsidian py-20 sm:py-24 lg:py-40">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+    <section id="testimonials" className="relative bg-obsidian py-20 sm:py-24 lg:py-40 overflow-hidden">
+      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16 lg:mb-24">
           <div>
             <div className="flex items-center gap-3 mb-6 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('test.kicker')}
@@ -79,7 +82,7 @@ export default function Testimonials() {
               </p>
               <Stars count={parseFloat(avg)} />
               <p
-                className="text-[0.6rem] tracking-[0.12em] uppercase text-[#4a4a4a] mt-1"
+                className="text-[0.6rem] tracking-[0.12em] uppercase text-ink-4 mt-1"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {visible.length === 1
@@ -87,7 +90,7 @@ export default function Testimonials() {
                   : t('test.reviewCountMany', { count: visible.length })}
               </p>
             </div>
-            <div className="w-px h-12 bg-[rgba(255,255,255,0.06)] hidden sm:block" />
+            <div className="w-px h-12 bg-line hidden sm:block" />
             <div className="text-center">
               <p
                 className="text-3xl sm:text-4xl font-semibold text-ash"
@@ -96,7 +99,7 @@ export default function Testimonials() {
                 {visible.length}
               </p>
               <p
-                className="text-[0.6rem] tracking-[0.12em] uppercase text-[#4a4a4a] mt-1"
+                className="text-[0.6rem] tracking-[0.12em] uppercase text-ink-4 mt-1"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('test.reviewsCap')}
@@ -106,29 +109,29 @@ export default function Testimonials() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 border-t border-l border-[rgba(255,255,255,0.04)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 border-t border-l border-line-soft">
           {visible.map((t, i) => (
             <article
               key={t.id}
-              className={`group bg-obsidian p-8 lg:p-10 flex flex-col gap-6 hover:bg-surface transition-colors duration-400 reveal delay-${i * 200} border-r border-b border-[rgba(255,255,255,0.04)]`}
+              className={`group bg-obsidian p-8 lg:p-10 flex flex-col gap-6 hover:bg-surface transition-colors duration-400 reveal delay-${i * 200} border-r border-b border-line-soft`}
             >
               {/* Quote mark */}
-              <div className="text-[4rem] leading-none text-[#1e1e1e] font-display select-none" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
+              <div className="text-[4rem] leading-none text-ink-4 font-display select-none" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
                 "
               </div>
 
               <Stars count={t.rating} />
 
-              <blockquote className="text-[#8a8a8a] text-sm leading-relaxed flex-1 group-hover:text-[#aaa] transition-colors duration-400">
+              <blockquote className="text-ink-2 text-sm leading-relaxed flex-1 group-hover:text-ink-1 transition-colors duration-400">
                 "{t.quote}"
               </blockquote>
 
               {/* Meta */}
-              <div className="pt-4 border-t border-[rgba(255,255,255,0.05)] flex items-start justify-between gap-4 flex-wrap">
+              <div className="pt-4 border-t border-line flex items-start justify-between gap-4 flex-wrap">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-ash">{t.name}</p>
                   <p
-                    className="text-[0.62rem] tracking-wide text-[#5a5a5a] mt-0.5"
+                    className="text-[0.62rem] tracking-wide text-ink-3 mt-0.5"
                     style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                   >
                     {t.title}
@@ -142,13 +145,13 @@ export default function Testimonials() {
                 </div>
                 <div className="text-right shrink-0">
                   <p
-                    className="text-[0.58rem] tracking-[0.12em] uppercase text-[#3a3a3a]"
+                    className="text-[0.58rem] tracking-[0.12em] uppercase text-ink-4"
                     style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                   >
                     {t.project}
                   </p>
                   <p
-                    className="text-[0.58rem] tracking-[0.1em] text-[#3a3a3a] mt-1"
+                    className="text-[0.58rem] tracking-[0.1em] text-ink-4 mt-1"
                     style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                   >
                     {t.year}
@@ -160,7 +163,7 @@ export default function Testimonials() {
         </div>
         {visible.length === 0 && (
           <p
-            className="text-sm text-[#4a4a4a] text-center py-16"
+            className="text-sm text-ink-4 text-center py-16"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
             {t('test.empty')}

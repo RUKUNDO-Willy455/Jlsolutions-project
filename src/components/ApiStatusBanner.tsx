@@ -48,7 +48,7 @@ export default function ApiStatusBanner({ variant = 'portal' }: { variant?: 'por
             type="button"
             onClick={() => setDismissed(true)}
             aria-label={t('api.dismiss')}
-            className="shrink-0 text-[#5a5a5a] hover:text-ash"
+            className="shrink-0 text-ink-3 hover:text-ash"
           >
             <X size={14} />
           </button>

@@ -60,12 +60,12 @@ export function AvatarUpload({
           <button
             type="button"
             onClick={() => onChange('')}
-            className="text-[0.62rem] text-[#3a3a3a] hover:text-red-400 transition-colors duration-150 self-start"
+            className="text-[0.62rem] text-ink-4 hover:text-red-400 transition-colors duration-150 self-start"
           >
             Remove photo
           </button>
         )}
-        <p className="text-[0.6rem] text-[#3a3a3a] max-w-[220px]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+        <p className="text-[0.6rem] text-ink-4 max-w-[220px]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
           JPG or PNG · stored locally
         </p>
       </div>

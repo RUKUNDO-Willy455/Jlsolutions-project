@@ -84,4 +84,12 @@ export const IMAGES = {
   /** Founder profile photos for the carousel. */
   founderProfile: img('Founder/Founder-profile.jpg'),
   founderProfile2: img('Founder/Founder-profile2.jpg'),
+
+  /** Founder story collage photos. */
+  founderCollage: [
+    img('Founder/collage/TRE_7042.jpg'),
+    img('Founder/collage/TRE_7119.jpg'),
+    img('Founder/collage/TRE_7255.jpg'),
+    img('Founder/collage/meet the founder 2.jpg'),
+  ],
 };

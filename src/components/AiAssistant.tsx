@@ -345,6 +345,7 @@ export default function AiAssistant() {
 
         {/* Transcript */}
         <div className="ai-chat__body" ref={scrollRef}>
+          <div className="ai-chat__watermark" aria-hidden="true" />
           <div className="ai-chat__daymark">Today</div>
 
           {messages.map((m) => (

@@ -87,7 +87,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col overflow-hidden bg-obsidian">
+    <section data-theme="dark" className="relative min-h-screen flex flex-col overflow-hidden bg-obsidian">
 
       {/* ── Background image stack ── */}
       <div className="absolute inset-0">
@@ -131,7 +131,7 @@ export default function Hero() {
           >
             <span className="w-8 h-px bg-ember" />
             <span
-              className="text-[0.65rem] tracking-[0.22em] uppercase text-[#5a5a5a]"
+              className="text-[0.65rem] tracking-[0.22em] uppercase text-ink-3"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
               {slide.tag}
@@ -162,7 +162,7 @@ export default function Hero() {
           {/* Body */}
           <p
             key={`body-${active}`}
-            className="text-base lg:text-lg text-[#8f8f8f] leading-relaxed max-w-lg mb-12"
+            className="text-base lg:text-lg text-ink-2 leading-relaxed max-w-lg mb-12"
             style={{ animation: `${getEnterAnim()} 0.8s cubic-bezier(0.16,1,0.3,1) 370ms both` }}
           >
             {slide.body}
@@ -193,7 +193,7 @@ export default function Hero() {
                 <span className="text-2xl lg:text-3xl font-semibold text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
                   {stat.value}
                 </span>
-                <span className="text-[0.65rem] tracking-[0.18em] uppercase text-[#4a4a4a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                <span className="text-[0.65rem] tracking-[0.18em] uppercase text-ink-4" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                   {stat.label}
                 </span>
               </div>

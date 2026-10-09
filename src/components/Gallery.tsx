@@ -67,7 +67,7 @@ export default function Gallery() {
   }, [sel]);
 
   const arrowCls =
-    'w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.14)] text-[#aaa] hover:text-white hover:border-ember transition-colors duration-200';
+    'w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-line border border-line-strong text-ink-1 hover:text-ember hover:border-ember transition-colors duration-200';
 
   return (
     <section className="bg-obsidian py-20 sm:py-24 lg:py-32">
@@ -75,7 +75,7 @@ export default function Gallery() {
         <div className="flex items-center gap-3 mb-6 reveal">
           <span className="w-8 h-px bg-ember" />
           <span
-            className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+            className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
             {t('gal.kicker')}
@@ -89,7 +89,7 @@ export default function Gallery() {
             {t('gal.h1')}
             <span className="block italic font-light text-ember">{t('gal.hEm')}</span>
           </h2>
-          <p className="lg:max-w-sm text-sm text-[#8a8a8a] leading-relaxed reveal delay-200">
+          <p className="lg:max-w-sm text-sm text-ink-2 leading-relaxed reveal delay-200">
             {t('gal.body')}
           </p>
         </div>
@@ -100,11 +100,11 @@ export default function Gallery() {
             id="gallery-viewer"
             role="region"
             aria-label={t('gal.lightbox')}
-            className="max-w-4xl mx-auto mb-14 bg-[#0b0b0b] border border-[rgba(255,255,255,0.1)] rounded-[2px] p-4 sm:p-6"
+            className="max-w-4xl mx-auto mb-14 bg-obsidian border border-line-strong rounded-[2px] p-4 sm:p-6"
           >
             <div className="flex items-center justify-between gap-4 mb-4">
               <p
-                className="text-[0.65rem] tracking-[0.16em] uppercase text-[#8a8a8a] truncate"
+                className="text-[0.65rem] tracking-[0.16em] uppercase text-ink-2 truncate"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {counter} — {labelFor(currentSrc)}
@@ -113,7 +113,7 @@ export default function Gallery() {
                 type="button"
                 onClick={close}
                 aria-label={t('gal.close')}
-                className="shrink-0 text-[0.65rem] tracking-[0.16em] uppercase border border-[rgba(255,255,255,0.2)] text-[#aaa] hover:text-white hover:border-ember rounded-full px-3 py-1.5 transition-colors duration-200"
+                className="shrink-0 text-[0.65rem] tracking-[0.16em] uppercase border border-line-xstrong text-ink-1 hover:text-ember hover:border-ember rounded-full px-3 py-1.5 transition-colors duration-200"
               >
                 {t('gal.close')}
               </button>
@@ -164,7 +164,7 @@ export default function Gallery() {
             <div className="flex items-center gap-3 mb-4 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('gal.vidKicker')}
@@ -178,7 +178,7 @@ export default function Gallery() {
                 {t('gal.vidH1')}
                 <span className="block italic font-light text-ember">{t('gal.vidEm')}</span>
               </h3>
-              <p className="lg:max-w-sm text-sm text-[#8a8a8a] leading-relaxed reveal delay-200">
+              <p className="lg:max-w-sm text-sm text-ink-2 leading-relaxed reveal delay-200">
                 {t('gal.vidBody')}
               </p>
             </div>
@@ -189,7 +189,7 @@ export default function Gallery() {
                   key={video.src}
                   type="button"
                   onClick={() => setSel({ kind: 'video', index: i })}
-                  className="group relative overflow-hidden rounded-[2px] bg-[#111] focus-visible:outline-2 focus-visible:outline-offset-2 text-left"
+                  className="group relative overflow-hidden rounded-[2px] bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 text-left"
                   style={{ aspectRatio: '4/3' }}
                   aria-label={t('gal.play', { label: labelFor(video.src) })}
                 >
@@ -205,7 +205,7 @@ export default function Gallery() {
                   ) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#090909]/80 via-transparent to-transparent" />
                   <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="w-11 h-11 flex items-center justify-center rounded-full bg-ember/90 text-[#090909] shadow-lg shadow-black/40 group-hover:scale-110 transition-transform duration-300">
+                    <span className="w-11 h-11 flex items-center justify-center rounded-full bg-ember/90 text-solid shadow-lg shadow-black/40 group-hover:scale-110 transition-transform duration-300">
                       <svg viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5 ml-0.5">
                         <path d="M4 2.5v11l9.5-5.5L4 2.5z" />
                       </svg>
@@ -227,7 +227,7 @@ export default function Gallery() {
               key={src}
               type="button"
               onClick={() => setSel({ kind: 'photo', index: i })}
-              className="group relative overflow-hidden rounded-[2px] bg-[#111] focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="group relative overflow-hidden rounded-[2px] bg-surface focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{ aspectRatio: '4/3' }}
               aria-label={t('gal.open', { label: labelFor(src) })}
             >

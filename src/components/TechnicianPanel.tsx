@@ -665,7 +665,7 @@ const [signedIn, setSignedIn] = useState<Technician | null>(null);
   const pendingCount = profileRequests.filter(r => r.technicianId === tech.id && r.status === 'pending').length;
 
   return (
-    <div className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+    <div data-theme="dark" className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
       <ApiStatusBanner />
       <PanelBackground />
 

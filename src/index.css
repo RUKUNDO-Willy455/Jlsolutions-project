@@ -1,18 +1,89 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
-@theme {
-  --color-obsidian: #090909;
-  --color-surface: #111111;
-  --color-surface-2: #181818;
-  --color-surface-3: #202020;
-  --color-ash: #f2ede6;
-  --color-smoke: #7a7a7a;
-  --color-smoke-2: #4a4a4a;
+/* ============================================================
+   Theme palette (dark = default, light = [data-theme='light'])
+   All colors referenced by @theme inline so utilities flip
+   at runtime when the data-theme attribute changes.
+   ============================================================ */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --jl-bg: #090909;
+  --jl-surface-1: #111111;
+  --jl-surface-2: #181818;
+  --jl-surface-3: #202020;
+  --jl-ash: #f2ede6;
+  --jl-ink-1: #aaa;
+  --jl-ink-2: #8f8f8f;
+  --jl-ink-3: #5a5a5a;
+  --jl-ink-4: #3a3a3a;
+  --jl-solid: #090909;
+  --jl-line-soft: rgba(255, 255, 255, 0.05);
+  --jl-line: rgba(255, 255, 255, 0.06);
+  --jl-line-strong: rgba(255, 255, 255, 0.14);
+  --jl-line-xstrong: rgba(255, 255, 255, 0.3);
+  --jl-glass: rgba(13, 13, 13, 0.35);
+  --jl-glass-hover: rgba(13, 13, 13, 0.55);
+  --jl-navi-panel: rgba(14, 14, 14, 0.97);
+  --jl-scrim: rgba(9, 9, 9, 0.82);
+  --jl-accent: #93b8f7;
+  --jl-footer-bg: #050a17;
+  --jl-footer-heading: #64789c;
+  --jl-footer-text: #93a7c8;
+  --jl-footer-strong: #f4f8ff;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --jl-bg: #ecebe5;
+  --jl-surface-1: #f6f5f0;
+  --jl-surface-2: #eae9e2;
+  --jl-surface-3: #e0dfd8;
+  --jl-ash: #2a2a26;
+  --jl-ink-1: #4f4f4b;
+  --jl-ink-2: #63635f;
+  --jl-ink-3: #898986;
+  --jl-ink-4: #a9a9a5;
+  --jl-solid: #111111;
+  --jl-line-soft: rgba(30, 30, 28, 0.06);
+  --jl-line: rgba(30, 30, 28, 0.1);
+  --jl-line-strong: rgba(30, 30, 28, 0.16);
+  --jl-line-xstrong: rgba(30, 30, 28, 0.26);
+  --jl-glass: rgba(255, 255, 255, 0.55);
+  --jl-glass-hover: rgba(255, 255, 255, 0.72);
+  --jl-navi-panel: rgba(243, 242, 236, 0.97);
+  --jl-scrim: rgba(12, 12, 12, 0.55);
+  --jl-accent: #2563eb;
+  --jl-footer-bg: #e2e1da;
+  --jl-footer-heading: #94948f;
+  --jl-footer-text: #5f5f5c;
+  --jl-footer-strong: #2a2a26;
+}
+
+@theme inline {
+  --color-obsidian: var(--jl-bg);
+  --color-surface: var(--jl-surface-1);
+  --color-surface-2: var(--jl-surface-2);
+  --color-surface-3: var(--jl-surface-3);
+  --color-ash: var(--jl-ash);
+  --color-smoke: var(--jl-ink-3);
+  --color-smoke-2: var(--jl-ink-4);
+  --color-ink-1: var(--jl-ink-1);
+  --color-ink-2: var(--jl-ink-2);
+  --color-ink-3: var(--jl-ink-3);
+  --color-ink-4: var(--jl-ink-4);
+  --color-solid: var(--jl-solid);
+  --color-line-soft: var(--jl-line-soft);
+  --color-line: var(--jl-line);
+  --color-line-strong: var(--jl-line-strong);
+  --color-line-xstrong: var(--jl-line-xstrong);
+  --color-glass: var(--jl-glass);
+  --color-glass-hover: var(--jl-glass-hover);
+  --color-scrim: var(--jl-scrim);
   --color-ember: #2563eb;
   --color-ember-light: #60a5fa;
   --color-ember-dim: rgba(37, 99, 235, 0.15);
-  --color-wire: rgba(255, 255, 255, 0.06);
   --font-family-display: 'Fraunces', Georgia, serif;
   --font-family-body: 'Outfit', system-ui, sans-serif;
   --font-family-mono: 'DM Mono', 'Courier New', monospace;
@@ -27,12 +98,13 @@ html {
 }
 
 body {
-  background-color: #090909;
-  color: #f2ede6;
+  background-color: var(--jl-bg);
+  color: var(--jl-ash);
   font-family: 'Outfit', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 ::selection {
@@ -65,10 +137,10 @@ body {
   width: 3px;
 }
 ::-webkit-scrollbar-track {
-  background: #090909;
+  background: var(--jl-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: var(--jl-line-strong);
   border-radius: 2px;
 }
 
@@ -147,8 +219,8 @@ body {
 
 /* Ghost button */
 .btn-ghost {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #f2ede6;
+  border: 1px solid var(--jl-line-strong);
+  color: var(--jl-ash);
   font-family: 'Outfit', sans-serif;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -157,8 +229,8 @@ body {
   transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 .btn-ghost:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--jl-line-xstrong);
+  background-color: var(--jl-line-soft);
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(0,0,0,0.4);
 }
@@ -169,14 +241,14 @@ body {
 
 /* Hairline rule */
 .hairline {
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--jl-line);
 }
 
 /* Form inputs */
 .field {
-  background-color: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #f2ede6;
+  background-color: var(--jl-surface-2);
+  border: 1px solid var(--jl-line);
+  color: var(--jl-ash);
   font-family: 'Outfit', sans-serif;
   font-size: 0.9rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -192,11 +264,11 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 .field::placeholder {
-  color: #4a4a4a;
+  color: var(--jl-ink-4);
 }
 .field option {
-  background-color: #161616;
-  color: #f2ede6;
+  background-color: var(--jl-surface-2);
+  color: var(--jl-ash);
 }
 
 /* Noise overlay on hero */

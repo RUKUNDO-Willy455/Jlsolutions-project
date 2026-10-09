@@ -91,7 +91,7 @@ export default function WelcomeScreen({
   const firstName = userName.split(' ')[0];
 
   return (
-    <div className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+    <div data-theme="dark" className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
       {/* Background image — same treatment as the console */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#080808]">
         <img

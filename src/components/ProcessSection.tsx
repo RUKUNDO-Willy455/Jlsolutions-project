@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n';
+import adminBg1 from '../assets/admin-bg-1.jpg';
 
 export default function ProcessSection() {
   const { t } = useI18n();
@@ -26,15 +27,17 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section id="process" className="bg-obsidian py-20 sm:py-24 lg:py-40">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+    <section id="process" className="relative bg-obsidian py-20 sm:py-24 lg:py-40 overflow-hidden">
+      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           {/* Left: copy */}
           <div>
             <div className="flex items-center gap-3 mb-8 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('pro.kicker')}
@@ -47,7 +50,7 @@ export default function ProcessSection() {
               {t('pro.h1')}
               <span className="block italic font-light text-ember">{t('pro.hEm')}</span>
             </h2>
-            <p className="text-[#8f8f8f] text-base leading-relaxed mt-8 max-w-sm reveal delay-200">
+            <p className="text-ink-2 text-base leading-relaxed mt-8 max-w-sm reveal delay-200">
               {t('pro.body')}
             </p>
 
@@ -65,7 +68,7 @@ export default function ProcessSection() {
           </div>
 
           {/* Right: steps */}
-          <div className="flex flex-col divide-y divide-[rgba(255,255,255,0.05)]">
+          <div className="flex flex-col divide-y divide-line">
             {process.map((step, i) => (
               <div
                 key={step.step}
@@ -84,7 +87,7 @@ export default function ProcessSection() {
                   >
                     {step.title}
                   </h3>
-                  <p className="text-sm text-[#8f8f8f] leading-relaxed">{step.desc}</p>
+                  <p className="text-sm text-ink-2 leading-relaxed">{step.desc}</p>
                 </div>
               </div>
             ))}

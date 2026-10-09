@@ -24,8 +24,8 @@ class MapBoundary extends Component<
     const { t, children } = this.props;
     if (this.state.failed) {
       return (
-        <div className="relative h-80 w-full flex flex-col items-center justify-center gap-4 bg-[#0e0e0e]">
-          <p className="text-[0.7rem] tracking-[0.16em] uppercase text-[#8a8a8a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+        <div className="relative h-80 w-full flex flex-col items-center justify-center gap-4 bg-obsidian">
+          <p className="text-[0.7rem] tracking-[0.16em] uppercase text-ink-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
             {t('book.mapFail')}
           </p>
           <button
@@ -500,7 +500,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
   }
 
   return (
-    <section id="booking" className={`bg-surface border-t border-[rgba(255,255,255,0.05)] ${nested ? 'py-16 sm:py-20 lg:py-24' : 'py-20 sm:py-24 lg:py-40'}`}>
+    <section id="booking" className={`bg-surface border-t border-line ${nested ? 'py-16 sm:py-20 lg:py-24' : 'py-20 sm:py-24 lg:py-40'}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 lg:items-center">
           {/* Left: copy + tech cards */}
@@ -508,7 +508,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
             <div className="flex items-center gap-3 mb-6 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('book.kicker')}
@@ -521,7 +521,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
               {t('book.title')}
               <span className="block italic font-light text-ember">{t('book.titleEm')}</span>
             </h2>
-            <p className="text-[#8f8f8f] text-base leading-relaxed max-w-sm mb-8 reveal delay-200">
+            <p className="text-ink-2 text-base leading-relaxed max-w-sm mb-8 reveal delay-200">
               {t('book.sub')}
             </p>
 
@@ -538,29 +538,29 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                 return (
                 <div
                   key={tech.id}
-                  className={`flex items-center gap-3 p-3 rounded-[2px] border border-[rgba(255,255,255,0.06)] bg-surface-2 ${disabled ? 'opacity-40' : ''}`}
+                  className={`flex items-center gap-3 p-3 rounded-[2px] border border-line bg-surface-2 ${disabled ? 'opacity-40' : ''}`}
                 >
                   {/* Avatar */}
                   {tech.photoUrl ? (
                     <img
                       src={tech.photoUrl}
                       alt={tech.name}
-                      className="w-9 h-9 rounded-[1px] object-cover shrink-0 border border-[rgba(255,255,255,0.08)]"
+                      className="w-9 h-9 rounded-[1px] object-cover shrink-0 border border-line"
                     />
                   ) : (
                     <div
-                      className="w-9 h-9 rounded-[1px] flex items-center justify-center shrink-0 text-sm font-semibold bg-surface-3 text-[#5a5a5a]"
+                      className="w-9 h-9 rounded-[1px] flex items-center justify-center shrink-0 text-sm font-semibold bg-surface-3 text-ink-3"
                       style={{ fontFamily: 'Fraunces, Georgia, serif' }}
                     >
                       {tech.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate text-[#aaa]">
+                    <p className="text-sm font-semibold truncate text-ink-1">
                       {tech.name}
                     </p>
                     <p
-                      className="text-[0.62rem] tracking-wide text-[#5a5a5a] truncate"
+                      className="text-[0.62rem] tracking-wide text-ink-3 truncate"
                       style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                     >
                       {tech.role}
@@ -569,7 +569,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                   <span
                     className={`text-[0.55rem] tracking-[0.14em] uppercase px-2 py-1 rounded-[1px] shrink-0 ${
                       !tech.available
-                        ? 'text-[#4a4a4a] bg-surface-3'
+                        ? 'text-ink-4 bg-surface-3'
                         : slotBusy
                           ? 'text-yellow-400/90 bg-yellow-400/10 border border-yellow-400/20'
                           : 'text-emerald-400 bg-emerald-900/20 border border-emerald-900/40'
@@ -581,7 +581,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                 </div>
                 );
               })}
-              <p className="text-[0.7rem] text-[#6a6a6a] leading-relaxed mt-1 flex items-start gap-2">
+              <p className="text-[0.7rem] text-ink-3 leading-relaxed mt-1 flex items-start gap-2">
                 <ShieldCheck size={14} className="text-ember shrink-0 mt-0.5" />
                 {t('book.autoAssigned')}
               </p>
@@ -601,24 +601,24 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                   <h3 className="text-2xl font-semibold text-ash mb-3" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
                     {t('book.submittedTitle')}
                   </h3>
-                  <p className="text-[#8f8f8f] text-sm leading-relaxed max-w-xs">
+                  <p className="text-ink-2 text-sm leading-relaxed max-w-xs">
                     {t('book.submittedBody', { name: form.name || 'you', phone: form.phone || 'your number' })}
                   </p>
                 </div>
                 <div className="border border-ember/30 bg-ember/5 rounded-[2px] px-5 py-4 w-full max-w-sm flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-[0.55rem] tracking-[0.16em] uppercase text-[#8a8a8a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                    <p className="text-[0.55rem] tracking-[0.16em] uppercase text-ink-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                       {t('book.refLabel')}
                     </p>
                     <p className="text-2xl font-semibold text-ember mt-1" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                       {lastRef}
                     </p>
                   </div>
-                  <p className="text-[0.62rem] text-[#6a6a6a] max-w-[120px] leading-snug text-right">
+                  <p className="text-[0.62rem] text-ink-3 max-w-[120px] leading-snug text-right">
                     {t('book.refHint')}
                   </p>
                 </div>
-                <div className="border border-[rgba(255,255,255,0.06)] rounded-[2px] p-6 w-full max-w-sm">
+                <div className="border border-line rounded-[2px] p-6 w-full max-w-sm">
                   <dl className="flex flex-col gap-3">
 {[
                         { label: t('book.srv'), value: form.service || '—' },
@@ -635,7 +635,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                       ].map((row) => (
                       <div key={row.label} className="flex gap-4 items-baseline">
                         <dt
-                          className="text-[0.6rem] tracking-[0.14em] uppercase text-[#4a4a4a] w-16 shrink-0"
+                          className="text-[0.6rem] tracking-[0.14em] uppercase text-ink-4 w-16 shrink-0"
                           style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                         >
                           {row.label}
@@ -667,7 +667,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                 <a
                   href="#/track"
                   onClick={onTrack ? (e) => { e.preventDefault(); onTrack(); } : undefined}
-                  className="text-xs text-[#6a6a6a] hover:text-ember transition-colors duration-200 mt-1 underline underline-offset-4 decoration-[rgba(255,255,255,0.15)]"
+                  className="text-xs text-ink-3 hover:text-ember transition-colors duration-200 mt-1 underline underline-offset-4 decoration-[rgba(255,255,255,0.15)]"
                 >
                   {t('book.trackLink', { ref: lastRef })} →
                 </a>
@@ -706,7 +706,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                                 ? 'bg-ember border-ember text-obsidian'
                                 : step === i + 1
                                   ? 'bg-[rgba(37,99,235,0.14)] border-ember text-ember'
-                                  : 'bg-surface-2 border-[rgba(255,255,255,0.1)] text-[#4a4a4a]'
+                                  : 'bg-surface-2 border-line-strong text-ink-4'
                             }`}
                             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                           >
@@ -714,7 +714,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                           </span>
                           <span
                             className={`text-[0.58rem] tracking-[0.14em] uppercase transition-colors duration-300 ${
-                              step >= i + 1 ? 'text-ash' : 'text-[#4a4a4a]'
+                              step >= i + 1 ? 'text-ash' : 'text-ink-4'
                             }`}
                             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                           >
@@ -725,7 +725,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     ))}
                   </div>
                   <p
-                    className="text-[0.6rem] tracking-[0.14em] uppercase text-[#4a4a4a] mt-3"
+                    className="text-[0.6rem] tracking-[0.14em] uppercase text-ink-4 mt-3"
                     style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                   >
                     {t('book.stepOf', { step, total: PROCESS.length, title: t(`book.step${step}Title`) })}
@@ -736,7 +736,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                   <>
                     {/* Service type */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                         {t('book.service')}
                       </label>
                       <select
@@ -755,7 +755,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
 
                     {/* Location */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                         {t('book.address')}
                       </label>
                       <div className="relative">
@@ -770,14 +770,14 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                           className={`field ${errors.location ? '!border-red-500/70' : ''}`}
                         />
                         {showSug && (
-                          <div className="absolute inset-x-0 top-full mt-1.5 z-40 rounded-[2px] border border-[rgba(255,255,255,0.1)] bg-[#121212] shadow-[0_18px_40px_rgba(0,0,0,0.55)] overflow-hidden max-h-64 overflow-y-auto">
+                          <div className="absolute inset-x-0 top-full mt-1.5 z-40 rounded-[2px] border border-line-strong bg-surface shadow-[0_18px_40px_rgba(0,0,0,0.55)] overflow-hidden max-h-64 overflow-y-auto">
                             {sugLoading && (
-                              <p className="px-4 py-2.5 text-[0.7rem] text-[#6a6a6a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                              <p className="px-4 py-2.5 text-[0.7rem] text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                                 {t('book.searching')}
                               </p>
                             )}
                             {!sugLoading && suggestions.length === 0 && (
-                              <p className="px-4 py-2.5 text-[0.7rem] text-[#6a6a6a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                              <p className="px-4 py-2.5 text-[0.7rem] text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                                 {t('book.noMatches')}
                               </p>
                             )}
@@ -787,7 +787,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                                 type="button"
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={() => pickSuggestion(s)}
-                                className="w-full text-left px-4 py-2.5 flex items-start gap-2.5 border-b border-[rgba(255,255,255,0.04)] last:border-0 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-150"
+                                className="w-full text-left px-4 py-2.5 flex items-start gap-2.5 border-b border-line-soft last:border-0 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-150"
                               >
                                 <MapPin size={13} className="mt-0.5 text-ember shrink-0" />
                                 <span className="text-[0.8rem] text-ash leading-snug">{s.label}</span>
@@ -802,7 +802,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     {/* Precise location (inline Rwanda map) */}
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                        <span className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                           {t('book.precise')}
                         </span>
                         {form.lat != null && form.lng != null && (
@@ -817,23 +817,23 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                         onClick={openMap}
                         aria-expanded={mapOpen}
                         aria-controls="location-map-panel"
-                        className="flex items-center justify-between w-full px-4 py-3.5 rounded-[2px] border border-[rgba(255,255,255,0.08)] bg-[#161616] hover:border-[rgba(37,99,235,0.5)] transition-colors duration-200 text-left"
+                        className="flex items-center justify-between w-full px-4 py-3.5 rounded-[2px] border border-line bg-surface-2 hover:border-[rgba(37,99,235,0.5)] transition-colors duration-200 text-left"
                       >
                         <span className="flex items-center gap-2.5 text-[0.8rem] text-ash">
                           <MapPin size={15} className="text-ember" />
                           {mapOpen ? t('book.hideMap') : t('book.showMap')}
                         </span>
-                        <span className="text-[0.6rem] tracking-[0.12em] uppercase text-[#7a7a7a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                        <span className="text-[0.6rem] tracking-[0.12em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                           {t('book.rwOnly')}
                         </span>
                       </button>
 
                       {mapOpen && (
-                        <div id="location-map-panel" className="rounded-[2px] overflow-hidden border border-[rgba(255,255,255,0.1)]">
+                        <div id="location-map-panel" className="rounded-[2px] overflow-hidden border border-line-strong">
                           <MapBoundary t={t}>
                             <Suspense
                               fallback={
-                                <div className="h-80 w-full flex items-center justify-center text-[0.7rem] tracking-[0.16em] uppercase text-[#5a5a5a] animate-pulse bg-[#0e0e0e]">
+                                <div className="h-80 w-full flex items-center justify-center text-[0.7rem] tracking-[0.16em] uppercase text-ink-3 animate-pulse bg-obsidian">
                                   {t('book.mapLoading')}
                                 </div>
                               }
@@ -858,13 +858,13 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
 
                       {form.lat != null && form.lng != null && (
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-[0.7rem] text-[#8f8f8f] leading-relaxed truncate">
+                          <p className="text-[0.7rem] text-ink-2 leading-relaxed truncate">
                             {form.place || `${form.lat.toFixed(5)}, ${form.lng.toFixed(5)}`}
                           </p>
                           <button
                             type="button"
                             onClick={() => handleMapPick(null)}
-                            className="shrink-0 text-[0.6rem] tracking-[0.12em] uppercase text-[#8a8a8a] hover:text-red-400 transition-colors duration-200"
+                            className="shrink-0 text-[0.6rem] tracking-[0.12em] uppercase text-ink-2 hover:text-red-400 transition-colors duration-200"
                             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                           >
                             {t('book.removePin')}
@@ -875,7 +875,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
 
                     {/* Date */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                         {t('book.date')}
                       </label>
                       <input
@@ -894,7 +894,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
 
                     {/* Time */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                         {t('book.time')}
                       </label>
                       <select
@@ -924,7 +924,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
 
                     {/* Notes */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                         {t('book.notes')}
                       </label>
                       <textarea
@@ -950,7 +950,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                 {step === 2 && (
                   <>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                         {t('book.name')}
                       </label>
                       <input
@@ -968,7 +968,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                      <label className="text-[0.65rem] tracking-[0.14em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                         {t('book.phone')}
                       </label>
                       <input
@@ -1021,9 +1021,9 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                 {step === 3 && (
                   <>
                     {/* Summary card */}
-                    <div className="border border-[rgba(255,255,255,0.06)] rounded-[2px] p-5 bg-surface-2 flex flex-col gap-3">
+                    <div className="border border-line rounded-[2px] p-5 bg-surface-2 flex flex-col gap-3">
                       <p
-                        className="text-[0.6rem] tracking-[0.14em] uppercase text-[#4a4a4a] mb-1"
+                        className="text-[0.6rem] tracking-[0.14em] uppercase text-ink-4 mb-1"
                         style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                       >
                         {t('book.summary')}
@@ -1045,7 +1045,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                       ].map((row) => row.value ? (
                         <div key={row.label} className="flex gap-4 items-baseline">
                           <dt
-                            className="text-[0.58rem] tracking-[0.12em] uppercase text-[#3a3a3a] w-20 shrink-0"
+                            className="text-[0.58rem] tracking-[0.12em] uppercase text-ink-4 w-20 shrink-0"
                             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                           >
                             {row.label}
@@ -1055,7 +1055,7 @@ export default function BookingForm({ onTrack, nested }: { onTrack?: () => void;
                       ) : null)}
                     </div>
 
-                    <p className="text-[0.7rem] text-[#5a5a5a] leading-relaxed" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                    <p className="text-[0.7rem] text-ink-3 leading-relaxed" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                       {t('book.confirmNote')}
                     </p>
 

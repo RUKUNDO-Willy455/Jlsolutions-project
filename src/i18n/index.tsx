@@ -89,6 +89,7 @@ const en: Record<string, string> = {
   'nav.visitPage': 'Contact & Working Hours',
   'nav.visitPageCap': 'Visit page',
   'nav.menuToggle': 'Toggle menu',
+  'nav.themeMode': 'Theme',
   'lang.label': 'Language',
 
   // Footer
@@ -104,6 +105,8 @@ const en: Record<string, string> = {
   'footer.privacy': 'Privacy Policy',
   'footer.terms': 'Terms of Service',
   'footer.backToTop': 'Back to top',
+  'footer.visit': 'Visit',
+  'footer.visitPage': 'Contact & Working Hours',
 
   // CTA
   'cta.kicker': 'Get Started Today',
@@ -787,6 +790,7 @@ const fr: typeof en = {
   'nav.visitPage': 'Contact & horaires',
   'nav.visitPageCap': 'Voir la page',
   'nav.menuToggle': 'Ouvrir le menu',
+  'nav.themeMode': 'Thème',
   'lang.label': 'Langue',
 
   'footer.company': 'Entreprise',
@@ -801,6 +805,8 @@ const fr: typeof en = {
   'footer.privacy': 'Politique de confidentialité',
   'footer.terms': 'Conditions d\'utilisation',
   'footer.backToTop': 'Haut de page',
+  'footer.visit': 'Visite',
+  'footer.visitPage': 'Contact & heures de travail',
 
   'cta.kicker': 'Commencez aujourd\'hui',
   'cta.h1': 'Vos systèmes',
@@ -1449,6 +1455,7 @@ const rw: typeof en = {
   'nav.visitPage': 'Twandikire & amasaha',
   'nav.visitPageCap': 'Reba ipaji',
   'nav.menuToggle': 'Fungura imenyu',
+  'nav.themeMode': 'Uburyo',
   'lang.label': 'Ururimi',
 
   'footer.company': 'Isosiyete',
@@ -1463,6 +1470,8 @@ const rw: typeof en = {
   'footer.privacy': 'Politiki y\'ibanga',
   'footer.terms': 'Amategeko akoreshwa',
   'footer.backToTop': 'Subira hejuru',
+  'footer.visit': 'Sura',
+  'footer.visitPage': 'Aho duherereye & amasaha',
 
   'cta.kicker': 'Tangira uyu munsi',
   'cta.h1': 'Sisitemu zawe',

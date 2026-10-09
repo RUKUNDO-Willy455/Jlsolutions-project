@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LoadingScreen from './components/LoadingScreen';
+import FounderIntro from './components/FounderIntro';
 import AdminPanel from './components/AdminPanel';
 import TechnicianPanel from './components/TechnicianPanel';
 import AiAssistant from './components/AiAssistant';
@@ -21,7 +22,9 @@ import ContactPage from './pages/Contact';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
 
-function PageView() {
+type FooterHandlers = { onAdminClick?: () => void; onTechClick?: () => void };
+
+function PageView({ footerHandlers }: { footerHandlers: FooterHandlers }) {
   const path = useRoute();
 
   switch (path) {
@@ -49,7 +52,7 @@ function PageView() {
       return <TermsPage />;
     case '/':
     default:
-      return <HomePage />;
+      return <HomePage footerHandlers={footerHandlers} />;
   }
 }
 
@@ -83,11 +86,19 @@ function Shell() {
         <TechnicianPanel onExit={() => setTechOpen(false)} />
       ) : (
         <>
+          {path === '/founder' && !loading && <FounderIntro />}
           <Navbar />
           <main key={path} className="page-enter">
-            <PageView />
+            <PageView
+              footerHandlers={{
+                onAdminClick: () => setAdminOpen(true),
+                onTechClick: () => setTechOpen(true),
+              }}
+            />
           </main>
-          <Footer onAdminClick={() => setAdminOpen(true)} onTechClick={() => setTechOpen(true)} />
+          {path !== '/' && (
+            <Footer onAdminClick={() => setAdminOpen(true)} onTechClick={() => setTechOpen(true)} />
+          )}
           <AiAssistant />
         </>
       )}

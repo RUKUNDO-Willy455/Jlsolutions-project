@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useI18n } from '../i18n';
+import adminBg1 from '../assets/admin-bg-1.jpg';
 
 export default function Services() {
   const { t } = useI18n();
@@ -58,7 +59,10 @@ export default function Services() {
   const go = (dir: 1 | -1) => setActive((a) => (a + dir + services.length) % services.length);
 
   return (
-    <section id="services" className="relative bg-obsidian overflow-hidden" style={{ minHeight: '100vh' }}>
+    <section data-theme="dark" id="services" className="relative bg-obsidian overflow-hidden" style={{ minHeight: '100vh' }}>
+
+      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
 
       {/* ── Background image stack — all pre-rendered, only active is visible ── */}
       <div className="absolute inset-0">
@@ -93,7 +97,7 @@ export default function Services() {
             <div className="flex items-center gap-3 mb-6">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('srv.kicker')}
@@ -109,7 +113,7 @@ export default function Services() {
           </div>
 
           {/* Service rows */}
-          <div className="flex flex-col divide-y divide-[rgba(255,255,255,0.05)]">
+          <div className="flex flex-col divide-y divide-line">
             {services.map((s, i) => (
               <button
                 key={s.number}
@@ -122,14 +126,14 @@ export default function Services() {
                 {/* Active bar */}
                 <span
                   className={`shrink-0 w-[2px] h-8 rounded-full transition-all duration-300 ${
-                    active === i ? 'bg-ember opacity-100' : 'bg-[#2a2a2a] opacity-60 group-hover:bg-ember/40'
+                    active === i ? 'bg-ember opacity-100' : 'bg-surface-3 opacity-60 group-hover:bg-ember/40'
                   }`}
                 />
 
                 {/* Number */}
                 <span
                   className={`shrink-0 text-[0.6rem] tracking-[0.18em] transition-colors duration-300 w-6 ${
-                    active === i ? 'text-ember' : 'text-[#3a3a3a] group-hover:text-[#5a5a5a]'
+                    active === i ? 'text-ember' : 'text-ink-4 group-hover:text-ink-3'
                   }`}
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
@@ -139,7 +143,7 @@ export default function Services() {
                 {/* Title */}
                 <span
                   className={`text-base lg:text-lg font-semibold flex-1 transition-colors duration-300 ${
-                    active === i ? 'text-white' : 'text-[#5a5a5a] group-hover:text-[#aaa]'
+                    active === i ? 'text-white' : 'text-ink-3 group-hover:text-ink-1'
                   }`}
                   style={{ fontFamily: 'Fraunces, Georgia, serif' }}
                 >
@@ -153,7 +157,7 @@ export default function Services() {
                   className={`w-4 h-4 shrink-0 transition-all duration-300 ${
                     active === i
                       ? 'text-ember translate-x-0 opacity-100'
-                      : 'text-[#3a3a3a] -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-60'
+                      : 'text-ink-4 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-60'
                   }`}
                 >
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -164,14 +168,14 @@ export default function Services() {
         </div>
 
         {/* Right — active service detail */}
-        <div className="lg:w-1/2 lg:pl-16 lg:border-l lg:border-[rgba(255,255,255,0.06)] flex flex-col justify-center">
+        <div className="lg:w-1/2 lg:pl-16 lg:border-l lg:border-line flex flex-col justify-center">
           <div
             key={active}
             className="flex flex-col gap-8"
             style={{ animation: 'fadeSlideRight 0.5s cubic-bezier(0.16,1,0.3,1) forwards' }}
           >
             {/* Image */}
-            <div className="relative rounded-[2px] overflow-hidden bg-[#111]" style={{ aspectRatio: '16/9' }}>
+            <div className="relative rounded-[2px] overflow-hidden bg-surface" style={{ aspectRatio: '16/9' }}>
               <img
                 src={current.image}
                 alt={current.alt}
@@ -210,14 +214,14 @@ export default function Services() {
             </div>
 
             {/* Description */}
-            <p className="text-[#8a8a8a] text-sm leading-relaxed">{current.description}</p>
+            <p className="text-ink-2 text-sm leading-relaxed">{current.description}</p>
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2">
               {current.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[0.62rem] tracking-[0.12em] uppercase text-[#5a5a5a] px-3 py-1.5 border border-[rgba(255,255,255,0.07)] rounded-[1px] hover:border-ember/40 hover:text-ember transition-colors duration-200"
+                  className="text-[0.62rem] tracking-[0.12em] uppercase text-ink-3 px-3 py-1.5 border border-line rounded-[1px] hover:border-ember/40 hover:text-ember transition-colors duration-200"
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
                   {tag}
@@ -231,14 +235,14 @@ export default function Services() {
                 type="button"
                 onClick={() => go(-1)}
                 aria-label={t('srv.prev')}
-                className="w-9 h-9 flex items-center justify-center rounded-full border border-[rgba(255,255,255,0.12)] text-[#979797] hover:text-ash hover:border-ember/50 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-200"
+                className="w-9 h-9 flex items-center justify-center rounded-full border border-line-strong text-ink-2 hover:text-ash hover:border-ember/50 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-200"
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 ml-0.5">
                   <path d="M10 3l-5 5 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
 
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-3 items-center">
                 {services.map((_, i) => (
                   <button
                     key={i}
@@ -247,8 +251,8 @@ export default function Services() {
                     aria-current={i === active ? 'true' : undefined}
                     className={`transition-all duration-300 rounded-full ${
                       i === active
-                        ? 'w-6 h-1.5 bg-ember'
-                        : 'w-1.5 h-1.5 bg-[#2a2a2a] hover:bg-[#4a4a4a]'
+                        ? 'w-8 h-2.5 bg-ember shadow-[0_0_12px_rgba(37,99,235,0.6)]'
+                        : 'w-2.5 h-2.5 bg-ink-4 hover:bg-ink-3'
                     }`}
                   />
                 ))}
@@ -258,7 +262,7 @@ export default function Services() {
                 type="button"
                 onClick={() => go(1)}
                 aria-label={t('srv.next')}
-                className="w-9 h-9 flex items-center justify-center rounded-full border border-[rgba(255,255,255,0.12)] text-[#979797] hover:text-ash hover:border-ember/50 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-200"
+                className="w-9 h-9 flex items-center justify-center rounded-full border border-line-strong text-ink-2 hover:text-ash hover:border-ember/50 hover:bg-[rgba(37,99,235,0.08)] transition-colors duration-200"
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 mr-0.5">
                   <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

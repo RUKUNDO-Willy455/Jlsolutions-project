@@ -37,24 +37,24 @@ export default function PortalSidebar({
     <>
       {/* Desktop sidebar — icon-only by default, expands on hover */}
       <aside
-        className="group/sidebar shrink-0 border-r border-[rgba(255,255,255,0.05)] backdrop-blur-sm flex-col hidden md:flex transition-all duration-300 ease-in-out overflow-hidden"
+        className="group/sidebar shrink-0 border-r border-line backdrop-blur-sm flex-col hidden md:flex transition-all duration-300 ease-in-out overflow-hidden"
         style={{ width: '56px', background: 'rgba(10,10,10,0.60)' }}
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.width = '220px'; }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.width = '56px'; }}
       >
         {/* Header — logo + home button */}
-        <div className="flex items-center gap-2 px-3 py-4 border-b border-[rgba(255,255,255,0.05)] shrink-0">
+        <div className="flex items-center gap-2 px-3 py-4 border-b border-line shrink-0">
           <button
             type="button"
             onClick={onHome}
             title="Back to main site"
             className="group flex items-center justify-center w-8 h-8 rounded-[2px] hover:bg-[rgba(37,99,235,0.08)] transition-all duration-200 shrink-0"
           >
-            <i className="bx bx-home text-base text-[#4a4a4a] group-hover:text-ember transition-colors duration-200" />
+            <i className="bx bx-home text-base text-ink-4 group-hover:text-ember transition-colors duration-200" />
           </button>
           <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 flex items-center gap-2 overflow-hidden">
             <img src={jeanlucLogo} alt="" className="h-6 w-auto object-contain shrink-0" />
-            <span className="text-[0.6rem] tracking-[0.18em] uppercase text-[#3a3a3a] whitespace-nowrap" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{portalName}</span>
+            <span className="text-[0.6rem] tracking-[0.18em] uppercase text-ink-4 whitespace-nowrap" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{portalName}</span>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ export default function PortalSidebar({
               className={`flex items-center gap-3.5 px-4 py-3.5 text-left transition-all duration-150 whitespace-nowrap ${
                 activeTab === t
                   ? 'text-white bg-[rgba(37,99,235,0.14)] border-r-2 border-ember'
-                  : 'text-[#5a5a5a] hover:text-[#ccc] hover:bg-[rgba(255,255,255,0.04)]'
+                  : 'text-ink-3 hover:text-ink-1 hover:bg-line-soft'
               }`}
             >
               <i className={`bx ${icon} text-xl shrink-0`} />
@@ -88,7 +88,7 @@ export default function PortalSidebar({
         </div>
 
         {/* Bottom — persona + log out */}
-        <div className="border-t border-[rgba(255,255,255,0.05)] pb-2">
+        <div className="border-t border-line pb-2">
           {onPersonaClick ? (
             <button
               onClick={onPersonaClick}
@@ -103,13 +103,13 @@ export default function PortalSidebar({
                     {personaInitials}
                   </div>
                 )}
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#0a0a0a] flex items-center justify-center opacity-0 group-hover/profile:opacity-100 transition-opacity duration-150">
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-obsidian flex items-center justify-center opacity-0 group-hover/profile:opacity-100 transition-opacity duration-150">
                   <i className="bx bx-pencil text-[8px] text-ember" />
                 </div>
               </div>
               <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 overflow-hidden">
                 <p className="text-[0.72rem] font-semibold text-white whitespace-nowrap leading-tight">{personaName}</p>
-                <p className="text-[0.58rem] text-[#4a4a4a] whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{personaRole}</p>
+                <p className="text-[0.58rem] text-ink-4 whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{personaRole}</p>
               </div>
             </button>
           ) : (
@@ -123,7 +123,7 @@ export default function PortalSidebar({
               )}
               <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 overflow-hidden">
                 <p className="text-[0.72rem] font-semibold text-white whitespace-nowrap leading-tight">{personaName}</p>
-                <p className="text-[0.58rem] text-[#4a4a4a] whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{personaRole}</p>
+                <p className="text-[0.58rem] text-ink-4 whitespace-nowrap mt-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{personaRole}</p>
               </div>
             </div>
           )}
@@ -142,12 +142,12 @@ export default function PortalSidebar({
       </aside>
 
       {/* Mobile bottom tab strip */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0a0a]/95 border-t border-[rgba(255,255,255,0.06)] flex overflow-x-auto pb-[env(safe-area-inset-bottom)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-obsidian/95 border-t border-line flex overflow-x-auto pb-[env(safe-area-inset-bottom)]">
         {items.map(({ tab: t, badge }) => (
           <button
             key={t}
             onClick={() => onSelect(t)}
-            className={`relative flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap transition-colors duration-150 ${activeTab === t ? 'text-ember border-t border-ember' : 'text-[#4a4a4a]'}`}
+            className={`relative flex-1 min-w-fit px-3 py-3.5 text-[0.6rem] tracking-wide uppercase whitespace-nowrap transition-colors duration-150 ${activeTab === t ? 'text-ember border-t border-ember' : 'text-ink-4'}`}
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
             {t}

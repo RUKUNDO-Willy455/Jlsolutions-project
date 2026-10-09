@@ -22,9 +22,22 @@
          flash between the document load and the LoadingScreen taking over.
          Must match the base tone of .splash in src/components/LoadingScreen.css. -->
     <style>
-      html { background: #0a0f1a; color-scheme: dark; }
+      html { background: #0a0f1a; }
       body { background: #0a0f1a; margin: 0; }
     </style>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('jl-theme');
+          if (t !== 'light' && t !== 'dark') t = 'dark';
+          document.documentElement.setAttribute('data-theme', t);
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', t === 'light' ? '#ecebe5' : '#090909');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
     <title>Jean Luc Solutions — Skills · Speed · Sustainability</title>
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
     <!-- figma:head-end -->

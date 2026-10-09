@@ -67,7 +67,7 @@ export default function BookingFlow({ variant }: { variant: 'page' | 'home' }) {
     <section ref={rootRef}>
       {/* Header with view switcher */}
       <div
-        className={`bg-obsidian border-b border-[rgba(255,255,255,0.05)] ${
+        className={`bg-obsidian border-b border-line ${
           variant === 'page'
             ? 'pt-32 sm:pt-40 lg:pt-44 pb-12'
             : 'pt-20 sm:pt-24 lg:pt-28 pb-12'
@@ -78,7 +78,7 @@ export default function BookingFlow({ variant }: { variant: 'page' | 'home' }) {
             <div className="flex items-center gap-3 mb-5 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('book.flowKicker')}

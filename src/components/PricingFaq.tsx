@@ -28,7 +28,7 @@ export default function PricingFaq() {
             <div className="flex items-center gap-3 mb-8 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('faq.incKicker')}
@@ -40,7 +40,7 @@ export default function PricingFaq() {
                   <span className="mt-0.5 w-6 h-6 rounded-[2px] bg-[rgba(37,99,235,0.12)] border border-[rgba(37,99,235,0.25)] flex items-center justify-center shrink-0">
                     <Check size={13} strokeWidth={3} className="text-ember" />
                   </span>
-                  <span className="text-sm text-[#8a8a8a] leading-relaxed">{item}</span>
+                  <span className="text-sm text-ink-2 leading-relaxed">{item}</span>
                 </li>
               ))}
             </ul>
@@ -51,7 +51,7 @@ export default function PricingFaq() {
             <div className="flex items-center gap-3 mb-8 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('faq.qKicker')}
@@ -67,7 +67,7 @@ export default function PricingFaq() {
                     <Info size={15} className="text-ember mt-1 shrink-0" />
                     {f.q}
                   </h3>
-                  <p className="text-sm text-[#8f8f8f] leading-relaxed">{f.a}</p>
+                  <p className="text-sm text-ink-2 leading-relaxed">{f.a}</p>
                 </div>
               ))}
             </div>

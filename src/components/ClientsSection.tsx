@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n';
+import adminBg1 from '../assets/admin-bg-1.jpg';
 
 const clients = [
   { name: 'Bank of Kigali', since: '2012' },
@@ -15,19 +16,21 @@ export default function ClientsSection() {
   const { t } = useI18n();
 
   return (
-    <section id="clients" className="bg-surface py-20 sm:py-24 lg:py-32 border-y border-[rgba(255,255,255,0.05)]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+    <section id="clients" className="relative bg-surface py-20 sm:py-24 lg:py-32 border-y border-line overflow-hidden">
+      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex items-center gap-3 mb-12 reveal">
           <span className="w-8 h-px bg-ember" />
           <span
-            className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+            className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
             {t('cl.kicker')}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[rgba(255,255,255,0.05)]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-line">
           {clients.map((client, i) => (
             <div
               key={client.name}
@@ -45,7 +48,7 @@ export default function ClientsSection() {
                   </span>
                 </div>
                 <span
-                  className="text-[0.6rem] text-[#3a3a3a]"
+                  className="text-[0.6rem] text-ink-4"
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
                   {client.since}→
@@ -54,7 +57,7 @@ export default function ClientsSection() {
               <div>
                 <p className="text-sm font-semibold text-ash leading-tight">{client.name}</p>
                 <p
-                  className="text-[0.65rem] tracking-wide text-[#5a5a5a] mt-1"
+                  className="text-[0.65rem] tracking-wide text-ink-3 mt-1"
                   style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
                 >
                   {t(`cl.sec${i}`)}

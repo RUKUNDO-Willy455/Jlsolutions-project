@@ -19,7 +19,7 @@ export default function BookingViewTabs({
 
   return (
     <div
-      className={`inline-flex rounded-[2px] border border-[rgba(255,255,255,0.12)] overflow-hidden ${className}`}
+      className={`inline-flex rounded-[2px] border border-line-strong overflow-hidden ${className}`}
       role="tablist"
       aria-label={t('tabs.request')}
     >
@@ -32,7 +32,7 @@ export default function BookingViewTabs({
           className={`px-6 py-3 text-[0.65rem] tracking-[0.16em] uppercase transition-colors duration-200 ${
             view === tb.key
               ? 'text-ember bg-[rgba(37,99,235,0.08)]'
-              : 'text-[#8a8a8a] hover:text-ash'
+              : 'text-ink-2 hover:text-ash'
           }`}
           style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
         >

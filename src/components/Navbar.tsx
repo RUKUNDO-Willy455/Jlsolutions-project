@@ -3,6 +3,7 @@ import jeanlucLogo from '../assets/jeanluc-logo.png';
 import { PHONE_LINKS, SITE } from '../data/site';
 import { useRoute } from '../router';
 import { LOCALE_NAMES, useI18n } from '../i18n';
+import ThemeToggle from './ThemeToggle';
 import type { Locale } from '../i18n';
 
 const LINKS = [
@@ -22,7 +23,7 @@ function LangSwitcher() {
     <div
       role="group"
       aria-label={LOCALE_NAMES[locale]}
-      className="flex items-center gap-0.5 border border-[rgba(255,255,255,0.08)] rounded-[2px] px-1 py-0.5"
+      className="flex items-center gap-0.5 border border-line rounded-[2px] px-1 py-0.5"
     >
       {locales.map((l) => (
         <button
@@ -34,7 +35,7 @@ function LangSwitcher() {
           className={`text-[0.62rem] tracking-widest px-1.5 py-1 rounded-[1px] transition-colors duration-200 ${
             locale === l
               ? 'text-obsidian bg-ember'
-              : 'text-[#6a6a6a] hover:text-ash'
+              : 'text-ink-3 hover:text-ash'
           }`}
           style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
         >
@@ -93,7 +94,7 @@ export default function Navbar() {
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
-        background: scrolled ? 'rgba(9,9,9,0.72)' : 'transparent',
+        background: scrolled ? 'var(--jl-glass)' : 'transparent',
         backdropFilter: scrolled ? 'blur(14px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(14px)' : 'none',
       }}
@@ -114,7 +115,7 @@ export default function Navbar() {
             className="h-10 lg:h-12 w-auto object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_14px_rgba(37,99,235,0.55)]"
           />
           <span
-            className="hidden sm:block text-sm font-semibold tracking-tight text-ash group-hover:text-white transition-colors duration-300"
+            className="hidden sm:block text-sm font-semibold tracking-tight text-ash group-hover:text-ember transition-colors duration-300"
             style={{ fontFamily: 'Fraunces, Georgia, serif' }}
           >
             Jean Luc{' '}
@@ -130,7 +131,7 @@ export default function Navbar() {
                 href={link.href}
                 aria-current={isActive(link.href) ? 'page' : undefined}
                 className={`text-[0.8rem] uppercase tracking-[0.12em] py-1 inline-block transition-colors duration-200 ${
-                  isActive(link.href) ? 'text-ash' : 'text-[#979797] hover:text-ash'
+                  isActive(link.href) ? 'text-ash' : 'text-ink-2 hover:text-ash'
                 }`}
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
@@ -151,7 +152,7 @@ export default function Navbar() {
               aria-expanded={contactOpen}
               aria-haspopup="true"
               aria-controls="contact-menu"
-              className="flex items-center gap-1.5 text-[0.8rem] uppercase tracking-[0.12em] text-[#979797] hover:text-ash transition-colors duration-200 py-1"
+              className="flex items-center gap-1.5 text-[0.8rem] uppercase tracking-[0.12em] text-ink-2 hover:text-ash transition-colors duration-200 py-1"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
               {t('nav.contactUs')}
@@ -169,9 +170,9 @@ export default function Navbar() {
               id="contact-menu"
               className="absolute top-full right-0 mt-3 w-80 rounded-[2px] overflow-hidden transition-all duration-300 origin-top-right"
               style={{
-                background: 'rgba(14,14,14,0.97)',
+                background: 'var(--jl-navi-panel)',
                 backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                border: '1px solid var(--jl-line)',
                 boxShadow: '0 24px 48px rgba(0,0,0,0.6)',
                 opacity: contactOpen ? 1 : 0,
                 transform: contactOpen ? 'scaleY(1) translateY(0)' : 'scaleY(0.92) translateY(-6px)',
@@ -194,7 +195,7 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.phone')}</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-ink-4 mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.phone')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>+{SITE.phone}</p>
                   </div>
                 </a>
@@ -213,7 +214,7 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.whatsapp')}</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-ink-4 mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.whatsapp')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{SITE.whatsappDisplay}</p>
                   </div>
                 </a>
@@ -230,7 +231,7 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.email')}</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-ink-4 mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.email')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{SITE.email}</p>
                   </div>
                 </a>
@@ -249,13 +250,13 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.location')}</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-ink-4 mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.location')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200">{t('nav.locationValue')}</p>
                   </div>
                 </a>
 
                 {/* Divider */}
-                <div className="h-px bg-[rgba(255,255,255,0.05)]" />
+                <div className="h-px bg-line" />
 
                 {/* Contact page */}
                 <a
@@ -269,7 +270,7 @@ export default function Navbar() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-[#4a4a4a] mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.visitPageCap')}</p>
+                    <p className="text-[0.6rem] tracking-[0.16em] uppercase text-ink-4 mb-0.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.visitPageCap')}</p>
                     <p className="text-sm text-ash group-hover/item:text-ember transition-colors duration-200">{t('nav.visitPage')}</p>
                   </div>
                 </a>
@@ -288,26 +289,36 @@ export default function Navbar() {
 
           {/* Language switch */}
           <li className="hidden xl:flex items-center">
+            <ThemeToggle />
+            <span className="w-px h-5 bg-line mx-2" aria-hidden="true" />
             <LangSwitcher />
           </li>
         </ul>
 
-        {/* Mobile hamburger */}
-        <button
-          className="xl:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px] overflow-hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label={t('nav.menuToggle')}
-        >
-          <span className={`block h-[1.5px] w-5 rounded-full transition-all duration-300 origin-center ${menuOpen ? 'rotate-45 translate-y-[7px] bg-ember' : 'bg-[#aaa]'}`} />
-          <span className={`block h-[1.5px] w-5 rounded-full bg-[#aaa] transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} />
-          <span className={`block h-[1.5px] w-5 rounded-full transition-all duration-300 origin-center ${menuOpen ? '-rotate-45 -translate-y-[7px] bg-ember' : 'bg-[#aaa]'}`} />
-        </button>
+        {/* Right-side controls */}
+        <div className="flex items-center gap-2">
+          {/* Theme toggle on mobile/tablet */}
+          <div className="xl:hidden">
+            <ThemeToggle />
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="xl:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px] overflow-hidden"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={t('nav.menuToggle')}
+          >
+            <span className={`block h-[1.5px] w-5 rounded-full transition-all duration-300 origin-center ${menuOpen ? 'rotate-45 translate-y-[7px] bg-ember' : 'bg-ink-1'}`} />
+            <span className={`block h-[1.5px] w-5 rounded-full bg-ink-1 transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} />
+            <span className={`block h-[1.5px] w-5 rounded-full transition-all duration-300 origin-center ${menuOpen ? '-rotate-45 -translate-y-[7px] bg-ember' : 'bg-ink-1'}`} />
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
       <div
         className={`xl:hidden transition-all duration-400 overflow-y-auto ${menuOpen ? 'max-h-[calc(100vh-4rem)] opacity-100' : 'max-h-0 opacity-0'}`}
-        style={{ background: 'rgba(9,9,9,0.96)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ background: 'var(--jl-navi-panel)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--jl-line)' }}
       >
         <div className="px-5 sm:px-6 pb-6 pt-2 flex flex-col gap-1">
           {links.map((link) => (
@@ -316,8 +327,8 @@ export default function Navbar() {
               href={link.href}
               aria-current={isActive(link.href) ? 'page' : undefined}
               onClick={() => setMenuOpen(false)}
-              className={`text-[0.8rem] uppercase tracking-[0.12em] hover:text-ash hover:pl-2 transition-all duration-200 py-3 border-b border-[rgba(255,255,255,0.04)] last:border-0 ${
-                isActive(link.href) ? 'text-ash' : 'text-[#979797]'
+              className={`text-[0.8rem] uppercase tracking-[0.12em] hover:text-ash hover:pl-2 transition-all duration-200 py-3 border-b border-line-soft last:border-0 ${
+                isActive(link.href) ? 'text-ash' : 'text-ink-2'
               }`}
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
@@ -326,15 +337,15 @@ export default function Navbar() {
           ))}
 
           {/* Contact info in mobile menu */}
-          <div className="pt-2 pb-1 border-b border-[rgba(255,255,255,0.04)]">
-            <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#3a3a3a] mb-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.contactUs')}</p>
-            <a href={PHONE_LINKS.primary} className="block text-[0.8rem] text-[#979797] hover:text-ember transition-colors duration-200 py-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+          <div className="pt-2 pb-1 border-b border-line-soft">
+            <p className="text-[0.6rem] tracking-[0.2em] uppercase text-ink-4 mb-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{t('nav.contactUs')}</p>
+            <a href={PHONE_LINKS.primary} className="block text-[0.8rem] text-ink-2 hover:text-ember transition-colors duration-200 py-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               +{SITE.phone}
             </a>
-            <a href={PHONE_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="block text-[0.8rem] text-[#979797] hover:text-ember transition-colors duration-200 py-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            <a href={PHONE_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="block text-[0.8rem] text-ink-2 hover:text-ember transition-colors duration-200 py-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               WhatsApp · {SITE.whatsappDisplay}
             </a>
-            <a href={PHONE_LINKS.mail} className="block text-[0.8rem] text-[#979797] hover:text-ember transition-colors duration-200 py-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            <a href={PHONE_LINKS.mail} className="block text-[0.8rem] text-ink-2 hover:text-ember transition-colors duration-200 py-1.5" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               {SITE.email}
             </a>
             <a
@@ -356,6 +367,11 @@ export default function Navbar() {
               {t('nav.book')}
             </a>
             <LangSwitcher />
+          </div>
+
+          <div className="flex items-center gap-3 mt-4">
+            <ThemeToggle />
+            <span className="text-xs text-ink-4">{t('nav.themeMode')}</span>
           </div>
         </div>
       </div>

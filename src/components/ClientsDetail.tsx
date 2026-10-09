@@ -18,7 +18,7 @@ export default function ClientsDetail() {
   return (
     <>
       {/* Stats strip */}
-      <section className="bg-surface border-b border-[rgba(255,255,255,0.05)] py-16 lg:py-20">
+      <section className="bg-surface border-b border-line py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
           {stats.map((s, i) => (
             <div key={s.label} className="reveal" style={{ transitionDelay: `${i * 90}ms` }}>
@@ -29,7 +29,7 @@ export default function ClientsDetail() {
                 <span className="text-ember">{s.value}</span>
               </p>
               <p
-                className="text-[0.62rem] tracking-[0.14em] uppercase text-[#4a4a4a] mt-2"
+                className="text-[0.62rem] tracking-[0.14em] uppercase text-ink-4 mt-2"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {s.label}
@@ -45,14 +45,14 @@ export default function ClientsDetail() {
           <div className="flex items-center gap-3 mb-12 reveal">
             <span className="w-8 h-px bg-ember" />
             <span
-              className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+              className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
               {t('cd.kicker')}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[rgba(255,255,255,0.05)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-line">
             {sectors.map((s, i) => (
               <div
                 key={s.name}
@@ -66,7 +66,7 @@ export default function ClientsDetail() {
                   >
                     {s.name}
                   </h3>
-                  <p className="text-sm text-[#8f8f8f] leading-relaxed">{s.desc}</p>
+                  <p className="text-sm text-ink-2 leading-relaxed">{s.desc}</p>
                 </div>
                 <span
                   className="shrink-0 text-2xl font-semibold text-ember/60 group-hover:text-ember transition-colors duration-300 pt-1"

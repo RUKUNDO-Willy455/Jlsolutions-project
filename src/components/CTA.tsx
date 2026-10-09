@@ -1,22 +1,22 @@
+import { ReactNode } from 'react';
 import { MessageCircle, Phone } from 'lucide-react';
 import { PHONE_LINKS } from '../data/site';
 import { useI18n } from '../i18n';
 
-export default function CTA() {
+export default function CTA({ children }: { children?: ReactNode }) {
   const { t } = useI18n();
   return (
-    <section className="relative bg-surface overflow-hidden py-20 sm:py-24 lg:py-40 border-t border-[rgba(255,255,255,0.05)]">
-      {/* Background image with strong overlay */}
-      <div className="absolute inset-0">
-        <img
-          src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&h=800&fit=crop&auto=format&q=70"
-          alt="Circuit board background"
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover opacity-10"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-surface via-surface/95 to-[rgba(37,99,235,0.06)]" />
-      </div>
+    <section
+      className="relative bg-surface overflow-hidden pt-20 sm:pt-24 lg:pt-40 pb-8 sm:pb-10 lg:pb-10 border-t border-line"
+      style={{
+        backgroundImage: 'url(https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&h=1200&fit=crop&auto=format&q=70)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* Uniform overlay to keep text readable — mirrors the footer so both read as one image */}
+      <div className="absolute inset-0 bg-[rgba(5,10,23,0.55)]" />
 
       {/* Decorative horizontal lines */}
       <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-ember/20 to-transparent" />
@@ -28,7 +28,7 @@ export default function CTA() {
             <div className="flex items-center gap-3 mb-8 reveal">
               <span className="w-8 h-px bg-ember" />
               <span
-                className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+                className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {t('cta.kicker')}
@@ -47,7 +47,7 @@ export default function CTA() {
 
           {/* Right */}
           <div className="flex flex-col gap-8 reveal delay-200">
-            <p className="text-[#979797] text-base leading-relaxed">
+            <p className="text-ink-2 text-base leading-relaxed">
               {t('cta.body')}
             </p>
 
@@ -56,7 +56,7 @@ export default function CTA() {
               {[t('cta.feat1'), t('cta.feat2'), t('cta.feat3'), t('cta.feat4')].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-ember shrink-0" />
-                  <span className="text-sm text-[#8a8a8a] leading-snug">{item}</span>
+                  <span className="text-sm text-ink-2 leading-snug">{item}</span>
                 </li>
               ))}
             </ul>
@@ -83,7 +83,7 @@ export default function CTA() {
         </div>
 
         {/* Bottom metrics strip */}
-        <div className="mt-20 pt-10 border-t border-[rgba(255,255,255,0.05)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 reveal delay-300">
+        <div className="mt-20 pt-10 border-t border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 reveal delay-300">
           {[
             { value: '50+', label: t('cta.statClients') },
             { value: '0', label: t('cta.statBreaches') },
@@ -97,7 +97,7 @@ export default function CTA() {
                 {stat.value}
               </span>
               <span
-                className="text-[0.62rem] tracking-[0.14em] uppercase text-[#4a4a4a] leading-snug"
+                className="text-[0.62rem] tracking-[0.14em] uppercase text-ink-4 leading-snug"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {stat.label}
@@ -106,6 +106,8 @@ export default function CTA() {
           ))}
         </div>
       </div>
+
+      {children}
     </section>
   );
 }

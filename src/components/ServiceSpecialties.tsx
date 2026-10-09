@@ -27,19 +27,19 @@ export default function ServiceSpecialties() {
   ];
 
   return (
-    <section className="relative bg-surface py-20 sm:py-24 lg:py-32 border-y border-[rgba(255,255,255,0.05)]">
+    <section className="relative bg-surface py-20 sm:py-24 lg:py-32 border-y border-line">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex items-center gap-3 mb-12 reveal">
           <span className="w-8 h-px bg-ember" />
           <span
-            className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+            className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
             style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
           >
             {t('spec.kicker')}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[rgba(255,255,255,0.05)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-line">
           {guarantees.map((g) => (
             <div
               key={g.title}
@@ -54,7 +54,7 @@ export default function ServiceSpecialties() {
               >
                 {g.title}
               </h3>
-              <p className="text-sm text-[#8f8f8f] leading-relaxed">{g.text}</p>
+              <p className="text-sm text-ink-2 leading-relaxed">{g.text}</p>
             </div>
           ))}
         </div>

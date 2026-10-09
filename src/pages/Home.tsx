@@ -9,8 +9,11 @@ import BookingFlow from '../components/BookingFlow';
 import Testimonials from '../components/Testimonials';
 import Gallery from '../components/Gallery';
 import CTA from '../components/CTA';
+import Footer from '../components/Footer';
 
-export default function HomePage() {
+type FooterHandlers = { onAdminClick?: () => void; onTechClick?: () => void };
+
+export default function HomePage({ footerHandlers }: { footerHandlers: FooterHandlers }) {
   return (
     <Page>
       <Hero />
@@ -22,7 +25,9 @@ export default function HomePage() {
       <BookingFlow variant="home" />
       <Testimonials />
       <Gallery />
-      <CTA />
+      <CTA>
+        <Footer {...footerHandlers} />
+      </CTA>
     </Page>
   );
 }

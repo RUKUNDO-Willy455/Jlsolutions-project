@@ -1492,7 +1492,7 @@ export default function AdminPanel({ onExit }: { onExit: () => void }) {
   }
 
   return (
-    <div className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+    <div data-theme="dark" className="relative h-dvh bg-[#080808] text-white flex flex-col overflow-hidden" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
       <ApiStatusBanner />
       {/* Subtle service background behind entire console */}
       <AdminBackground />

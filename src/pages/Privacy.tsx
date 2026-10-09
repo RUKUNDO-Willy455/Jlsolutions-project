@@ -11,7 +11,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       >
         {title}
       </h2>
-      <div className="flex flex-col gap-3 text-[#8a8a8a] text-sm leading-relaxed">{children}</div>
+      <div className="flex flex-col gap-3 text-ink-2 text-sm leading-relaxed">{children}</div>
     </div>
   );
 }
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           <div className="flex items-center gap-3 mb-6">
             <span className="w-8 h-px bg-ember" />
             <span
-              className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]"
+              className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3"
               style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
             >
               {t('leg.kicker')}
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
             {t('priv.title')}
             <span className="block italic font-light text-ember">{t('priv.titleEm')}</span>
           </h1>
-          <p className="mt-4 text-xs text-[#8f8f8f]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+          <p className="mt-4 text-xs text-ink-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
             {t('leg.updated', { date: 'February 2026' })}
           </p>
 

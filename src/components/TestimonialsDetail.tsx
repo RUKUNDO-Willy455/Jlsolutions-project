@@ -8,7 +8,7 @@ function Stars({ count, className }: { count: number; className?: string }) {
   return (
     <div className={`flex gap-1 ${className ?? ''}`}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} viewBox="0 0 12 12" fill="none" className={`w-3 h-3 ${i < count ? 'text-ember' : 'text-[#2a2a2a]'}`}>
+        <svg key={i} viewBox="0 0 12 12" fill="none" className={`w-3 h-3 ${i < count ? 'text-ember' : 'text-ink-4'}`}>
           <path
             d="M6 1l1.24 2.5L10 3.89l-2 1.95.47 2.75L6 7.25 3.53 8.59 4 5.84 2 3.89l2.76-.39L6 1z"
             fill="currentColor"
@@ -56,12 +56,12 @@ function InlineRateForm({
 
   if (submitted) {
     return (
-      <div className="mt-5 border-t border-[rgba(255,255,255,0.06)] pt-5 text-center">
+      <div className="mt-5 border-t border-line pt-5 text-center">
         <p className="text-4xl mb-4">✓</p>
         <p className="text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
           {t('td.mThanks', { name })}
         </p>
-        <p className="text-xs text-[#5a5a5a] mt-2 leading-relaxed">{t('td.mDone', { stars })}</p>
+        <p className="text-xs text-ink-3 mt-2 leading-relaxed">{t('td.mDone', { stars })}</p>
         <button onClick={onCancel} className="btn-ghost px-5 py-2.5 rounded-[2px] text-xs mt-5">
           {t('td.mClose')}
         </button>
@@ -70,11 +70,11 @@ function InlineRateForm({
   }
 
   return (
-    <div className="mt-5 border-t border-[rgba(255,255,255,0.06)] pt-5">
+    <div className="mt-5 border-t border-line pt-5">
       <p className="text-sm text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
         {t('td.mTitle')}
       </p>
-      <p className="text-xs text-[#5a5a5a] mt-1">{t('td.mBody')}</p>
+      <p className="text-xs text-ink-3 mt-1">{t('td.mBody')}</p>
 
       {/* Star picker */}
       <div className="flex gap-1.5 my-5">
@@ -87,7 +87,7 @@ function InlineRateForm({
               onClick={() => setStars(i + 1)}
               onMouseEnter={() => setHover(i + 1)}
               onMouseLeave={() => setHover(0)}
-              className={`p-1 -m-1 transition-transform duration-150 hover:scale-110 ${filled ? 'text-ember' : 'text-[#3a3a3a]'}`}
+              className={`p-1 -m-1 transition-transform duration-150 hover:scale-110 ${filled ? 'text-ember' : 'text-ink-4'}`}
               aria-label={t(i === 4 ? 'td.mStarOne' : 'td.mStarMany', { n: i + 1 })}
             >
               <svg viewBox="0 0 12 12" fill="none" className="w-7 h-7">
@@ -105,7 +105,7 @@ function InlineRateForm({
       {stars > 0 && (
         <div className="mb-5 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            <label className="block text-[0.62rem] tracking-wide uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               {t('td.mName')}
             </label>
             <input
@@ -120,7 +120,7 @@ function InlineRateForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            <label className="block text-[0.62rem] tracking-wide uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               {t('td.mRole')}
             </label>
             <input
@@ -133,7 +133,7 @@ function InlineRateForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            <label className="block text-[0.62rem] tracking-wide uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               {t('td.mCompany')}
             </label>
             <input
@@ -146,7 +146,7 @@ function InlineRateForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            <label className="block text-[0.62rem] tracking-wide uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               {t('td.mReview')}
             </label>
             <textarea
@@ -159,7 +159,7 @@ function InlineRateForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="block text-[0.62rem] tracking-wide uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            <label className="block text-[0.62rem] tracking-wide uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
               {t('td.mProject')}
             </label>
             <input
@@ -289,14 +289,14 @@ export default function TestimonialsDetail() {
 
   return (
     <>
-      <section className="bg-surface border-y border-[rgba(255,255,255,0.05)] py-16 lg:py-20">
+      <section className="bg-surface border-y border-line py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
           {highlights.map((h, i) => (
             <div key={h.label} className="reveal" style={{ transitionDelay: `${i * 90}ms` }}>
               <p className="text-4xl lg:text-5xl font-semibold text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
                 <span className="text-ember">{h.value}</span>
               </p>
-              <p className="text-[0.62rem] tracking-[0.14em] uppercase text-[#4a4a4a] mt-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+              <p className="text-[0.62rem] tracking-[0.14em] uppercase text-ink-4 mt-2" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                 {h.label}
               </p>
             </div>
@@ -310,7 +310,7 @@ export default function TestimonialsDetail() {
             <div className="reveal">
               <div className="flex items-center gap-3 mb-6">
                 <span className="w-8 h-px bg-ember" />
-                <span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                <span className="text-[0.7rem] tracking-[0.2em] uppercase text-ink-3" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                   {t('td.kicker')}
                 </span>
               </div>
@@ -318,17 +318,17 @@ export default function TestimonialsDetail() {
                 {t('td.h1')}
                 <span className="block italic font-light text-ember">{t('td.hEm')}</span>
               </h2>
-              <p className="mt-6 text-[#8f8f8f] text-base leading-relaxed max-w-md">
+              <p className="mt-6 text-ink-2 text-base leading-relaxed max-w-md">
                 {t('td.p1')}
               </p>
-              <p className="mt-4 text-[#8f8f8f] text-base leading-relaxed max-w-md">
+              <p className="mt-4 text-ink-2 text-base leading-relaxed max-w-md">
                 {t('td.p2')}
               </p>
             </div>
 
             <div className="flex flex-col gap-4 reveal delay-100">
               {total === 0 ? (
-                <div className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.05)] rounded-[2px] p-6 text-sm text-[#4a4a4a]">
+                <div className="bg-surface border border-line rounded-[2px] p-6 text-sm text-ink-4">
                   {t('td.empty')}
                 </div>
               ) : (
@@ -338,13 +338,13 @@ export default function TestimonialsDetail() {
                       <span className="text-sm font-semibold text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>{b.stars}</span>
                       <Stars count={b.stars} />
                     </div>
-                    <div className="flex-1 h-1.5 bg-[#1c1c1c] rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-surface-2 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-ember rounded-full transition-all duration-700"
                         style={{ width: `${b.pct}%` }}
                       />
                     </div>
-                    <span className="w-10 text-right text-[0.65rem] tracking-wide text-[#4a4a4a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+                    <span className="w-10 text-right text-[0.65rem] tracking-wide text-ink-4" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
                       {b.pct}% · {b.count}
                     </span>
                   </div>
@@ -352,18 +352,18 @@ export default function TestimonialsDetail() {
               )}
 
               {/* Reminder: rate us after a service */}
-              <div className="mt-2 bg-[#0f0f0f] border border-[rgba(255,255,255,0.05)] border-l-2 border-l-ember rounded-[2px] p-5 reveal delay-200" id="rate-us">
+              <div className="mt-2 bg-surface border border-line border-l-2 border-l-ember rounded-[2px] p-5 reveal delay-200" id="rate-us">
                 <p className="text-sm text-white font-semibold" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
                   {t('td.had')}
                 </p>
-                <p className="mt-1.5 text-xs text-[#8f8f8f] leading-relaxed">
+                <p className="mt-1.5 text-xs text-ink-2 leading-relaxed">
                   {t('td.hadBody')}
                 </p>
                 {showRateUs ? (
                   <InlineRateForm onCancel={() => setShowRateUs(false)} onSave={saveRating} />
                 ) : (
                   <div className="mt-3 flex items-center gap-3 flex-wrap">
-                    <Stars count={0} className="!text-[#2a2a2a]" />
+                    <Stars count={0} className="!text-ink-4" />
                     <button
                       onClick={() => setShowRateUs(true)}
                       className="btn-ember px-5 py-2.5 rounded-[2px] text-xs flex items-center gap-2"
