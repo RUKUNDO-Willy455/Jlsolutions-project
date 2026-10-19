@@ -5,6 +5,8 @@ import LoadingScreen from './components/LoadingScreen';
 import FounderIntro from './components/FounderIntro';
 import AdminPanel from './components/AdminPanel';
 import TechnicianPanel from './components/TechnicianPanel';
+import PortalLogin from './components/PortalLogin';
+import type { Technician } from './data/editor';
 import AiAssistant from './components/AiAssistant';
 import { useRoute } from './router';
 import { useSeo } from './hooks/useSeo';
@@ -22,7 +24,7 @@ import ContactPage from './pages/Contact';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
 
-type FooterHandlers = { onAdminClick?: () => void; onTechClick?: () => void };
+type FooterHandlers = { onLoginClick?: () => void };
 
 function PageView({ footerHandlers }: { footerHandlers: FooterHandlers }) {
   const path = useRoute();
@@ -68,6 +70,9 @@ function Shell() {
   const [loading, setLoading] = useState(true);
   const [adminOpen, setAdminOpen] = useState(false);
   const [techOpen, setTechOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [adminAuthed, setAdminAuthed] = useState(false);
+  const [authedTech, setAuthedTech] = useState<Technician | null>(null);
   const path = useRoute();
 
   useSeo(path);
@@ -80,10 +85,24 @@ function Shell() {
   return (
     <>
       <LoadingScreen visible={loading} />
-      {adminOpen ? (
-        <AdminPanel onExit={() => setAdminOpen(false)} />
+      {loginOpen ? (
+        <PortalLogin
+          onExit={() => setLoginOpen(false)}
+          onAuthedAdmin={() => {
+            setLoginOpen(false);
+            setAdminAuthed(true);
+            setAdminOpen(true);
+          }}
+          onAuthedTech={tech => {
+            setLoginOpen(false);
+            setAuthedTech(tech);
+            setTechOpen(true);
+          }}
+        />
+      ) : adminOpen ? (
+        <AdminPanel onExit={() => setAdminOpen(false)} initialAuthed={adminAuthed} />
       ) : techOpen ? (
-        <TechnicianPanel onExit={() => setTechOpen(false)} />
+        <TechnicianPanel onExit={() => setTechOpen(false)} initialTech={authedTech} />
       ) : (
         <>
           {path === '/founder' && !loading && <FounderIntro />}
@@ -91,13 +110,12 @@ function Shell() {
           <main key={path} className="page-enter">
             <PageView
               footerHandlers={{
-                onAdminClick: () => setAdminOpen(true),
-                onTechClick: () => setTechOpen(true),
+                onLoginClick: () => setLoginOpen(true),
               }}
             />
           </main>
           {path !== '/' && (
-            <Footer onAdminClick={() => setAdminOpen(true)} onTechClick={() => setTechOpen(true)} />
+            <Footer onLoginClick={() => setLoginOpen(true)} />
           )}
           <AiAssistant />
         </>

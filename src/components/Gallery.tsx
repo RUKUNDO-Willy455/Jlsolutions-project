@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_PHOTOS } from '../data/images';
 import { ALL_VIDEOS } from '../data/videos';
 import { useI18n } from '../i18n';
@@ -49,6 +49,34 @@ export default function Gallery() {
 
   const videoItems = useMemo(() => ALL_VIDEOS, []);
 
+  // Side-scrolling photo rail — the arrows reflect whether more content is
+  // available in each direction, so the rail never looks like a dead end.
+  const railRef = useRef<HTMLDivElement>(null);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(true);
+
+  const updateRail = () => {
+    const el = railRef.current;
+    if (!el) return;
+    setCanPrev(el.scrollLeft > 4);
+    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    updateRail();
+    const el = railRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => updateRail());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const railScroll = (dir: -1 | 1) => {
+    const el = railRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.max(240, el.clientWidth * 0.8), behavior: 'smooth' });
+  };
+
   useEffect(() => {
     if (!sel) return;
     const onKey = (e: KeyboardEvent) => {
@@ -70,7 +98,8 @@ export default function Gallery() {
     'w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-line border border-line-strong text-ink-1 hover:text-ember hover:border-ember transition-colors duration-200';
 
   return (
-    <section className="bg-obsidian py-20 sm:py-24 lg:py-32">
+    <section className="relative py-20 sm:py-24 lg:py-32">
+      {/* Background comes from the page-wide static layer in Home.tsx */}
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex items-center gap-3 mb-6 reveal">
           <span className="w-8 h-px bg-ember" />
@@ -220,31 +249,62 @@ export default function Gallery() {
           </div>
         )}
 
-        {/* Photos */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {ALL_PHOTOS.map((src, i) => (
-            <button
-              key={src}
-              type="button"
-              onClick={() => setSel({ kind: 'photo', index: i })}
-              className="group relative overflow-hidden rounded-[2px] bg-surface focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{ aspectRatio: '4/3' }}
-              aria-label={t('gal.open', { label: labelFor(src) })}
-            >
-              <img
-                src={src}
-                alt={labelFor(src)}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                style={{ opacity: 0.9 }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090909]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="absolute bottom-3 left-3 right-3 text-left text-[0.62rem] tracking-[0.12em] uppercase text-white/90 font-medium opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 truncate">
-                {labelFor(src)}
-              </span>
-            </button>
-          ))}
+        {/* Photos — narrow side-scrolling rail: only a few frames are visible,
+            the rest stay clipped until the rail is scrolled */}
+        <div className="relative mx-auto w-full lg:w-[88%]">
+          <div
+            ref={railRef}
+            onScroll={updateRail}
+            className="flex w-full gap-2 overflow-x-auto overscroll-x-contain snap-x snap-mandatory rounded-3xl pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {ALL_PHOTOS.map((src, i) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => setSel({ kind: 'photo', index: i })}
+                className="group relative shrink-0 w-[60%] sm:w-[23%] snap-start overflow-hidden rounded-[2px] bg-surface focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{ aspectRatio: '4/3' }}
+                aria-label={t('gal.open', { label: labelFor(src) })}
+              >
+                <img
+                  src={src}
+                  alt={labelFor(src)}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  style={{ opacity: 0.9 }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#090909]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="absolute bottom-3 left-3 right-3 text-left text-[0.6rem] tracking-[0.12em] uppercase text-white/90 font-medium opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 truncate">
+                  {labelFor(src)}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Rail arrows — dimmed at the ends of the rail */}
+          <button
+            type="button"
+            onClick={() => railScroll(-1)}
+            disabled={!canPrev}
+            aria-label={t('gal.prev')}
+            className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-obsidian/85 backdrop-blur-sm border border-line-strong text-ink-1 hover:text-ember hover:border-ember transition-colors duration-200 disabled:opacity-25 disabled:pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 z-10"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+              <path d="M10 3l-5 5 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => railScroll(1)}
+            disabled={!canNext}
+            aria-label={t('gal.next')}
+            className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-obsidian/85 backdrop-blur-sm border border-line-strong text-ink-1 hover:text-ember hover:border-ember transition-colors duration-200 disabled:opacity-25 disabled:pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 z-10"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+              <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </div>
       </div>
     </section>

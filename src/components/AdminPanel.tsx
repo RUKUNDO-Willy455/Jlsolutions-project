@@ -1403,8 +1403,8 @@ function FounderProfileTab({
 
 // ─── Main export ───────────────────────────────────────────────────────────────
 
-export default function AdminPanel({ onExit }: { onExit: () => void }) {
-  const [authed, setAuthed] = useState(false);
+export default function AdminPanel({ onExit, initialAuthed = false }: { onExit: () => void; initialAuthed?: boolean }) {
+  const [authed, setAuthed] = useState(initialAuthed);
   const [started, setStarted] = useState(false);
   const [tab, setTab] = useState<Tab>(() => loadStored<Tab>(STORAGE_KEYS.adminLastTab, 'Dashboard'));
   const [bookings, setBookings] = useEditorStore<Booking[]>(STORAGE_KEYS.bookings, seedBookings);

@@ -2,9 +2,9 @@
 @import 'tailwindcss';
 
 /* ============================================================
-   Theme palette (dark = default, light = [data-theme='light'])
-   All colors referenced by @theme inline so utilities flip
-   at runtime when the data-theme attribute changes.
+   Theme palette (dark only — the light-mode toggle was removed)
+   Defined on :root and re-declared under [data-theme='dark']
+   for the sections that pin the attribute themselves.
    ============================================================ */
 :root,
 [data-theme='dark'] {
@@ -32,33 +32,6 @@
   --jl-footer-heading: #64789c;
   --jl-footer-text: #93a7c8;
   --jl-footer-strong: #f4f8ff;
-}
-
-[data-theme='light'] {
-  color-scheme: light;
-  --jl-bg: #ecebe5;
-  --jl-surface-1: #f6f5f0;
-  --jl-surface-2: #eae9e2;
-  --jl-surface-3: #e0dfd8;
-  --jl-ash: #2a2a26;
-  --jl-ink-1: #4f4f4b;
-  --jl-ink-2: #63635f;
-  --jl-ink-3: #898986;
-  --jl-ink-4: #a9a9a5;
-  --jl-solid: #111111;
-  --jl-line-soft: rgba(30, 30, 28, 0.06);
-  --jl-line: rgba(30, 30, 28, 0.1);
-  --jl-line-strong: rgba(30, 30, 28, 0.16);
-  --jl-line-xstrong: rgba(30, 30, 28, 0.26);
-  --jl-glass: rgba(255, 255, 255, 0.55);
-  --jl-glass-hover: rgba(255, 255, 255, 0.72);
-  --jl-navi-panel: rgba(243, 242, 236, 0.97);
-  --jl-scrim: rgba(12, 12, 12, 0.55);
-  --jl-accent: #2563eb;
-  --jl-footer-bg: #e2e1da;
-  --jl-footer-heading: #94948f;
-  --jl-footer-text: #5f5f5c;
-  --jl-footer-strong: #2a2a26;
 }
 
 @theme inline {
@@ -114,7 +87,11 @@ body {
 
 /* Page-change transition (mounted with a new route key) */
 .page-enter {
-  animation: pageIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* fill-mode backwards (not both): after the animation ends the identity
+     `transform` is released — a lingering transform would turn <main> into the
+     containing block for position:fixed descendants (hero/founder backgrounds)
+     and break their viewport pinning. */
+  animation: pageIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 @keyframes pageIn {
   from {

@@ -8,7 +8,7 @@ export default function FounderSpecialties() {
 
   return (
     <>
-      <section className="bg-surface border-y border-line py-20 sm:py-24 lg:py-32">
+      <section className="relative bg-surface border-y border-line py-20 sm:py-24 lg:py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="flex items-center gap-3 mb-12 reveal">
             <span className="w-8 h-px bg-ember" />

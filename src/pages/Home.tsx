@@ -11,11 +11,17 @@ import Gallery from '../components/Gallery';
 import CTA from '../components/CTA';
 import Footer from '../components/Footer';
 
-type FooterHandlers = { onAdminClick?: () => void; onTechClick?: () => void };
+type FooterHandlers = { onLoginClick?: () => void };
 
 export default function HomePage({ footerHandlers }: { footerHandlers: FooterHandlers }) {
   return (
     <Page>
+      {/* One static background for the entire home page. The hero, booking and
+          CTA/Footer sections paint their own backgrounds above it. */}
+      <div aria-hidden="true" className="fixed inset-0 -z-10 pointer-events-none">
+        <img src="/images/loading%20without%20logo.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-[rgba(5,10,23,0.7)]" />
+      </div>
       <Hero />
       <Welcome />
       <Services />

@@ -1,4 +1,6 @@
-const CACHE = 'jl-solutions-v1';
+// Bumped to v2 so clients drop the v1 shell (built before the back-to-top
+// button was removed) the first time the new worker activates.
+const CACHE = 'jl-solutions-v2';
 const PRECACHE = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {

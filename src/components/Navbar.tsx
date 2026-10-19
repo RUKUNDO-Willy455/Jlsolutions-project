@@ -3,7 +3,6 @@ import jeanlucLogo from '../assets/jeanluc-logo.png';
 import { PHONE_LINKS, SITE } from '../data/site';
 import { useRoute } from '../router';
 import { LOCALE_NAMES, useI18n } from '../i18n';
-import ThemeToggle from './ThemeToggle';
 import type { Locale } from '../i18n';
 
 const LINKS = [
@@ -289,18 +288,12 @@ export default function Navbar() {
 
           {/* Language switch */}
           <li className="hidden xl:flex items-center">
-            <ThemeToggle />
-            <span className="w-px h-5 bg-line mx-2" aria-hidden="true" />
             <LangSwitcher />
           </li>
         </ul>
 
         {/* Right-side controls */}
         <div className="flex items-center gap-2">
-          {/* Theme toggle on mobile/tablet */}
-          <div className="xl:hidden">
-            <ThemeToggle />
-          </div>
 
           {/* Mobile hamburger */}
           <button
@@ -367,11 +360,6 @@ export default function Navbar() {
               {t('nav.book')}
             </a>
             <LangSwitcher />
-          </div>
-
-          <div className="flex items-center gap-3 mt-4">
-            <ThemeToggle />
-            <span className="text-xs text-ink-4">{t('nav.themeMode')}</span>
           </div>
         </div>
       </div>

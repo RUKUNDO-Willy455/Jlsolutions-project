@@ -26,6 +26,16 @@ export const PHONE_LINKS = {
   mail: `mailto:${SITE.email}`,
 } as const;
 
+/** Physical location used by the Contact page and the footer map. */
+export const LOCATION = {
+  /** Address shown to visitors. */
+  address: 'Gasabo, Kigali, Rwanda',
+  /** Google Maps search query for the same point. */
+  mapsQuery: 'Gasabo,Kigali,Rwanda',
+  /** Link that opens the location in a new tab. */
+  mapsUrl: 'https://maps.google.com/?q=Gasabo,Kigali,Rwanda',
+} as const;
+
 /** "Having an issue?" — opens the visitor's email client with a ready-made message sent to the company email. */
 export const SUPPORT_MESSAGE =
   'Describe the issue you are facing (or the question you have):\n\n- What were you doing?\n- What did you expect to happen?\n- What happened instead?\n- Any screenshots / details that could help us help you faster.';

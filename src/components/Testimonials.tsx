@@ -1,7 +1,6 @@
 import { useEditorStore, STORAGE_KEYS, seedTestimonials } from '../data/editor';
 import type { Testimonial } from '../data/editor';
 import { useI18n } from '../i18n';
-import adminBg1 from '../assets/admin-bg-1.jpg';
 
 function Stars({ count }: { count: number }) {
   const { t } = useI18n();
@@ -47,8 +46,8 @@ export default function Testimonials() {
     : '0.0';
 
   return (
-    <section id="testimonials" className="relative bg-obsidian py-20 sm:py-24 lg:py-40 overflow-hidden">
-      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
+    <section id="testimonials" className="relative py-20 sm:py-24 lg:py-40 overflow-hidden">
+      {/* Background comes from the page-wide static layer in Home.tsx */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         {/* Header */}

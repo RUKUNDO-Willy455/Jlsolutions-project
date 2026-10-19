@@ -15,8 +15,9 @@ export default function CTA({ children }: { children?: ReactNode }) {
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* Uniform overlay to keep text readable — mirrors the footer so both read as one image */}
-      <div className="absolute inset-0 bg-[rgba(5,10,23,0.55)]" />
+      {/* Uniform overlay to keep text readable — the same image as the footer,
+          dimmed harder here so the copy stays legible over it */}
+      <div className="absolute inset-0 bg-[rgba(5,10,23,0.86)]" />
 
       {/* Decorative horizontal lines */}
       <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-ember/20 to-transparent" />
@@ -97,7 +98,7 @@ export default function CTA({ children }: { children?: ReactNode }) {
                 {stat.value}
               </span>
               <span
-                className="text-[0.62rem] tracking-[0.14em] uppercase text-ink-4 leading-snug"
+                className="text-[0.62rem] tracking-[0.14em] uppercase text-ink-1 leading-snug"
                 style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
               >
                 {stat.label}

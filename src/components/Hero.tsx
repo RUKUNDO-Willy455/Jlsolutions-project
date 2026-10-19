@@ -87,10 +87,10 @@ export default function Hero() {
   };
 
   return (
-    <section data-theme="dark" className="relative min-h-screen flex flex-col overflow-hidden bg-obsidian">
+    <section data-theme="dark" className="relative isolate min-h-screen flex flex-col overflow-hidden bg-obsidian">
 
-      {/* ── Background image stack ── */}
-      <div className="absolute inset-0">
+      {/* ── Background image stack (fixed to the viewport — stays put while content scrolls over it) ── */}
+      <div className="fixed inset-0">
         {slides.map((s, i) => (
           <div
             key={i}

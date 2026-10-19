@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useI18n } from '../i18n';
-import adminBg1 from '../assets/admin-bg-1.jpg';
 
 export default function Services() {
   const { t } = useI18n();
@@ -59,10 +58,8 @@ export default function Services() {
   const go = (dir: 1 | -1) => setActive((a) => (a + dir + services.length) % services.length);
 
   return (
-    <section data-theme="dark" id="services" className="relative bg-obsidian overflow-hidden" style={{ minHeight: '100vh' }}>
-
-      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
+    <section data-theme="dark" id="services" className="relative overflow-hidden" style={{ minHeight: '100vh' }}>
+      {/* Background comes from the page-wide static layer in Home.tsx */}
 
       {/* ── Background image stack — all pre-rendered, only active is visible ── */}
       <div className="absolute inset-0">

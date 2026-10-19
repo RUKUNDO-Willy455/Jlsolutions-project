@@ -1,5 +1,4 @@
 import { useI18n } from '../i18n';
-import adminBg1 from '../assets/admin-bg-1.jpg';
 
 export default function ProcessSection() {
   const { t } = useI18n();
@@ -27,8 +26,8 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section id="process" className="relative bg-obsidian py-20 sm:py-24 lg:py-40 overflow-hidden">
-      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
+    <section id="process" className="relative py-20 sm:py-24 lg:py-40 overflow-hidden">
+      {/* Background comes from the page-wide static layer in Home.tsx */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">

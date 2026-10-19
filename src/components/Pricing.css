@@ -1,7 +1,6 @@
 /* Pricing section — latest-version texture */
 .pricing {
   position: relative;
-  background-color: var(--jl-surface-1);
   border-top: 1px solid var(--jl-line-soft);
   overflow: hidden;
 }

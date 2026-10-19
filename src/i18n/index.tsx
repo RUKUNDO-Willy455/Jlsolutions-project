@@ -89,7 +89,6 @@ const en: Record<string, string> = {
   'nav.visitPage': 'Contact & Working Hours',
   'nav.visitPageCap': 'Visit page',
   'nav.menuToggle': 'Toggle menu',
-  'nav.themeMode': 'Theme',
   'lang.label': 'Language',
 
   // Footer
@@ -104,9 +103,13 @@ const en: Record<string, string> = {
   'footer.emailQuestion': 'Having an issue? Ask us',
   'footer.privacy': 'Privacy Policy',
   'footer.terms': 'Terms of Service',
-  'footer.backToTop': 'Back to top',
   'footer.visit': 'Visit',
   'footer.visitPage': 'Contact & Working Hours',
+  'footer.quickLinks': 'Quick Links',
+  'footer.contactUs': 'Contact Us',
+  'footer.findUs': 'Find Us',
+  'footer.mapTitle': 'Location map',
+  'footer.mapLink': 'View Location',
 
   // CTA
   'cta.kicker': 'Get Started Today',
@@ -305,6 +308,8 @@ const en: Record<string, string> = {
   'track.submit': 'Track my booking',
   'track.searching': 'Searching…',
   'track.needBoth': 'Enter both your reference and phone number to look up a booking.',
+  'track.errPhoneInvalid':
+    'Enter a valid Rwandan mobile number, e.g. 0788 123 456 or +250 788 123 456.',
   'track.phoneOnlyHint':
     'We check your reference together with your phone number so nobody else can see your booking.',
   'track.help': "Can't find it? Check the reference and phone number you used, or",
@@ -790,7 +795,6 @@ const fr: typeof en = {
   'nav.visitPage': 'Contact & horaires',
   'nav.visitPageCap': 'Voir la page',
   'nav.menuToggle': 'Ouvrir le menu',
-  'nav.themeMode': 'Thème',
   'lang.label': 'Langue',
 
   'footer.company': 'Entreprise',
@@ -804,9 +808,13 @@ const fr: typeof en = {
   'footer.emailQuestion': 'Un problème ? Contactez-nous',
   'footer.privacy': 'Politique de confidentialité',
   'footer.terms': 'Conditions d\'utilisation',
-  'footer.backToTop': 'Haut de page',
   'footer.visit': 'Visite',
   'footer.visitPage': 'Contact & heures de travail',
+  'footer.quickLinks': 'Liens rapides',
+  'footer.contactUs': 'Contactez-nous',
+  'footer.findUs': 'Localisation',
+  'footer.mapTitle': 'Carte de localisation',
+  'footer.mapLink': 'Voir la localisation',
 
   'cta.kicker': 'Commencez aujourd\'hui',
   'cta.h1': 'Vos systèmes',
@@ -992,6 +1000,8 @@ const fr: typeof en = {
   'track.submit': 'Suivre ma réservation',
   'track.searching': 'Recherche…',
   'track.needBoth': 'Saisissez votre référence et votre numéro de téléphone pour retrouver votre réservation.',
+  'track.errPhoneInvalid':
+    'Entrez un numéro mobile rwandais valide, ex. 0788 123 456 ou +250 788 123 456.',
   'track.phoneOnlyHint': 'Nous vérifions votre référence avec votre numéro de téléphone afin que personne d\'autre ne puisse voir votre réservation.',
   'track.help': 'Introuvable ? Vérifiez la référence et le numéro utilisés, ou',
   'track.helpEnd': 'et nous chercherons.',
@@ -1455,7 +1465,6 @@ const rw: typeof en = {
   'nav.visitPage': 'Twandikire & amasaha',
   'nav.visitPageCap': 'Reba ipaji',
   'nav.menuToggle': 'Fungura imenyu',
-  'nav.themeMode': 'Uburyo',
   'lang.label': 'Ururimi',
 
   'footer.company': 'Isosiyete',
@@ -1469,9 +1478,13 @@ const rw: typeof en = {
   'footer.emailQuestion': 'Hari ikibazo? Tubaze',
   'footer.privacy': 'Politiki y\'ibanga',
   'footer.terms': 'Amategeko akoreshwa',
-  'footer.backToTop': 'Subira hejuru',
   'footer.visit': 'Sura',
   'footer.visitPage': 'Aho duherereye & amasaha',
+  'footer.quickLinks': 'Ilinksi',
+  'footer.contactUs': 'Twandikire',
+  'footer.findUs': 'Aho turi',
+  'footer.mapTitle': 'Ikarita',
+  'footer.mapLink': 'Reba mu ikarita',
 
   'cta.kicker': 'Tangira uyu munsi',
   'cta.h1': 'Sisitemu zawe',
@@ -1657,6 +1670,8 @@ const rw: typeof en = {
   'track.submit': 'Kurikirana gahunda yanjye',
   'track.searching': 'Gushakisha…',
   'track.needBoth': 'Injiza nimero ya gahunda na nomero ya telefone byombi kugira ngo ubone gahunda yawe.',
+  'track.errPhoneInvalid':
+    'Andika nomero y\'ikiganza (mobile) nyarwanda, urugero 0788 123 456 cyangwa +250 788 123 456.',
   'track.phoneOnlyHint': 'Tugenzura nimero ya gahunda hamwe na nomero ya telefone yawe kugira ngo n uwundi umuntu ashobora kubona gahunda yawe.',
   'track.help': 'Ntibonetse? Ongera ugosora nomero n\'ikiganiro, cyangwa',
   'track.helpEnd': 'tuzabishakisha.',

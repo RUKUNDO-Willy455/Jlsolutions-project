@@ -576,7 +576,7 @@ function TechRequestsTab({ tech, requests, setRequests }: { tech: Technician; re
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
+export default function TechnicianPanel({ onExit, initialTech }: { onExit: () => void; initialTech?: Technician | null }) {
   // The tech portal authenticates as a technician, so its requests must carry
   // the technician session rather than an admin one.
   const [technicians] = useEditorStore<Technician[]>(STORAGE_KEYS.technicians, seedTechnicians, 'tech');
@@ -586,8 +586,8 @@ export default function TechnicianPanel({ onExit }: { onExit: () => void }) {
     seedProfileRequests,
     'tech',
   );
-  const [techId, setTechId] = useState<string | null>(null);
-const [signedIn, setSignedIn] = useState<Technician | null>(null);
+  const [techId, setTechId] = useState<string | null>(initialTech?.id ?? null);
+const [signedIn, setSignedIn] = useState<Technician | null>(initialTech ?? null);
   const [started, setStarted] = useState(false);
   const [tab, setTab] = useState<TechTab>(() => loadStored<TechTab>(STORAGE_KEYS.techLastTab, 'Dashboard'));
   const [info, setInfo] = useState('');

@@ -8,8 +8,8 @@ export default function Welcome() {
   const [profile] = useEditorStore<typeof seedFounder>(STORAGE_KEYS.founder, seedFounder);
   const founderName = profile.name;
   return (
-    <section className="relative bg-obsidian overflow-hidden py-20 sm:py-24 lg:py-32 border-b border-line">
-      <div className="absolute inset-0 bg-gradient-to-b from-obsidian via-surface to-obsidian opacity-60" aria-hidden="true" />
+    <section className="relative overflow-hidden py-20 sm:py-24 lg:py-32 border-b border-line">
+      {/* Background comes from the page-wide static layer in Home.tsx */}
       <div className="absolute -top-24 right-0 w-[420px] h-[420px] bg-[radial-gradient(closest-side,rgba(37,99,235,0.10),transparent_70%)] pointer-events-none" aria-hidden="true" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-10 text-center">

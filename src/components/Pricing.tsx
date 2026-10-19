@@ -1,7 +1,6 @@
 import { ArrowRight, Check, BadgeCheck, ShieldCheck, Clock3, Award } from 'lucide-react';
 import { SERVICES, formatUsd, formatRwf } from '../data/services';
 import { useI18n } from '../i18n';
-import adminBg1 from '../assets/admin-bg-1.jpg';
 import './Pricing.css';
 
 export default function Pricing() {
@@ -15,7 +14,6 @@ export default function Pricing() {
 
   return (
     <section data-theme="dark" id="pricing" className="relative pricing overflow-hidden">
-      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10 py-20 sm:py-24 lg:py-40">
         {/* Header */}

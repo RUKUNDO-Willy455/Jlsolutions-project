@@ -63,13 +63,14 @@ export default function Founder() {
 
   return (
     <>
-      <section id="founder" className="relative founder overflow-hidden">
-        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.40, willChange: 'opacity' }}>
+      <section id="founder" className="relative founder isolate overflow-hidden">
+        {/* Crossfading collage — fixed to the viewport so it stays put while the content scrolls over it */}
+        <div className="fixed inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.40, willChange: 'opacity' }}>
           <img
             src={IMAGES.founderCollage[bgPrev]}
             alt=""
             className="absolute inset-0 w-full h-full"
-            style={{ objectFit: 'cover', objectPosition: '50% 30%' }}
+            style={{ objectFit: 'contain', objectPosition: 'center' }}
           />
           {bgFade && (
             <img
@@ -77,11 +78,12 @@ export default function Founder() {
               src={IMAGES.founderCollage[bgIndex]}
               alt=""
               className="founder-collage--crossfade absolute inset-0 w-full h-full"
-              style={{ objectFit: 'cover', objectPosition: '50% 30%' }}
+              style={{ objectFit: 'contain', objectPosition: 'center' }}
             />
           )}
         </div>
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.68) 0%, rgba(8,8,8,0.42) 45%, rgba(8,8,8,0.16) 100%)' }} />
+        {/* Readability gradient — also fixed so it stays aligned with the pinned images */}
+        <div className="fixed inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.68) 0%, rgba(8,8,8,0.42) 45%, rgba(8,8,8,0.16) 100%)' }} />
         {/* ambient glow */}
         <div className="founder__glow" aria-hidden="true" />
 

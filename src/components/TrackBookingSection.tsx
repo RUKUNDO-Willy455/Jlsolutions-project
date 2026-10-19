@@ -3,7 +3,7 @@ import { apiJson } from '../data/api';
 import type { Booking } from '../data/editor';
 import { MapPin, CheckCircle2, XCircle, Clock3, Phone, ArrowRight, ChevronRight } from 'lucide-react';
 import { PHONE_LINKS, SITE } from '../data/site';
-import { digitsOnly } from '../utils/phone';
+import { digitsOnly, isValidRwMobile } from '../utils/phone';
 import { useI18n } from '../i18n';
 
 const statusColor: Record<Booking['status'], string> = {
@@ -117,6 +117,15 @@ export default function TrackBookingSection() {
     const phoneNumber = digitsOnly(phone);
     if (!reference || !phoneNumber) {
       setSearchError(t('track.needBoth'));
+      setMatches([]);
+      setSelected(null);
+      setLookedUp(true);
+      return;
+    }
+    // Same shape rule the booking form enforces, so a typo is caught here
+    // instead of coming back as a confusing "not found".
+    if (!isValidRwMobile(phone)) {
+      setSearchError(t('track.errPhoneInvalid'));
       setMatches([]);
       setSelected(null);
       setLookedUp(true);

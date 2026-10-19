@@ -64,7 +64,7 @@ export default function BookingFlow({ variant }: { variant: 'page' | 'home' }) {
   }, [view]);
 
   return (
-    <section ref={rootRef}>
+    <section ref={rootRef} className="relative bg-obsidian">
       {/* Header with view switcher */}
       <div
         className={`bg-obsidian border-b border-line ${

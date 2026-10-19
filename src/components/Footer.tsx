@@ -4,7 +4,7 @@ import {
   Mail,
   MapPin,
   Clock,
-  ArrowUp,
+  ArrowRight,
   Instagram,
   Linkedin,
   X,
@@ -12,7 +12,7 @@ import {
   Youtube,
 } from 'lucide-react';
 import BrandLogo from './BrandLogo';
-import { PHONE_LINKS, SITE, SOCIAL_LINKS } from '../data/site';
+import { LOCATION, PHONE_LINKS, SITE, SOCIAL_LINKS } from '../data/site';
 import { useI18n } from '../i18n';
 import './Footer.css';
 
@@ -24,17 +24,32 @@ const SOCIALS = [
   { label: 'YouTube', href: 'https://www.youtube.com', icon: Youtube },
 ];
 
+/** Pages that exist in this site. Every link points at a real route. */
 const QUICK_LINKS = [
   { key: 'nav.home', href: '#/' },
-  { key: 'nav.founder', href: '#/founder' },
   { key: 'nav.services', href: '#/services' },
-  { key: 'nav.pricing', href: '#/pricing' },
   { key: 'nav.process', href: '#/process' },
+  { key: 'nav.founder', href: '#/founder' },
+  { key: 'nav.pricing', href: '#/pricing' },
   { key: 'nav.clients', href: '#/clients' },
   { key: 'nav.testimonials', href: '#/testimonials' },
   { key: 'nav.book', href: '#/booking' },
+  { key: 'nav.track', href: '#/track' },
   { key: 'nav.contact', href: '#/contact' },
 ];
+
+/** Opening hours rendered in the Contact Us column. */
+const HOURS = [
+  { key: 'contact.hSunThu', time: 'contact.hSunThuTime' },
+  { key: 'contact.hFri', time: 'contact.hFriTime' },
+  { key: 'contact.hHoliday', time: 'contact.hHolidayTime' },
+];
+
+/** Google Maps embed for the company location (same point as CONTACT uses). */
+const MAP_EMBED =
+  'https://maps.google.com/maps?q=' +
+  encodeURIComponent(LOCATION.mapsQuery) +
+  '&output=embed';
 
 function FooterDots() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,7 +58,8 @@ function FooterDots() {
     const container = containerRef.current;
     if (!container) return;
 
-    const COUNT = 1500;
+    // Bolts (not dots) — fewer and taller so the shape reads at a glance.
+    const COUNT = 340;
     let raf = 0;
     let time = 0;
     let w = 0;
@@ -58,11 +74,16 @@ function FooterDots() {
         baseX: 0,
         baseY: 0,
         phase: Math.random() * Math.PI * 2,
-        speed: 0.001 + Math.random() * 0.004,
-        driftX: (Math.random() - 0.5) * 40,
-        driftY: (Math.random() - 0.5) * 30,
-        size: 1.8 + Math.random() * 2.2,
-        opacity: 0.15 + Math.random() * 0.45,
+        speed: 0.001 + Math.random() * 0.003,
+        // Dimming breathing rate — ~1.7–3.5 s per full dim→bright cycle.
+        pulse: 0.03 + Math.random() * 0.03,
+        driftX: (Math.random() - 0.5) * 20,
+        driftY: (Math.random() - 0.5) * 15,
+        // Bolt dimensions; the clip-path in Footer.css draws the shape.
+        w: 3 + Math.random() * 3,
+        h: 7 + Math.random() * 7,
+        rot: (Math.random() - 0.5) * 40,
+        opacity: 0.18 + Math.random() * 0.42,
       };
     });
 
@@ -86,10 +107,15 @@ function FooterDots() {
         const ny = Math.cos(time * dot.speed * 0.8 + dot.phase);
         const xp = dot.baseX + nx * dot.driftX;
         const yp = dot.baseY + ny * dot.driftY;
-        dot.el.style.transform = `translate3d(${xp}px, ${yp}px, 0) translate(-50%, -50%)`;
-        dot.el.style.opacity = String(dot.opacity);
-        dot.el.style.width = `${dot.size}px`;
-        dot.el.style.height = `${dot.size}px`;
+        // Dimming breathing: each dot fades all the way out and back to its
+        // base opacity at its own pace, so the field visibly twinkles instead
+        // of sitting flat. Static under prefers-reduced-motion (dim pinned
+        // to 1), which is also what `.footer__dot { animation: none }` targets.
+        const dim = reduceMotion ? 1 : 0.5 + 0.5 * Math.sin(time * dot.pulse + dot.phase);
+        dot.el.style.transform = `translate3d(${xp}px, ${yp}px, 0) translate(-50%, -50%) rotate(${dot.rot}deg)`;
+        dot.el.style.opacity = String(dot.opacity * dim);
+        dot.el.style.width = `${dot.w}px`;
+        dot.el.style.height = `${dot.h}px`;
       }
     };
 
@@ -116,30 +142,29 @@ function FooterDots() {
   return <div ref={containerRef} className="footer__particles" aria-hidden="true" />;
 }
 
-export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: () => void; onTechClick?: () => void }) {
+export default function Footer({
+  onLoginClick,
+}: {
+  onLoginClick?: () => void;
+}) {
   const { t } = useI18n();
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
     <footer className="footer">
       <div className="footer__box container">
         <FooterDots />
-        <div className="footer__logo-float" aria-hidden="true">
-          <BrandLogo size={220} glow />
-        </div>
+
         <div className="footer__grid">
-          <section className="footer__brand">
+          {/* Brand */}
+          <section className="footer__brand" aria-labelledby="footer-brand-heading">
             <a href="#/" className="footer__logo" aria-label={`${SITE.name} home`}>
               <BrandLogo size={48} glow />
               <span className="footer__logo-text">
-                <strong>{SITE.shortName.toUpperCase()}</strong>
+                <strong>{SITE.name.toUpperCase()}</strong>
               </span>
             </a>
 
-            <p className="footer__desc">
-              An innovative technology-focused company dedicated to delivering professional
-              technical, electrical and security solutions for homes, businesses and modern spaces.
-            </p>
+            <p className="footer__desc">{t('footer.desc')}</p>
 
             <ul className="footer__socials" aria-label="Social media">
               {SOCIALS.map(({ label, href, icon: Icon }) => (
@@ -159,66 +184,81 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
             </ul>
           </section>
 
+          {/* Quick links */}
           <nav className="footer__col" aria-label="Quick links">
-            <h4>{t('footer.company')}</h4>
+            <h4 id="footer-quick-links">{t('footer.quickLinks')}</h4>
             <ul>
               {QUICK_LINKS.map((l) => (
-                <li key={l.href.concat(l.key)}>
-                  <a href={l.href}>{t(l.key)}</a>
+                <li key={l.key}>
+                  <a href={l.href}>
+                    {t(l.key)}
+                    <ArrowRight className="footer__arrow" size={13} aria-hidden="true" />
+                  </a>
                 </li>
               ))}
             </ul>
           </nav>
 
-          <section className="footer__col footer__contact-section">
-            <h4>Contact Us</h4>
+          {/* Contact us */}
+          <section className="footer__col" aria-labelledby="footer-contact">
+            <h4 id="footer-contact">{t('footer.contactUs')}</h4>
             <ul className="footer__contact">
               <li>
                 <Clock size={15} />
-                <span>Mon – Fri, 9:00 AM – 5:00 PM</span>
+                <span className="footer__hours">
+                  {t('contact.hours')} ·{' '}
+                  {HOURS.map(({ key, time }) => (
+                    <span key={key}>
+                      {t(key)} {t(time)}
+                    </span>
+                  ))}
+                </span>
               </li>
               <li>
-                <a href={PHONE_LINKS.primary}>
-                  <Phone size={15} /> {SITE.phone}
-                </a>
+                <Phone size={15} />
+                <a href={PHONE_LINKS.primary}>{SITE.phone}</a>
               </li>
               <li>
-                <a href={PHONE_LINKS.mail}>
-                  <Mail size={15} /> {SITE.email}
-                </a>
+                <Mail size={15} />
+                <a href={PHONE_LINKS.mail}>{SITE.email}</a>
               </li>
             </ul>
           </section>
 
-          <section className="footer__col">
-            <h4>{t('footer.visit')}</h4>
-            <ul className="footer__contact">
-              <li>
-                <MapPin size={15} />
-                <span>Kigali, Rwanda</span>
-              </li>
-              <li>
-                <a href="#/contact" className="footer__visit-link">
-                  {t('footer.visitPage')}
-                </a>
-              </li>
-            </ul>
+          {/* Find us */}
+          <section className="footer__col" aria-labelledby="footer-find-us">
+            <h4 id="footer-find-us">{t('footer.findUs')}</h4>
+            <div className="footer__map">
+              <iframe
+                title={t('footer.mapTitle')}
+                src={MAP_EMBED}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
+            <p className="footer__address">
+              <MapPin size={15} />
+              <span>{LOCATION.address}</span>
+            </p>
+            <a
+              className="footer__visit-link"
+              href={LOCATION.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('footer.mapLink')}
+              <ArrowRight size={13} aria-hidden="true" />
+            </a>
           </section>
         </div>
 
-        {(onTechClick || onAdminClick) && (
+        {onLoginClick && (
           <div className="footer__access">
             <div className="footer__access-inner">
-              {onTechClick && (
-                <button type="button" className="footer__admin" onClick={onTechClick}>
-                  Technician Login
-                </button>
-              )}
-              {onAdminClick && (
-                <button type="button" className="footer__admin" onClick={onAdminClick}>
-                  Admin
-                </button>
-              )}
+              <button type="button" className="footer__admin" onClick={onLoginClick}>
+                Login
+              </button>
             </div>
           </div>
         )}
@@ -233,9 +273,6 @@ export default function Footer({ onAdminClick, onTechClick }: { onAdminClick?: (
                 <a href="#/terms">{t('footer.terms')}</a>
               </nav>
             </div>
-            <button type="button" className="footer__top" onClick={scrollTop}>
-              {t('footer.backToTop')} <ArrowUp size={14} />
-            </button>
           </div>
         </div>
       </div>

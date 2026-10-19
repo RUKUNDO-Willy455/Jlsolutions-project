@@ -1,5 +1,4 @@
 import { useI18n } from '../i18n';
-import adminBg1 from '../assets/admin-bg-1.jpg';
 
 const clients = [
   { name: 'Bank of Kigali', since: '2012' },
@@ -16,8 +15,8 @@ export default function ClientsSection() {
   const { t } = useI18n();
 
   return (
-    <section id="clients" className="relative bg-surface py-20 sm:py-24 lg:py-32 border-y border-line overflow-hidden">
-      <img src={adminBg1} alt="" className="absolute inset-0 w-full h-full" style={{ opacity: 0.80, objectFit: 'cover', objectPosition: 'right center' }} />
+    <section id="clients" className="relative py-20 sm:py-24 lg:py-32 border-y border-line overflow-hidden">
+      {/* Background comes from the page-wide static layer in Home.tsx */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.70) 45%, rgba(8,8,8,0.30) 100%)' }} />
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex items-center gap-3 mb-12 reveal">
