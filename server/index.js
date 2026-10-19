@@ -5,7 +5,9 @@ import path from "node:path"
 import fs from "node:fs"
 import { fileURLToPath } from "node:url"
 import {
-  db,
+  all,
+  get,
+  usingTurso,
   verifyPassword,
   hashPassword,
   FounderStore,
@@ -16,9 +18,12 @@ import {
   RatingStore,
 } from "./db.js"
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const ENV_FILE = path.join(__dirname, "..", ".env")
-const DIST_DIR = path.join(__dirname, "..", "dist")
+// Named serverDir, not __dirname: Netlify's function entry glue declares
+// __dirname at the top of the bundled file, and esbuild treats __dirname as a
+// global it will not rename, so a second declaration is a syntax error.
+const serverDir = path.dirname(fileURLToPath(import.meta.url))
+const ENV_FILE = path.join(serverDir, "..", ".env")
+const DIST_DIR = path.join(serverDir, "..", "dist")
 
 if (fs.existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE)
 
@@ -40,7 +45,15 @@ if (IS_PROD) {
   if (!process.env.SESSION_SECRET)
     problems.push("SESSION_SECRET is not set - generate one with: openssl rand -hex 32")
   if (problems.length) {
-    console.error("[api] Refusing to start with NODE_ENV=production:\n  - " + problems.join("\n  - "))
+    const message =
+      "[api] Refusing to start with NODE_ENV=production:\n  - " +
+      problems.join("\n  - ")
+    // Inside a Netlify/Lambda function process.exit() would kill the runtime
+    // without a readable log, so fail the invocation instead.
+    if (process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+      throw new Error(message)
+    }
+    console.error(message)
     process.exit(1)
   }
 }
@@ -218,21 +231,21 @@ function tooManyRequests(res) {
 }
 
 
-function collectionGet(storeRes, res) {
-  send(res, 200, storeRes.all())
+async function collectionGet(store, res) {
+  send(res, 200, await store.all())
 }
 
 // Collection-level replace. The client keeps whole collections in React state
 // and syncs them here (mirrors the README migration path §6.3).
-function collectionPut(store, list, res, { sanitize } = {}) {
+async function collectionPut(store, list, res, { sanitize } = {}) {
   if (!Array.isArray(list)) return badRequest(res, "Expected an array.")
   try {
-    store.replace(list)
+    await store.replace(list)
   } catch (err) {
     return send(res, 500, { error: `Database error: ${err.message}` })
   }
-  const out = sanitize ? sanitize(store.all()) : store.all()
-  return send(res, 200, out)
+  const rows = await store.all()
+  return send(res, 200, sanitize ? await sanitize(rows) : rows)
 }
 
 // Collection-level UPSERT (merge) for the same client shape.
@@ -243,10 +256,10 @@ function collectionPut(store, list, res, { sanitize } = {}) {
 // not know about. So: rows absent from the payload are preserved, rows present
 // are updated, new ids are inserted. Deleting is always explicit, via
 // DELETE /api/<collection>/:id.
-function collectionMerge(store, incoming, res, { sanitize } = {}) {
+async function collectionMerge(store, incoming, res, { sanitize } = {}) {
   if (!Array.isArray(incoming)) return badRequest(res, "Expected an array.")
   try {
-    const current = store.all() ?? []
+    const current = (await store.all()) ?? []
     const currentById = new Map(current.map((row) => [String(row.id), row]))
     const incomingById = new Map()
     for (const item of incoming) {
@@ -258,30 +271,30 @@ function collectionMerge(store, incoming, res, { sanitize } = {}) {
       ...current.map((row) => incomingById.get(String(row.id)) ?? row),
       ...[...incomingById.values()].filter((item) => !currentById.has(String(item.id))),
     ]
-    store.replace(merged)
+    await store.replace(merged)
   } catch (err) {
     return send(res, 500, { error: `Database error: ${err.message}` })
   }
-  const out = sanitize ? sanitize(store.all()) : store.all()
-  return send(res, 200, out)
+  const rows = await store.all()
+  return send(res, 200, sanitize ? await sanitize(rows) : rows)
 }
 
-function collectionDelete(store, id, res, { sanitize } = {}) {
+async function collectionDelete(store, id, res, { sanitize } = {}) {
   try {
-    const current = store.all() ?? []
+    const current = (await store.all()) ?? []
     const next = current.filter((row) => String(row.id) !== String(id))
     if (next.length === current.length) return send(res, 404, { error: "Not found" })
-    store.replace(next)
+    await store.replace(next)
   } catch (err) {
     return send(res, 500, { error: `Database error: ${err.message}` })
   }
-  const out = sanitize ? sanitize(store.all()) : store.all()
-  return send(res, 200, out)
+  const rows = await store.all()
+  return send(res, 200, sanitize ? await sanitize(rows) : rows)
 }
 
 /** Mints the next reference, accepting the legacy "BK" and current "JL" forms. */
-function nextBookingRef() {
-  const rows = db.prepare("SELECT id FROM bookings").all()
+async function nextBookingRef() {
+  const rows = await all("SELECT id FROM bookings")
   let max = 0
   for (const row of rows) {
     const match = /^(?:BK|JL)(\d+)$/.exec(String(row.id ?? ""))
@@ -542,7 +555,7 @@ async function handleAssistantRequest(req, res) {
 // Routes
 // ---------------------------------------------------------------------------
 
-async function handleApi(req, res, url) {
+export async function handleApi(req, res, url) {
   const { pathname } = url
   const seg = pathname.split("/").filter(Boolean) // ['api', 'auth', 'admin'] ...
 
@@ -551,7 +564,7 @@ async function handleApi(req, res, url) {
   // Every remaining path below is an API route: always produce exactly one response.
   try {
     if (seg.length === 2 && seg[1] === "health" && req.method === "GET") {
-      send(res, 200, { ok: true, db: "sqlite" })
+      send(res, 200, { ok: true, db: usingTurso ? "turso" : "sqlite" })
       return true
     }
 
@@ -601,8 +614,10 @@ async function handleApi(req, res, url) {
           }
         : null
       try {
-        RatingStore.replace([...RatingStore.all(), ratingRow])
-        if (pending) TestimonialStore.replace([...TestimonialStore.all(), pending])
+        await RatingStore.replace([...(await RatingStore.all()), ratingRow])
+        if (pending) {
+          await TestimonialStore.replace([...(await TestimonialStore.all()), pending])
+        }
       } catch (err) {
         return send(res, 500, { error: `Database error: ${err.message}` })
       }
@@ -620,7 +635,7 @@ async function handleApi(req, res, url) {
       const name = String(body?.name ?? "").trim()
       const phone = String(body?.phone ?? "").trim()
       if (!name || !phone) return badRequest(res, "Name and phone are required.")
-      const id = nextBookingRef()
+      const id = await nextBookingRef()
       const booking = {
         id,
         name,
@@ -650,8 +665,8 @@ async function handleApi(req, res, url) {
         ],
       }
       try {
-        const merged = [booking, ...BookingStore.all()]
-        BookingStore.replace(merged)
+        const merged = [booking, ...(await BookingStore.all())]
+        await BookingStore.replace(merged)
       } catch (err) {
         return send(res, 500, { error: `Database error: ${err.message}` })
       }
@@ -671,7 +686,7 @@ async function handleApi(req, res, url) {
       const ref = String(url.searchParams.get("ref") ?? "").trim().toUpperCase()
       const phone = String(url.searchParams.get("phone") ?? "").trim()
       if (!ref || !phone) return badRequest(res, "A reference and phone number are required.")
-      const matches = BookingStore.all().filter(
+      const matches = (await BookingStore.all()).filter(
         (b) => String(b.id).toUpperCase() === ref && samePhone(b.phone, phone),
       )
       send(res, 200, matches)
@@ -681,7 +696,7 @@ async function handleApi(req, res, url) {
     // Public, PII-free availability feed so the booking form can show how many
     // technicians are free without downloading customer data.
     if (seg.length === 2 && seg[1] === "availability" && req.method === "GET") {
-      const rows = BookingStore.all()
+      const rows = (await BookingStore.all())
         .filter((b) => ["pending", "confirmed", "completed"].includes(b.status))
         .map((b) => ({
           technicianId: b.technicianId,
@@ -719,18 +734,18 @@ async function handleApi(req, res, url) {
 
       if (route === "founder") {
         if (req.method === "GET") {
-          send(res, 200, FounderStore.get())
+          send(res, 200, await FounderStore.get())
           return true
         }
         if (req.method === "PUT") {
           const body = await readBody(req)
           try {
-            FounderStore.replace(body)
+            await FounderStore.replace(body)
           } catch (err) {
             send(res, 500, { error: err.message })
             return true
           }
-          send(res, 200, FounderStore.get())
+          send(res, 200, await FounderStore.get())
           return true
         }
         send(res, 405, { error: "Method not allowed" })
@@ -742,7 +757,7 @@ async function handleApi(req, res, url) {
         send(
           res,
           200,
-          TechnicianStore.all().map((t) => ({
+          (await TechnicianStore.all()).map((t) => ({
             id: t.id,
             name: t.name,
             role: t.role,
@@ -757,12 +772,12 @@ async function handleApi(req, res, url) {
       if (entry) {
         const [store, opts] = entry
         if (req.method === "GET") {
-          collectionGet(store, res)
+          await collectionGet(store, res)
           return true
         }
         if (req.method === "PUT") {
           const body = await readBody(req)
-          collectionMerge(store, body, res, opts ?? {})
+          await collectionMerge(store, body, res, opts ?? {})
           return true
         }
         send(res, 405, { error: "Method not allowed" })
@@ -784,7 +799,7 @@ async function handleApi(req, res, url) {
       if (entry && req.method === "DELETE") {
         if (!requireAuth(req, res)) return true
         const [store, opts] = entry
-        collectionDelete(store, decodeURIComponent(seg[2]), res, opts ?? {})
+        await collectionDelete(store, decodeURIComponent(seg[2]), res, opts ?? {})
         return true
       }
     }
@@ -826,9 +841,9 @@ async function handleApi(req, res, url) {
       const username = String(body.username ?? "")
         .trim()
         .toLowerCase()
-      const row = db
-        .prepare("SELECT * FROM technicians WHERE lower(username) = ?")
-        .get(username)
+      const row = await get("SELECT * FROM technicians WHERE lower(username) = ?", [
+        username,
+      ])
       if (
         !row ||
         !verifyPassword(String(body.password ?? ""), row.password_hash)
@@ -942,4 +957,4 @@ if (
   start()
 }
 
-export { db, hashPassword }
+export { hashPassword }

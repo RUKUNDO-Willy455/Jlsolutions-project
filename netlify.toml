@@ -7,8 +7,13 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# AI assistant — the app fetches /api/assistant from the same origin,
-# so route it to the Netlify Function in functions/assistant.js
+# Everything under /api/* (bookings, technicians, auth, availability, tracking…)
+# is served by functions/api.js. That function declares its own route with
+# Netlify Functions v2 `config.path`, so no rewrite rule is needed for it.
+#
+# The AI assistant is deliberately routed separately: it talks only to an
+# external AI API, so keeping it on its own function means the chat keeps
+# working even if the database is unavailable.
 [[redirects]]
   from = "/api/assistant"
   to = "/.netlify/functions/assistant"
