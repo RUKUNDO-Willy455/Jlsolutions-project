@@ -1,0 +1,21 @@
+# Netlify build + routing config
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# AI assistant — the app fetches /api/assistant from the same origin,
+# so route it to the Netlify Function in functions/api/assistant.js
+[[redirects]]
+  from = "/api/assistant"
+  to = "/.netlify/functions/api/assistant"
+  status = 200
+
+# SPA fallback — React Router renders every route from index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
