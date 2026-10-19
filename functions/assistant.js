@@ -1,5 +1,5 @@
-const EJO_API_URL =
-  typeof EJO_API_URL !== "undefined" ? EJO_API_URL : "https://api.ejolabs.com/api/v1/subiza";
+// Netlify Function (v1 handler format) — proxied from /api/assistant by netlify.toml
+const EJO_API_URL = process.env.EJO_API_URL || "https://api.ejolabs.com/api/v1/subiza";
 
 const ASSISTANT_CONTEXT = `You are JL Assistant, the conversational AI support for Jean Luc Solutions, a technical installation, maintenance, security, energy, and technology company in Rwanda.
 
@@ -18,43 +18,39 @@ Use these website facts as the source of truth for company-specific claims:
 - Booking requests are not confirmed until a coordinator contacts the customer. You cannot see or change the live booking calendar, technician schedule, customer records, or quote system.
 - For urgent electrical, CCTV, network, fire, access-control, or other technical failures, advise contacting the team by phone or WhatsApp.`;
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
-  const apiKey = env.EJO_API_KEY || "";
+const json = (statusCode, payload) => ({
+  statusCode,
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+});
 
+export const handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return json(405, { error: "Method not allowed" });
+  }
+
+  const apiKey = process.env.EJO_API_KEY || "";
   if (!apiKey) {
-    return new Response(
-      JSON.stringify({
-        error: "The AI assistant is not configured. Please contact the website team.",
-      }),
-      { status: 503, headers: { "Content-Type": "application/json" } }
-    );
+    return json(503, {
+      error: "The AI assistant is not configured. Please contact the website team.",
+    });
   }
 
   let body;
   try {
-    body = await request.json();
+    body = JSON.parse(event.body || "{}");
   } catch {
-    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json(400, { error: "Invalid JSON body" });
   }
 
   const { message, history = [] } = body;
 
   if (!message || typeof message !== "string" || !message.trim()) {
-    return new Response(JSON.stringify({ error: "A message is required." }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json(400, { error: "A message is required." });
   }
 
   if (message.length > 4000) {
-    return new Response(JSON.stringify({ error: "Message is too long." }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json(400, { error: "Message is too long." });
   }
 
   const messages = [
@@ -79,37 +75,19 @@ export async function onRequestPost(context) {
     const data = await response.json();
 
     if (!response.ok) {
-      return new Response(
-        JSON.stringify({
-          error: data?.error || `AI service returned ${response.status}`,
-        }),
-        { status: response.status, headers: { "Content-Type": "application/json" } }
-      );
+      return json(response.status, {
+        error: data?.error || `AI service returned ${response.status}`,
+      });
     }
 
     const text = data?.choices?.[0]?.message?.content;
 
     if (!text) {
-      return new Response(
-        JSON.stringify({ error: "The AI returned an empty response." }),
-        { status: 502, headers: { "Content-Type": "application/json" } }
-      );
+      return json(502, { error: "The AI returned an empty response." });
     }
 
-    return new Response(JSON.stringify({ text }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "Could not reach the AI service." }),
-      { status: 502, headers: { "Content-Type": "application/json" } }
-    );
+    return json(200, { text });
+  } catch {
+    return json(502, { error: "Could not reach the AI service." });
   }
-}
-
-export async function onRequest() {
-  return new Response(JSON.stringify({ error: "Method not allowed" }), {
-    status: 405,
-    headers: { "Content-Type": "application/json" },
-  });
-}
+};

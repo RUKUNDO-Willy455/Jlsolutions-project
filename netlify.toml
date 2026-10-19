@@ -8,10 +8,10 @@
   NODE_VERSION = "22"
 
 # AI assistant — the app fetches /api/assistant from the same origin,
-# so route it to the Netlify Function in functions/api/assistant.js
+# so route it to the Netlify Function in functions/assistant.js
 [[redirects]]
   from = "/api/assistant"
-  to = "/.netlify/functions/api/assistant"
+  to = "/.netlify/functions/assistant"
   status = 200
 
 # SPA fallback — React Router renders every route from index.html

@@ -26,3 +26,6 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+
+# Local Netlify folder
+.netlify
