@@ -38,7 +38,7 @@ function Stars({ count }: { count: number }) {
 }
 
 export default function Testimonials() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [testimonials] = useEditorStore<Testimonial[]>(STORAGE_KEYS.testimonials, seedTestimonials);
   const visible = testimonials.filter(t => t.visible);
   const avg = visible.length
@@ -71,7 +71,7 @@ export default function Testimonials() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-6 reveal delay-200 w-full lg:w-auto">
+          <div className="flex items-center gap-6 reveal delay-200 w-full lg:w-auto" key={lang}>
             <div className="text-center">
               <p
                 className="text-3xl sm:text-4xl font-semibold text-ash"

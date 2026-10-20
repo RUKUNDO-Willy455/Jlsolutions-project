@@ -194,7 +194,7 @@ function InlineRateForm({
 }
 
 export default function TestimonialsDetail() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [testimonials, setTestimonials] = useEditorStore<Testimonial[]>(STORAGE_KEYS.testimonials, seedTestimonials);
   const [ratings, setRatings] = useEditorStore<Rating[]>(STORAGE_KEYS.ratings, seedRatings);
   const [notifications, setNotifications] = useEditorStore<AdminNotification[]>(STORAGE_KEYS.notifications, seedNotifications);
@@ -255,34 +255,44 @@ export default function TestimonialsDetail() {
     }
     // Optimistic local echo so the stars update immediately for this visitor.
     const now = new Date().toISOString();
-    const r: Rating = { id: `r-${Date.now()}`, name, rating, date: now.split('T')[0] };
-    setRatings(prev => [...prev, r]);
+    setRatings(prev => {
+      if (prev.some(r => r.id === `r-${now}`)) return prev;
+      const r: Rating = { id: `r-${Date.now()}`, name, rating, date: now.split('T')[0] };
+      return [...prev, r];
+    });
 
     if (details.quote) {
-      const pending: Testimonial = {
-        id: `rv-${Date.now()}`,
-        name,
-        title: details.title || '',
-        company: details.company || '',
-        quote: details.quote,
-        rating,
-        project: details.project || 'Client Review',
-        year: now.slice(0, 4),
-        visible: false,
-        createdAt: now,
-        source: 'user',
-      };
-      setTestimonials(prev => [...prev, pending]);
+      setTestimonials(prev => {
+        if (prev.some(t => t.source === 'user' && t.name === name && t.quote === details.quote)) return prev;
+        const pending: Testimonial = {
+          id: `rv-${Date.now()}`,
+          name,
+          title: details.title || '',
+          company: details.company || '',
+          quote: details.quote,
+          rating,
+          project: details.project || 'Client Review',
+          year: now.slice(0, 4),
+          visible: false,
+          createdAt: now,
+          source: 'user',
+        };
+        return [...prev, pending];
+      });
 
-      const notice: AdminNotification = {
-        id: `n${Date.now()}`,
-        kind: 'review',
-        title: `New client review from ${name}`,
-        message: `${rating}-star review awaiting approval: "${details.quote}"`,
-        createdAt: now,
-        read: false,
-      };
-      setNotifications(prev => [notice, ...prev]);
+      setNotifications(prev => {
+        const exists = prev.some(n => n.kind === 'review' && n.title.includes(name) && n.createdAt.slice(0,10) === now.slice(0,10));
+        if (exists) return prev;
+        const notice: AdminNotification = {
+          id: `n${Date.now()}`,
+          kind: 'review',
+          title: `New client review from ${name}`,
+          message: `${rating}-star review awaiting approval: "${details.quote}"`,
+          createdAt: now,
+          read: false,
+        };
+        return [notice, ...prev];
+      });
     }
     return true;
   }
@@ -290,7 +300,7 @@ export default function TestimonialsDetail() {
   return (
     <>
       <section className="bg-surface border-y border-line py-16 lg:py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10" key={lang}>
           {highlights.map((h, i) => (
             <div key={h.label} className="reveal" style={{ transitionDelay: `${i * 90}ms` }}>
               <p className="text-4xl lg:text-5xl font-semibold text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
