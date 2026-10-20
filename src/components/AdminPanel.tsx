@@ -1133,10 +1133,38 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
   );
 }
 
-function SettingsTab({ settings, setSettings }: { settings: SiteSettings; setSettings: React.Dispatch<React.SetStateAction<SiteSettings>> }) {
+function SettingsTab({ 
+  settings, 
+  setSettings,
+  testimonials,
+  setTestimonials,
+  ratings,
+  setRatings,
+}: { 
+  settings: SiteSettings; 
+  setSettings: React.Dispatch<React.SetStateAction<SiteSettings>>;
+  testimonials: Testimonial[];
+  setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>>;
+  ratings: Rating[];
+  setRatings: React.Dispatch<React.SetStateAction<Rating[]>>;
+}) {
   const [saved, setSaved] = useState(false);
+  const [confirmResetReviews, setConfirmResetReviews] = useState(false);
+  const [confirmResetTestimonials, setConfirmResetTestimonials] = useState(false);
   function set(key: keyof SiteSettings, value: string) { setSettings(prev => ({ ...prev, [key]: value })); }
   function handleSave() { setSaved(true); setTimeout(() => setSaved(false), 2000); }
+  function resetReviews() {
+    if (!confirmResetReviews) { setConfirmResetReviews(true); setTimeout(() => setConfirmResetReviews(false), 4000); return; }
+    setRatings([]);
+    localStorage.removeItem(STORAGE_KEYS.ratings);
+    setConfirmResetReviews(false);
+  }
+  function resetTestimonials() {
+    if (!confirmResetTestimonials) { setConfirmResetTestimonials(true); setTimeout(() => setConfirmResetTestimonials(false), 4000); return; }
+    setTestimonials([]);
+    localStorage.removeItem(STORAGE_KEYS.testimonials);
+    setConfirmResetTestimonials(false);
+  }
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -1151,6 +1179,18 @@ function SettingsTab({ settings, setSettings }: { settings: SiteSettings; setSet
       <button onClick={handleSave} className={`btn-ember px-8 py-3 rounded-[2px] self-start transition-all duration-300 ${saved ? '!bg-emerald-600' : ''}`}>
         {saved ? '✓ Saved' : 'Save Settings'}
       </button>
+      <div className="border-t border-[rgba(255,255,255,0.06)] pt-6 mt-4">
+        <p className="text-sm font-semibold text-white mb-2" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Reviews &amp; Testimonials</p>
+        <p className="text-xs text-[#5a5a5a] mb-4">Reset all reviews and testimonials. This action cannot be undone.</p>
+        <div className="flex flex-wrap gap-3">
+          <button onClick={resetReviews} className={`px-5 py-2.5 rounded-[2px] text-xs border transition-colors duration-150 ${confirmResetReviews ? 'text-red-400 bg-red-400/10 border-red-400/40' : 'text-[#a0a0a0] bg-[#111] border-[rgba(255,255,255,0.08)] hover:text-red-400 hover:border-red-400/30'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            {confirmResetReviews ? 'Click again to confirm reset reviews' : `Reset all reviews (${ratings.length})`}
+          </button>
+          <button onClick={resetTestimonials} className={`px-5 py-2.5 rounded-[2px] text-xs border transition-colors duration-150 ${confirmResetTestimonials ? 'text-red-400 bg-red-400/10 border-red-400/40' : 'text-[#a0a0a0] bg-[#111] border-[rgba(255,255,255,0.08)] hover:text-red-400 hover:border-red-400/30'}`} style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
+            {confirmResetTestimonials ? 'Click again to confirm reset testimonials' : `Reset all testimonials (${testimonials.length})`}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1412,7 +1452,7 @@ export default function AdminPanel({ onExit, initialAuthed = false }: { onExit: 
   const [profileRequests, setProfileRequests] = useEditorStore<ProfileEditRequest[]>(STORAGE_KEYS.profileRequests, seedProfileRequests);
   const [services, setServices] = useState<Service[]>(seedServices);
   const [testimonials, setTestimonials] = useEditorStore<Testimonial[]>(STORAGE_KEYS.testimonials, seedTestimonials);
-  const [ratings] = useEditorStore<Rating[]>(STORAGE_KEYS.ratings, seedRatings);
+  const [ratings, setRatings] = useEditorStore<Rating[]>(STORAGE_KEYS.ratings, seedRatings);
   const [settings, setSettings] = useState<SiteSettings>(seedSettings);
   const [founder, setFounder] = useEditorStore<FounderProfile>(STORAGE_KEYS.founder, seedFounder);
 
@@ -1569,7 +1609,7 @@ export default function AdminPanel({ onExit, initialAuthed = false }: { onExit: 
         )}
             {tab === 'Services'     && <ServicesTab services={services} setServices={setServices} />}
             {tab === 'Testimonials' && <TestimonialsTab testimonials={testimonials} setTestimonials={setTestimonials} />}
-            {tab === 'Settings'     && <SettingsTab settings={settings} setSettings={setSettings} />}
+            {tab === 'Settings'     && <SettingsTab settings={settings} setSettings={setSettings} testimonials={testimonials} setTestimonials={setTestimonials} ratings={ratings} setRatings={setRatings} />}
           </div>
         </main>
       </div>

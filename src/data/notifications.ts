@@ -88,6 +88,9 @@ export function deriveAdminNotifications(
     });
   });
 
+  // Always show newest notifications first
+  list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   // Newest bookings first — flag ones the admin still has to act on.
   [...bookings]
     .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
