@@ -237,8 +237,10 @@ export default function TestimonialsDetail() {
     details: { title: string; company: string; quote: string; project: string },
   ): Promise<boolean> {
     setSubmitError(null);
+    const now = new Date().toISOString();
+    const today = now.slice(0, 10);
     try {
-      await apiJson('/api/reviews', {
+      const res = await apiJson('/api/reviews', {
         method: 'POST',
         body: {
           name,
@@ -248,24 +250,33 @@ export default function TestimonialsDetail() {
           quote: details.quote,
           project: details.project,
         },
-      });
+      }) as any;
+      if (res?.duplicate) {
+        // Already exists, don't duplicate locally
+        return true;
+      }
     } catch (err) {
       setSubmitError((err as Error).message);
       return false;
     }
-    // Optimistic local echo so the stars update immediately for this visitor.
-    const now = new Date().toISOString();
+    // Only add locally if not duplicate
+    if (ratings.some(r => String(r.name || '').trim().toLowerCase() === name.toLowerCase() && String(r.date || '').slice(0,10) === today)) {
+      return true;
+    }
+    const r: Rating = { id: `r-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, name, rating, date: today };
     setRatings(prev => {
-      if (prev.some(r => r.id === `r-${now}`)) return prev;
-      const r: Rating = { id: `r-${Date.now()}`, name, rating, date: now.split('T')[0] };
+      if (prev.some(x => String(x.name || '').trim().toLowerCase() === name.toLowerCase() && String(x.date || '').slice(0,10) === today)) return prev;
       return [...prev, r];
     });
 
     if (details.quote) {
+      if (testimonials.some(t => t.source === 'user' && String(t.name || '').trim().toLowerCase() === name.toLowerCase() && String(t.quote || '').trim() === details.quote.trim())) {
+        return true;
+      }
       setTestimonials(prev => {
-        if (prev.some(t => t.source === 'user' && t.name === name && t.quote === details.quote)) return prev;
+        if (prev.some(t => t.source === 'user' && String(t.name || '').trim().toLowerCase() === name.toLowerCase() && String(t.quote || '').trim() === details.quote.trim())) return prev;
         const pending: Testimonial = {
-          id: `rv-${Date.now()}`,
+          id: `rv-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
           name,
           title: details.title || '',
           company: details.company || '',
@@ -281,10 +292,10 @@ export default function TestimonialsDetail() {
       });
 
       setNotifications(prev => {
-        const exists = prev.some(n => n.kind === 'review' && n.title.includes(name) && n.createdAt.slice(0,10) === now.slice(0,10));
+        const exists = prev.some(n => n.kind === 'review' && String(n.title || '').toLowerCase().includes(name.toLowerCase()) && String(n.createdAt || '').slice(0,10) === today);
         if (exists) return prev;
         const notice: AdminNotification = {
-          id: `n${Date.now()}`,
+          id: `n${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
           kind: 'review',
           title: `New client review from ${name}`,
           message: `${rating}-star review awaiting approval: "${details.quote}"`,
