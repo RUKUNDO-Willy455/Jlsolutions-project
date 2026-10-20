@@ -588,40 +588,53 @@ export async function handleApi(req, res, url) {
       if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
         return badRequest(res, "Please choose a rating between 1 and 5.")
       }
+      const quote = String(body?.quote ?? "").trim()
       const now = new Date()
       const stamp = now.toISOString()
-      const ratingRow = {
-        id: `r-${now.getTime()}`,
-        name,
-        rating,
-        date: stamp.slice(0, 10),
-      }
-      const quote = String(body?.quote ?? "").trim()
-      const pending = quote
-        ? {
-            id: `rv-${now.getTime()}`,
-            name,
-            title: String(body?.title ?? "").trim(),
-            company: String(body?.company ?? "").trim(),
-            quote,
-            rating,
-            project: String(body?.project ?? "").trim() || "Client Review",
-            year: stamp.slice(0, 4),
-            // Forced off regardless of what the client asked for.
-            visible: false,
-            createdAt: stamp,
-            source: "user",
-          }
-        : null
       try {
-        await RatingStore.replace([...(await RatingStore.all()), ratingRow])
-        if (pending) {
-          await TestimonialStore.replace([...(await TestimonialStore.all()), pending])
+        const [existingRatings, existingTestimonials] = await Promise.all([
+          RatingStore.all(),
+          TestimonialStore.all(),
+        ])
+        // Prevent duplicates: same name, same rating, same day
+        const today = stamp.slice(0, 10)
+        const already = existingRatings.some(
+          (r) => String(r.name || "").trim().toLowerCase() === name.toLowerCase() && Number(r.rating) === rating && String(r.date || "").slice(0, 10) === today,
+        ) || (quote && existingTestimonials.some(
+          (t) => String(t.name || "").trim().toLowerCase() === name.toLowerCase() && String(t.quote || "").trim() === quote,
+        ))
+        if (already) {
+          return send(res, 200, { ok: true, duplicate: true })
         }
+        const ratingRow = {
+          id: `r-${now.getTime()}`,
+          name,
+          rating,
+          date: today,
+        }
+        const pending = quote
+          ? {
+              id: `rv-${now.getTime()}`,
+              name,
+              title: String(body?.title ?? "").trim(),
+              company: String(body?.company ?? "").trim(),
+              quote,
+              rating,
+              project: String(body?.project ?? "").trim() || "Client Review",
+              year: stamp.slice(0, 4),
+              visible: false,
+              createdAt: stamp,
+              source: "user",
+            }
+          : null
+        await RatingStore.replace([...existingRatings, ratingRow])
+        if (pending) {
+          await TestimonialStore.replace([...existingTestimonials, pending])
+        }
+        send(res, 201, { ok: true, rating: ratingRow, pending: Boolean(pending) })
       } catch (err) {
         return send(res, 500, { error: `Database error: ${err.message}` })
       }
-      send(res, 201, { ok: true, rating: ratingRow, pending: Boolean(pending) })
       return true
     }
 
