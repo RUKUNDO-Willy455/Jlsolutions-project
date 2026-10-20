@@ -1133,12 +1133,12 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
               <div><Label>Year</Label><Field value={draft.year} onChange={v => setDraft(d => d ? { ...d, year: v } : d)} /></div>
               <div>
                 <Label>Rating</Label>
-                <StarPicker value={draft.rating} onChange={v => setDraft(d => d ? { ...d, rating: v } : d)} readOnly={draft.source === 'user'} />
+                <StarPicker value={draft.rating} onChange={v => setDraft(d => d ? { ...d, rating: v } : d)} readOnly={true} />
               </div>
-              <div className="sm:col-span-2"><Label>Quote</Label><Field value={draft.quote} onChange={v => setDraft(d => d ? { ...d, quote: v } : d)} multiline readOnly={draft.source === 'user'} /></div>
+              <div className="sm:col-span-2"><Label>Quote</Label><Field value={draft.quote} onChange={v => setDraft(d => d ? { ...d, quote: v } : d)} multiline readOnly={true} /></div>
               {draft.source === 'user' && (
                 <p className="sm:col-span-2 text-[0.6rem] text-[#6a6a6a] italic" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  Client-submitted review — rating and review text are locked. You can still publish or remove it.
+                  Client-submitted testimonial — all content, name, details, rating, and quote are locked. You can only publish or remove it.
                 </p>
               )}
               <div className="sm:col-span-2 flex gap-3"><button onClick={save} className="btn-ember px-5 py-2 rounded-[2px] text-xs">Save</button><button onClick={() => { setEditing(null); setDraft(null); }} className="btn-ghost px-5 py-2 rounded-[2px] text-xs">Cancel</button></div>
