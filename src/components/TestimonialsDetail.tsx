@@ -40,11 +40,9 @@ function InlineRateForm({
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
-    if (stars < 1 || !name.trim() || saving) return;
+    if (stars < 1 || !name.trim() || saving || submitted) return;
     setSaving(true);
     setError(null);
-    // The parent only resolves once the server has stored the review, so the
-    // thank-you message can never claim success for a submission that failed.
     const ok = await onSave(stars, name.trim(), { title: title.trim(), company: company.trim(), quote: quote.trim(), project: project.trim() });
     setSaving(false);
     if (!ok) {
@@ -239,6 +237,12 @@ export default function TestimonialsDetail() {
     setSubmitError(null);
     const now = new Date().toISOString();
     const today = now.slice(0, 10);
+    // Check again before sending
+    const nowCheck = new Date().toISOString();
+    const todayCheck = nowCheck.slice(0, 10);
+    if (ratings.some(r => String(r.name || '').trim().toLowerCase() === name.toLowerCase() && String(r.date || '').slice(0,10) === todayCheck)) {
+      return true;
+    }
     try {
       const res = await apiJson('/api/reviews', {
         method: 'POST',
@@ -252,7 +256,6 @@ export default function TestimonialsDetail() {
         },
       }) as any;
       if (res?.duplicate) {
-        // Already exists, don't duplicate locally
         return true;
       }
     } catch (err) {
