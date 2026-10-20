@@ -999,7 +999,7 @@ function StarPicker({ value, onChange, readOnly }: { value: number; onChange: (v
   );
 }
 
-function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Testimonial[]; setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>> }) {
+function TestimonialsTab({ testimonials, setTestimonials, ratings, setRatings }: { testimonials: Testimonial[]; setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>>; ratings: Rating[]; setRatings: React.Dispatch<React.SetStateAction<Rating[]>> }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<Testimonial | null>(null);
   const [adding, setAdding] = useState(false);
@@ -1026,21 +1026,54 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
     setNewT({ name: '', title: '', company: '', quote: '', rating: 5, project: '', year: '', visible: true });
     setAdding(false); setAddError('');
   }
+  const userTestimonials = [...testimonials].filter(t => t.source === 'user' || !t.source);
+  const adminTestimonials = [...testimonials].filter(t => t.source === 'admin');
+  function removeRating(id: string) {
+    setRatings(prev => prev.filter(r => r.id !== id));
+    localStorage.removeItem(STORAGE_KEYS.ratings);
+  }
   return (
-    <div className="flex flex-col gap-4">
-      {!adding && (
-        <div className="flex justify-end">
-          <button
-            onClick={() => { setAdding(true); setEditing(null); setAddError(''); }}
-            className="btn-ember px-5 py-2.5 rounded-[2px] flex items-center gap-2 text-xs"
-          >
-            <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-            Add Testimonial
-          </button>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Reviews (Ratings)</p>
+        <p className="text-xs text-[#5a5a5a]">Simple star ratings submitted by visitors (who reviewed).</p>
+        <div className="flex flex-col gap-2">
+          {[...ratings].sort((a,b)=> new Date(b.date).getTime()-new Date(a.date).getTime()).map(r => (
+            <div key={r.id} className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.06)] rounded-[2px] p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-sm font-semibold text-white">{(r.name||'U').charAt(0).toUpperCase()}</div>
+                <div>
+                  <p className="text-sm text-white">{r.name||'Anonymous'}</p>
+                  <p className="text-[0.6rem] text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{r.date}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <StarPicker value={r.rating} readOnly />
+                <button onClick={() => removeRating(r.id)} className="text-[0.65rem] text-[#4a4a4a] hover:text-red-400 transition-colors">Remove</button>
+              </div>
+            </div>
+          ))}
+          {ratings.length === 0 && <p className="text-sm text-[#3a3a3a] text-center py-6">No reviews yet.</p>}
         </div>
-      )}
+      </div>
+      <div className="border-t border-[rgba(255,255,255,0.06)] pt-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Testimonials (Written Reviews)</p>
+            <p className="text-xs text-[#5a5a5a]">Written feedback — client-submitted ones are locked and cannot be edited.</p>
+          </div>
+          {!adding && (
+            <button
+              onClick={() => { setAdding(true); setEditing(null); setAddError(''); }}
+              className="btn-ember px-5 py-2.5 rounded-[2px] flex items-center gap-2 text-xs"
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+              Add Testimonial
+            </button>
+          )}
+        </div>
 
       {adding && (
         <div className="bg-[#0f0f0f] border border-ember/30 rounded-[2px] p-6">
@@ -1076,7 +1109,7 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
         </div>
       )}
 
-      {[...testimonials].sort((a, b) => Number(a.visible) - Number(b.visible)).map(t => (
+      {[...userTestimonials, ...adminTestimonials].sort((a, b) => Number(a.visible) - Number(b.visible)).map(t => (
         <div key={t.id} className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.06)] rounded-[2px] p-5">
           {editing === t.id && draft ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1129,6 +1162,7 @@ function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Test
       {testimonials.length === 0 && (
         <p className="text-sm text-[#3a3a3a] text-center py-12">No testimonials yet. Add your first one above.</p>
       )}
+      </div>
     </div>
   );
 }
@@ -1608,7 +1642,7 @@ export default function AdminPanel({ onExit, initialAuthed = false }: { onExit: 
           </div>
         )}
             {tab === 'Services'     && <ServicesTab services={services} setServices={setServices} />}
-            {tab === 'Testimonials' && <TestimonialsTab testimonials={testimonials} setTestimonials={setTestimonials} />}
+            {tab === 'Testimonials' && <TestimonialsTab testimonials={testimonials} setTestimonials={setTestimonials} ratings={ratings} setRatings={setRatings} />}
             {tab === 'Settings'     && <SettingsTab settings={settings} setSettings={setSettings} testimonials={testimonials} setTestimonials={setTestimonials} ratings={ratings} setRatings={setRatings} />}
           </div>
         </main>
