@@ -178,27 +178,7 @@ export default function Hero() {
             <a href="#/services" className="btn-ghost px-8 py-4 rounded-[2px]">{t('hero.explore')}</a>
           </div>
 
-          {/* Stats */}
-          <div className="flex flex-wrap gap-10">
-            {[
-              { value: '99.8%', label: t('hero.statUptime') },
-              { value: '24/7', label: t('hero.statSupport') },
-              { value: '15yr', label: t('hero.statExperience') },
-            ].map((stat, si) => (
-              <div
-                key={`${active}-stat-${stat.label}`}
-                className="flex flex-col gap-1"
-                style={{ animation: `${getEnterAnim()} 0.8s cubic-bezier(0.16,1,0.3,1) ${620 + si * 70}ms both` }}
-              >
-                <span className="text-2xl lg:text-3xl font-semibold text-ash" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
-                  {stat.value}
-                </span>
-                <span className="text-[0.65rem] tracking-[0.18em] uppercase text-ink-4" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>
-                  {stat.label}
-                </span>
-              </div>
-            ))}
-          </div>
+          {/* Stats removed */}
         </div>
       </div>
 

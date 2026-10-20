@@ -1,15 +1,6 @@
 import { useI18n } from '../i18n';
 
-const clients = [
-  { name: 'Bank of Kigali', since: '2012' },
-  { name: 'MTN Rwanda', since: '2015' },
-  { name: 'Rwanda Development Board', since: '2010' },
-  { name: 'BPR Bank Rwanda', since: '2018' },
-  { name: 'Kigali Convention Centre', since: '2016' },
-  { name: 'Rwanda Revenue Authority', since: '2011' },
-  { name: 'Airtel Rwanda', since: '2019' },
-  { name: 'Irembo Ltd', since: '2014' },
-];
+const clients: Array<{ name: string; since: string }> = [];
 
 export default function ClientsSection() {
   const { t } = useI18n();

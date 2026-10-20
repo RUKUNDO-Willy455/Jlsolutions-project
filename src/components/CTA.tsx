@@ -83,29 +83,7 @@ export default function CTA({ children }: { children?: ReactNode }) {
           </div>
         </div>
 
-        {/* Bottom metrics strip */}
-        <div className="mt-20 pt-10 border-t border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 reveal delay-300">
-          {[
-            { value: '50+', label: t('cta.statClients') },
-            { value: '0', label: t('cta.statBreaches') },
-            { value: '10yr', label: t('cta.statExperience') },
-          ].map((stat) => (
-            <div key={stat.label} className="flex flex-col gap-2">
-              <span
-                className="text-3xl lg:text-4xl font-semibold text-ash"
-                style={{ fontFamily: 'Fraunces, Georgia, serif' }}
-              >
-                {stat.value}
-              </span>
-              <span
-                className="text-[0.62rem] tracking-[0.14em] uppercase text-ink-1 leading-snug"
-                style={{ fontFamily: 'DM Mono, Courier New, monospace' }}
-              >
-                {stat.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* Bottom metrics strip removed */}
       </div>
 
       {children}
