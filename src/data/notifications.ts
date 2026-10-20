@@ -49,7 +49,7 @@ export function deriveAdminNotifications(
   ratings: Rating[] = [],
 ): PortalNotification[] {
   const list: PortalNotification[] = [];
-  const stamp = nowLabel();
+  const stamp = new Date().toISOString();
 
   const truncate = (s: string, max: number) =>
     s.length > max ? `${s.slice(0, max)}…` : s;

@@ -73,7 +73,7 @@ const seedSettings: SiteSettings = {
 
 // ─── Small shared components ──────────────────────────────────────────────────
 
-const TABS = ['Dashboard', 'Bookings', 'Technicians', 'Requests', 'Founder', 'Services', 'Testimonials', 'Settings'] as const;
+const TABS = ['Dashboard', 'Bookings', 'Technicians', 'Requests', 'Founder', 'Services', 'Reviews', 'Testimonials', 'Settings'] as const;
 type Tab = typeof TABS[number];
 
 const statusColor: Record<Booking['status'], string> = {
@@ -999,7 +999,42 @@ function StarPicker({ value, onChange, readOnly }: { value: number; onChange: (v
   );
 }
 
-function TestimonialsTab({ testimonials, setTestimonials, ratings, setRatings }: { testimonials: Testimonial[]; setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>>; ratings: Rating[]; setRatings: React.Dispatch<React.SetStateAction<Rating[]>> }) {
+function ReviewsTab({ ratings, setRatings }: { ratings: Rating[]; setRatings: React.Dispatch<React.SetStateAction<Rating[]>> }) {
+  function removeRating(id: string) {
+    setRatings(prev => prev.filter(r => r.id !== id));
+    localStorage.removeItem(STORAGE_KEYS.ratings);
+  }
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Reviews</p>
+          <p className="text-xs text-[#5a5a5a]">Star ratings submitted by visitors — see who reviewed and when.</p>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        {[...ratings].sort((a,b)=> new Date(b.date).getTime()-new Date(a.date).getTime()).map(r => (
+          <div key={r.id} className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.06)] rounded-[2px] p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-sm font-semibold text-white">{(r.name||'U').charAt(0).toUpperCase()}</div>
+              <div>
+                <p className="text-sm text-white">{r.name||'Anonymous'}</p>
+                <p className="text-[0.6rem] text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{r.date}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <StarPicker value={r.rating} readOnly />
+              <button onClick={() => removeRating(r.id)} className="text-[0.65rem] text-[#4a4a4a] hover:text-red-400 transition-colors">Remove</button>
+            </div>
+          </div>
+        ))}
+        {ratings.length === 0 && <p className="text-sm text-[#3a3a3a] text-center py-12">No reviews yet.</p>}
+      </div>
+    </div>
+  );
+}
+
+function TestimonialsTab({ testimonials, setTestimonials }: { testimonials: Testimonial[]; setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>> }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<Testimonial | null>(null);
   const [adding, setAdding] = useState(false);
@@ -1034,29 +1069,7 @@ function TestimonialsTab({ testimonials, setTestimonials, ratings, setRatings }:
   }
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Reviews (Ratings)</p>
-        <p className="text-xs text-[#5a5a5a]">Simple star ratings submitted by visitors (who reviewed).</p>
-        <div className="flex flex-col gap-2">
-          {[...ratings].sort((a,b)=> new Date(b.date).getTime()-new Date(a.date).getTime()).map(r => (
-            <div key={r.id} className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.06)] rounded-[2px] p-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-sm font-semibold text-white">{(r.name||'U').charAt(0).toUpperCase()}</div>
-                <div>
-                  <p className="text-sm text-white">{r.name||'Anonymous'}</p>
-                  <p className="text-[0.6rem] text-[#5a5a5a]" style={{ fontFamily: 'DM Mono, Courier New, monospace' }}>{r.date}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <StarPicker value={r.rating} readOnly />
-                <button onClick={() => removeRating(r.id)} className="text-[0.65rem] text-[#4a4a4a] hover:text-red-400 transition-colors">Remove</button>
-              </div>
-            </div>
-          ))}
-          {ratings.length === 0 && <p className="text-sm text-[#3a3a3a] text-center py-6">No reviews yet.</p>}
-        </div>
-      </div>
-      <div className="border-t border-[rgba(255,255,255,0.06)] pt-6 flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>Testimonials (Written Reviews)</p>
@@ -1552,6 +1565,7 @@ export default function AdminPanel({ onExit, initialAuthed = false }: { onExit: 
           { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingRequests },
           { tab: 'Founder', icon: 'bx-user-pin' },
           { tab: 'Services', icon: 'bx-briefcase' },
+          { tab: 'Reviews', icon: 'bx-star' },
           { tab: 'Testimonials', icon: 'bx-message-square-dots', badge: pendingReviews },
           { tab: 'Settings', icon: 'bx-cog' },
         ]}
@@ -1580,6 +1594,7 @@ export default function AdminPanel({ onExit, initialAuthed = false }: { onExit: 
             { tab: 'Requests', icon: 'bx-envelope-open', badge: pendingRequests },
             { tab: 'Founder', icon: 'bx-user-pin' },
             { tab: 'Services', icon: 'bx-briefcase' },
+            { tab: 'Reviews', icon: 'bx-star' },
             { tab: 'Testimonials', icon: 'bx-message-square-dots', badge: pendingReviews },
             { tab: 'Settings', icon: 'bx-cog' },
           ]}
@@ -1643,7 +1658,8 @@ export default function AdminPanel({ onExit, initialAuthed = false }: { onExit: 
         )}
             {tab === 'Services'     && <ServicesTab services={services} setServices={setServices} />}
             {tab === 'Testimonials' && <TestimonialsTab testimonials={testimonials} setTestimonials={setTestimonials} ratings={ratings} setRatings={setRatings} />}
-            {tab === 'Settings'     && <SettingsTab settings={settings} setSettings={setSettings} testimonials={testimonials} setTestimonials={setTestimonials} ratings={ratings} setRatings={setRatings} />}
+            {tab === 'Reviews'      && <ReviewsTab ratings={ratings} setRatings={setRatings} />}
+        {tab === 'Settings'     && <SettingsTab settings={settings} setSettings={setSettings} testimonials={testimonials} setTestimonials={setTestimonials} ratings={ratings} setRatings={setRatings} />}
           </div>
         </main>
       </div>
